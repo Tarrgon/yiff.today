@@ -85,10 +85,20 @@
       <h4>Local Tags</h4>
       <ul id="local-tags-container">
         <li>
-          <textarea id="local-tags" placeholder="example example2 example3 ( tag1 tag2 ) ( -x ~ -y )"></textarea>
+          <textarea id="local-tags" placeholder="example example2 ( tag1 tag2 ) ( -x -y )"></textarea>
         </li>
         <li class="note">
           These tags are checked locally and have a more powerful syntax, mainly supporting tag grouping and proper "or" tag resolving in those groups.
+        </li>
+      </ul>
+
+      <h4>Blacklist</h4>
+      <ul id="blacklist-container">
+        <li>
+          <textarea id="blacklist" placeholder="example example2"></textarea>
+        </li>
+        <li class="note">
+          These tags are checked locally. Supports tag groups.
         </li>
       </ul>
     </div>
@@ -207,6 +217,7 @@
   </div>
 
   <script src="https://unpkg.com/gif-frames@1.0.1/dist/gif-frames.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuzzysort@2.0.4/fuzzysort.min.js"></script>
   <script src="/js/globals.js"></script>
   <script src="/js/slideshowElements.js"></script>
   <script src="/js/Slide.js"></script>

@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     includeSafe: getValue("include-safe", true),
     includeFavorites: getValue("include-favorites", false),
     includeSeen: getValue("include-seen", false),
-    localTags: getValue("local-tags", "")
+    localTags: getValue("local-tags", ""),
+    blacklist: getValue("blacklist", "")
   }
 
   for (let [key, value] of Object.entries(filtering)) {

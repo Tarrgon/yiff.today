@@ -29,6 +29,7 @@ let uiElements = {
   includeFavorites: document.getElementById("include-favorites"),
   includeSeen: document.getElementById("include-seen"),
   localTags: document.getElementById("local-tags"),
+  blacklist: document.getElementById("blacklist"),
   secondsPerSlide: document.getElementById("seconds-per-slide"),
   maxWidth: document.getElementById("max-width"),
   maxHeight: document.getElementById("max-height"),

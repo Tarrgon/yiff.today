@@ -105,17 +105,16 @@ function levenshtein(a, b) {
 }
 
 function tagsPass(tags, singleTag, negate = false, fuzzy = false) {
-  if (!tags || !singleTag) return false;
+  if (!tags || !singleTag) return false
 
   let result = false
   for (let tag of tags) {
     if (fuzzy) {
       if (levenshtein(singleTag, tag) <= 2) {
         result = true
-        break;
+        break
       }
-    }
-    else {
+    } else {
       if (singleTag.includes("*")) {
         let regex = new RegExp(singleTag.replace("*", ".*"))
         if (tag.match(regex)) {
@@ -124,13 +123,12 @@ function tagsPass(tags, singleTag, negate = false, fuzzy = false) {
         }
       } else if (tag == singleTag) {
         result = true
-        break;
+        break
       }
     }
   }
 
-
-  return negate ? !result : result;
+  return negate ? !result : result
 }
 
 function passesGroup(item, group) {
@@ -182,19 +180,132 @@ function isRatingAllowed(rating) {
     (rating == "s" && filtering.includeSafe)
 }
 
+function areSomeTagsAreBlacklisted(tags) {
+  let postTags = tags.split(" ")
+  let groups = [{ normal: [], or: [] }]
+  let tokenized = filtering.blacklist.trim().replace("\n", " ").split("")
+
+  if (postTags.length == 0 || tokenized.length == 0)
+    return false
+
+  let getNextToken = function (index) {
+    if (index >= tokenized.length) return null
+    let token = ""
+    for (let i = index + 1; i < tokenized.length; i++) {
+      let t = tokenized[i]
+      if (t == " ") {
+        return token
+      } else {
+        token += t
+      }
+    }
+  }
+
+  let skip = [")", "~"]
+  let inGroup = false
+  let nextOr = false
+
+  let token = ""
+  for (let i = 0; i < tokenized.length; i++) {
+    let t = tokenized[i]
+    if (t == " ") {
+      if (token == "(") {
+        inGroup = true
+        groups.push({ normal: [], or: [] })
+      } else if (token == ")") {
+        inGroup = false
+      }
+      else if (!skip.includes(token)) {
+        if (nextOr) {
+          groups[inGroup ? groups.length - 1 : 0].or.push(token)
+          if (getNextToken(i) != "~") {
+            nextOr = false
+          }
+        } else if (getNextToken(i) == "~") {
+          nextOr = true
+          groups[inGroup ? groups.length - 1 : 0].or.push(token)
+        } else {
+          groups[inGroup ? groups.length - 1 : 0].normal.push(token)
+        }
+      }
+      token = ""
+    }
+    else {
+      token += t
+    }
+  }
+
+  if (token.length > 0 && !skip.includes(token)) {
+    groups[inGroup ? groups.length - 1 : 0].normal.push(token)
+  }
+
+  for (let tag of groups[0].normal) {
+    if (!tag.startsWith("-")) {
+      if (postTags.includes(tag)) return true
+    } else {
+      if (!postTags.includes(tag.slice(1))) return true
+    }
+  }
+
+  for (let i = 1; i < groups.length; i++) {
+    if (groups[i].normal.length > 0) {
+      let hasAll = true
+
+      for (let tag of groups[i].normal) {
+        if (!tag.startsWith("-")) {
+          if (!postTags.includes(tag)) {
+            hasAll = false
+            break
+          }
+        } else {
+          if (postTags.includes(tag.slice(1))) {
+            hasAll = false
+            break
+          }
+        }
+      }
+
+      if (hasAll)
+        return true
+    }
+
+    if (groups[i].or.length > 0) {
+      let hasAny = false
+
+      for (let tag of groups[i].or) {
+        if (!tag.startsWith("-")) {
+          if (!postTags.includes(tag)) {
+            hasAny = true
+            break
+          }
+        } else {
+          if (postTags.includes(tag.slice(1))) {
+            hasAny = true
+            break
+          }
+        }
+      }
+
+      if (!hasAny)
+        return true
+    }
+  }
+
+  return false
+}
+
 function slideFilter(slide) {
   if (!slide.tags || slide.tags == "" || typeof slide.tags != "string") return false
 
-  if (!isPathForSupportedMediaType(slide.fileUrl))
-    return false
+  if (!isPathForSupportedMediaType(slide.fileUrl)) return false
 
-  if (!isRatingAllowed(slide.rating))
-    return false
+  if (!isRatingAllowed(slide.rating)) return false
 
-  if (!filtering.includeSeen && history.alreadySeen(slide.id)) 
-    return false
+  if (!filtering.includeSeen && history.alreadySeen(slide.id)) return false
 
-  let filterText = uiElements.localTags.value
+  if (areSomeTagsAreBlacklisted(slide.tags)) return false
+
+  let filterText = filtering.localTags.trim().replace("\n", " ")
   let groups = [
     {
       or: [],
@@ -389,7 +500,7 @@ let slideshowController = {
       slideshowController.loadNewSlidesIfNeeded()
     })
 
-    history.addToSeen(slideshowController.slides[index].id)
+    if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
   },
 
   clearCallbacksForPreloadingSlides() {
