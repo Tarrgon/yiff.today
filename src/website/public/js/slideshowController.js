@@ -168,12 +168,6 @@ function isMediaTypeSupported(mediaType) {
     (mediaType == MEDIA_TYPE_VIDEO && filtering.includeWebms)
 }
 
-function isPathForSupportedMediaType(filePath) {
-  let mediaType = getMediaTypeFromPath(filePath)
-
-  return isMediaTypeSupported(mediaType)
-}
-
 function isRatingAllowed(rating) {
   return (rating == "e" && filtering.includeExplicit) ||
     (rating == "q" && filtering.includeQuestionable) ||
@@ -185,8 +179,7 @@ function areSomeTagsAreBlacklisted(tags) {
   let groups = [{ normal: [], or: [] }]
   let tokenized = filtering.blacklist.trim().replace("\n", " ").split("")
 
-  if (postTags.length == 0 || tokenized.length == 0)
-    return false
+  if (postTags.length == 0 || tokenized.length == 0) return false
 
   let getNextToken = function (index) {
     if (index >= tokenized.length) return null
@@ -297,7 +290,7 @@ function areSomeTagsAreBlacklisted(tags) {
 function slideFilter(slide) {
   if (!slide.tags || slide.tags == "" || typeof slide.tags != "string") return false
 
-  if (!isPathForSupportedMediaType(slide.fileUrl)) return false
+  if (!isMediaTypeSupported(slide.mediaType)) return false
 
   if (!isRatingAllowed(slide.rating)) return false
 
@@ -315,6 +308,8 @@ function slideFilter(slide) {
   ]
 
   let tokenized = filterText.split("")
+
+  if (tokenized.length == 0) return true
 
   let getNextToken = function (index) {
     if (index >= tokenized.length) return null;
@@ -1023,7 +1018,7 @@ let slideshowController = {
     let slide = slideshowController.getCurrentSlide()
 
     if (slide) {
-      let map = slide.rawTags.artist.map(a => a.split(" ").join("_")).filter(a => a != "unknown_artist" && a != "anonymous_artist" && a != "conditional_dnp" && a != "sound_warning" && !uiElements.searchText.value.includes(a)).join(" ~")
+      let map = slide.rawTags.artist.map(a => a.split(" ").join("_")).filter(a => a != "unknown_artist" && a != "third-party_edit" && a != "anonymous_artist" && a != "conditional_dnp" && a != "sound_warning" && !uiElements.searchText.value.includes(a)).join(" ~")
       if (map.length > 0) uiElements.searchText.value += " ~" + map
     }
   },

@@ -32,17 +32,15 @@ function getMaxThumbnailsBasedOnScreenSize() {
   return 10
 }
 
-function getMediaTypeFromPath(path) {
-  let fileExtension = path.substring(path.length - 4)
-
+function getMediaTypeFromFileType(fileExtension) {
   switch (fileExtension.toLowerCase()) {
     case 'webm':
-    case '.mp4':
+    case 'mp4':
       return MEDIA_TYPE_VIDEO
-    case '.gif':
+    case 'gif':
       return MEDIA_TYPE_GIF
-    case '.zip':
-    case '.swf':
+    case 'zip':
+    case 'swf':
       return MEDIA_TYPE_UNSUPPORTED
     default:
       return MEDIA_TYPE_IMAGE
