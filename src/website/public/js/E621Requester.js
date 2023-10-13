@@ -8,6 +8,7 @@ class E621Requester {
   constructor() {
     this.lastRequestTime = 0
     this.hasMore = true
+    this.requesting = false
   }
 
   // async ping() {
@@ -17,6 +18,7 @@ class E621Requester {
   // }
 
   async getSlides(searchText, pageNumber) {
+    this.requesting = true
     let waitTime = WAIT_DECAY - (Date.now() - this.lastRequestTime)
     WAIT_DECAY = Math.min(1000, WAIT_DECAY + 20)
     if (waitTime > 0) await wait(waitTime)
@@ -26,15 +28,28 @@ class E621Requester {
       headers.Authorization = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
     }
 
-    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100&query=${encodeURIComponent(searchText)}&page=${pageNumber}&_client=${E621Requester.USER_AGENT}`, {
+    let options = {
       headers
-    })
+    }
+
+    if (pageNumber == null && this._searchAfter != null) {
+      options.body = JSON.stringify({
+        searchAfter: this._searchAfter
+      })
+      options.headers["Content-Type"] = "application/json"
+      options.method = "POST"
+    }
+
+    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100&query=${encodeURIComponent(searchText)}${pageNumber != null ? `&page=${pageNumber}` : ""}&_client=${E621Requester.USER_AGENT}`, options)
 
     if (res.ok) {
       let data = await res.json()
-      this.hasMore = data.length >= 100
-      return data.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.file.md5, p.tags.flat(), p.tags))
+      this.hasMore = data.searchAfter != null
+      this._searchAfter = data.searchAfter
+      this.requesting = false
+      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))
     } else {
+      this.requesting = false
       slideshowController.showError(await res.text())
     }
   }

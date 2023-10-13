@@ -234,9 +234,15 @@ function areSomeTagsAreBlacklisted(tags) {
 
   for (let tag of groups[0].normal) {
     if (!tag.startsWith("-")) {
-      if (postTags.includes(tag)) return true
+      if (postTags.includes(tag)) {
+        // console.log(`Fails blacklist, has tag: ${tag}`)
+        return true
+      }
     } else {
-      if (!postTags.includes(tag.slice(1))) return true
+      if (!postTags.includes(tag.slice(1))) {
+        // console.log(`Fails blacklist, doesn't have tag: ${tag}`)
+        return true
+      }
     }
   }
 
@@ -258,8 +264,10 @@ function areSomeTagsAreBlacklisted(tags) {
         }
       }
 
-      if (hasAll)
+      if (hasAll) {
+        // console.log(`Fails blacklist, hasAll ${groups[i].normal}`)
         return true
+      }
     }
 
     if (groups[i].or.length > 0) {
@@ -279,10 +287,14 @@ function areSomeTagsAreBlacklisted(tags) {
         }
       }
 
-      if (!hasAny)
+      if (!hasAny) {
+        // console.log(`Fails blacklist, hasAny ${groups[i].or}`)
         return true
+      }
     }
   }
+
+  // console.log("Passed blacklist")
 
   return false
 }
@@ -373,7 +385,11 @@ function slideFilter(slide) {
   }
 
   for (let group of groups) {
-    if (!passesGroup(slide, group)) return false
+    if (!passesGroup(slide, group)) {
+      // console.log("Fails group:")
+      // console.log(group)
+      return false
+    }
   }
 
   return true
@@ -381,7 +397,6 @@ function slideFilter(slide) {
 
 let slideshowController = {
   currentSlideNumber: 0,
-  currentPage: 1,
   searchText: "",
   maxThumbnails: getMaxThumbnailsBasedOnScreenSize(),
   slides: [],
@@ -469,9 +484,9 @@ let slideshowController = {
   },
 
   async loadNewSlidesIfNeeded() {
-    if (!slideshowController.loadingNewSlides && slideshowController.currentSlideNumber >= slideshowController.slides.length - 11 && e621Requester.hasMore) {
+    if (!slideshowController.loadingNewSlides && slideshowController.currentSlideNumber >= slideshowController.slides.length - 11 && e621Requester.hasMore && !e621Requester.requesting) {
       loadingNewSlides = true
-      let slides = await e621Requester.getSlides(slideshowController.searchText, ++slideshowController.currentPage)
+      let slides = await e621Requester.getSlides(slideshowController.searchText, null)
 
       slideshowController.slides = slideshowController.slides.concat(slides.filter(slideFilter))
       loadingNewSlides = false
@@ -489,9 +504,9 @@ let slideshowController = {
     slideshowController.clearCallbacksForPreloadingSlides()
     slideshowController.currentSlideNumber = index
     slideshowController.preloadCurrentSlideIfNeeded()
-    slideshowController.preloadNextSlides()
     slideshowController.updateSlidesAndNavigation()
     new Promise(() => {
+      slideshowController.preloadNextSlides()
       slideshowController.loadNewSlidesIfNeeded()
     })
 
@@ -1018,7 +1033,7 @@ let slideshowController = {
     let slide = slideshowController.getCurrentSlide()
 
     if (slide) {
-      let map = slide.rawTags.artist.map(a => a.split(" ").join("_")).filter(a => a != "unknown_artist" && a != "third-party_edit" && a != "anonymous_artist" && a != "conditional_dnp" && a != "sound_warning" && !uiElements.searchText.value.includes(a)).join(" ~")
+      let map = slide.rawTags[1].map(a => a.split(" ").join("_")).filter(a => a != "unknown_artist" && a != "third-party_edit" && a != "anonymous_artist" && a != "conditional_dnp" && a != "sound_warning" && !uiElements.searchText.value.includes(a)).join(" ~")
       if (map.length > 0) uiElements.searchText.value += " ~" + map
     }
   },
@@ -1026,8 +1041,7 @@ let slideshowController = {
   async exectueSearch() {
     let searchText = uiElements.searchText.value
     slideshowController.searchText = searchText
-    slideshowController.currentPage = uiElements.startPage.value || 1
-    let slides = await e621Requester.getSlides(slideshowController.searchText, slideshowController.currentPage)
+    let slides = await e621Requester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
 
     slideshowController.slides = slides.filter(slideFilter)
     slideshowController.setCurrentSlideNumber(0)
