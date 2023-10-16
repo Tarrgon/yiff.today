@@ -24,9 +24,9 @@ class E621Requester {
     if (waitTime > 0) await wait(waitTime)
     this.lastRequestTime = Date.now()
     let headers = {}
-    if (login && login.e621Username != "" && login.e621ApiKey != "") {
-      headers.Authorization = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-    }
+    // if (login && login.e621Username != "" && login.e621ApiKey != "") {
+    //   headers.Authorization = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+    // }
 
     let options = {
       headers
