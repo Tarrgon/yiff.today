@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Yiff Today - Color Tagger</title>
+
+  <%- include("./partials/head"); %>
+</head>
+
+<body>
+  <p id="warning-message"></p>
+	<p id="info-message"></p>
+	<div id="slide-wrapper">
+		<img id="current-image" />
+		<img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+		<div id="tags" style="display:none;"></div>
+	</div>
+
+  <div id="navigation" class="columns">
+    <div class="column is-8 is-offset-2 mb-6 has-text-centered">
+      <span id="current-slide-number"></span> of <span id="total-slide-number"></span><br>
+      <button class="nav-button" id="first-button">&lt;&lt;</button>
+      <button class="nav-button" id="previous-button">&lt;</button>
+      <button class="nav-button" id="next-button">&gt;</button>
+      <button class="nav-button" id="last-button">&gt;&gt;</button>
+    </div>
+  </div>
+
+  <div id="thumbnail-list-wrapper">
+    <div id="thumbnail-list">
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 pb-5 has-text-centered">
+      <input id="search-text" type="search" list="search-history" /><br>
+      <input id="start-page-number" type="number" placeholder="Start page" /><br>
+      <button id="search-button">Search</button>
+      <datalist id="search-history"></datalist>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">Filtering</h4>
+      <ul>
+        <li>
+          <label><input id="include-explicit" type="checkbox" />Include Explicit</label>
+        </li>
+        <li>
+          <label><input id="include-questionable" type="checkbox" />Include Questionable</label>
+        </li>
+        <li>
+          <label><input id="include-safe" type="checkbox" checked />Include Safe</label>
+        </li>
+      </ul>
+
+      <h4>Local Tags</h4>
+      <ul id="local-tags-container">
+        <li>
+          <textarea id="local-tags" placeholder="example example2 ( tag1 tag2 ) ( -x -y )"></textarea>
+        </li>
+        <li class="note">
+          These tags are checked locally and have a more powerful syntax, mainly supporting tag grouping and proper "or" tag resolving in those groups.
+        </li>
+      </ul>
+
+      <h4>Blacklist</h4>
+      <ul id="blacklist-container">
+        <li>
+          <textarea id="blacklist" placeholder="example example2"></textarea>
+        </li>
+        <li class="note">
+          These tags are checked locally. Supports tag groups.
+        </li>
+      </ul>
+    </div>
+
+    <div class="options is-container box column is-4 is-offset-1 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">Presentation</h4>
+				<ul>
+					<li>
+						Max. Width
+						<br>
+						<input id="max-width" type="number" min="1" /><br>
+					</li>
+					<li>
+						Max. Height
+						<br>
+						<input id="max-height" type="number" min="1" />
+					</li>
+					<li>
+						<label><input id="auto-fit-slide" type="checkbox" checked/>Auto-Fit</label>
+					</li>
+				</ul>
+    </div>
+
+    <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">History</h4>
+      <ul>
+        <li><label><input id="store-history" type="checkbox" checked />Store Search History</label></li>
+        <li class="note">
+          Up to 100 queries are saved. Uses localStorage.
+        </li>
+        <li><button id="clear-history">Clear Search History</button></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="columns">
+    <!-- <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">E621 Login</h4>
+      <ul>
+        <li>
+          <label>E621 Username <input id="e621-username" type="text" /></label>
+        </li>
+        <li>
+          <label>E621 API Key <input id="e621-api-key" type="password" /></label>
+        </li>
+        <li><a href="https://e621.net/users/home" target="_blank">(get API key here)</a></li>
+        <li class="note">
+          This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
+          <br>
+          Allows you to access posts that can't be accessed without an account.
+        </li>
+      </ul>
+    </div> -->
+
+    <div class="is-container box column is-4 is-offset-4 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">Hotkeys</h4>
+      <ul class="has-text-light">
+        <li>Full-screen (F11)</li>
+        <li>Previous slide (&larr; or A)</li>
+        <li>Next slide (&rarr; or D)</li>
+        <li>Back 10 slides (&uarr; or W)</li>
+        <li>Forward 10 slides (&darr; or S)</li>
+        <li>Auto-Fit (F)</li>
+        <li>Open current image in new tab (E)</li>
+        <li>Download Current Image (L or Numpad period)</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/gif-frames@1.0.1/dist/gif-frames.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuzzysort@2.0.4/fuzzysort.min.js"></script>
+  <script src="/js/globals.js"></script>
+  <script src="/js/colors/slideshowElements.js"></script>
+  <script src="/js/Slide.js"></script>
+  <script src="/js/E621Requester.js"></script>
+  <script src="/js/dataHandler.js"></script>
+  <script src="/js/colors/filterHandler.js"></script>
+  <script src="/js/colors/presentationHandler.js"></script>
+  <script src="/js/colors/slideshowController.js"></script>
+</body>
+
+</html>

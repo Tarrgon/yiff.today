@@ -1,6 +1,6 @@
 function setValue(id, value) {
   let element = document.getElementById(id)
-  if (element.tagName == "INPUT" && element.type == "checkbox")element.checked = value
+  if (element.tagName == "INPUT" && element.type == "checkbox") element.checked = value
   else element.value = value
   localStorage.setItem(id, value)
 }
@@ -13,7 +13,7 @@ function getValue(id, def) {
     if (item != "" && !isNaN(item)) return Number(item)
     return item
   }
-  
+
   setValue(id, def)
   return def
 }
