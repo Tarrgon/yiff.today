@@ -10,16 +10,16 @@
 
 <body>
   <p id="warning-message"></p>
-	<p id="info-message"></p>
-	<div id="slide-wrapper">
-		<img id="current-image" />
-		<video id="current-video" autoplay="true" loop="true" volume="0" controls>
-			<source type="video/webm">
-			</source>
-		</video>
-		<img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
-		<div id="tags" style="display:none;"></div>
-	</div>
+  <p id="info-message"></p>
+  <div id="slide-wrapper">
+    <img id="current-image" />
+    <video id="current-video" autoplay="true" loop="true" volume="0" controls>
+      <source type="video/webm">
+      </source>
+    </video>
+    <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+    <div id="tags" style="display:none;"></div>
+  </div>
 
   <div id="navigation" class="columns">
     <div class="column is-8 is-offset-2 mb-6 has-text-centered">
@@ -105,48 +105,48 @@
 
     <div class="options is-container box column is-4 is-offset-1 my-6 has-text-centered">
       <h4 class="is-size-5 has-text-weight-bold has-text-light">Presentation</h4>
-				<ul>
-					<li>
-						Seconds per Slide
-						<br>
-						<input id="seconds-per-slide" type="number" min="1" value="5" />
-					</li>
-					<li>
-						Max. Width
-						<br>
-						<input id="max-width" type="number" min="1" /><br>
-					</li>
-					<li>
-						Max. Height
-						<br>
-						<input id="max-height" type="number" min="1" />
-					</li>
-					<li>
-						<label><input id="auto-fit-slide" type="checkbox" checked/>Auto-Fit</label>
-					</li>
-					<li class="hidden">
-						<label><input id="favorite-remotely" type="checkbox" />Favorite Remotely <span class="note">Requires API Key</span></label>
-					</li>
+      <ul>
+        <li>
+          Seconds per Slide
+          <br>
+          <input id="seconds-per-slide" type="number" min="1" value="5" />
+        </li>
+        <li>
+          Max. Width
+          <br>
+          <input id="max-width" type="number" min="1" /><br>
+        </li>
+        <li>
+          Max. Height
+          <br>
+          <input id="max-height" type="number" min="1" />
+        </li>
+        <li>
+          <label><input id="auto-fit-slide" type="checkbox" checked />Auto-Fit</label>
+        </li>
+        <li class="hidden">
+          <label><input id="favorite-remotely" type="checkbox" />Favorite Remotely <span class="note">Requires API Key</span></label>
+        </li>
 
-					<li>
-						<label><input id="slideshow-plays-full-video" type="checkbox" />Slideshow Plays Full Video</label>
-					</li>
+        <li>
+          <label><input id="slideshow-plays-full-video" type="checkbox" />Slideshow Plays Full Video</label>
+        </li>
 
-					<li>
-						Slideshow Gif Loop Count
-						<br>
-						<input id="slideshow-gif-loop-count" type="number" min="1" value="4" />
-					</li>
+        <li>
+          Slideshow Gif Loop Count
+          <br>
+          <input id="slideshow-gif-loop-count" type="number" min="1" value="4" />
+        </li>
 
-					<li>
-						Slideshow Low Duration mp4 Seconds
-						<br>
-						<input id="slideshow-low-duration-mp4-seconds" type="number" min="1" value="10" />
-					</li>
-          <li class="note">
-            Slideshow does not respect pausing videos, or buffering.
-          </li>
-				</ul>
+        <li>
+          Slideshow Low Duration mp4 Seconds
+          <br>
+          <input id="slideshow-low-duration-mp4-seconds" type="number" min="1" value="10" />
+        </li>
+        <li class="note">
+          Slideshow does not respect pausing videos, or buffering.
+        </li>
+      </ul>
     </div>
 
     <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">

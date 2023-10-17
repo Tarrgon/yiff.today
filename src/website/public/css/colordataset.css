@@ -1,0 +1,15 @@
+.content {
+  word-wrap: break-word;
+}
+
+.card-image {
+  height: 10em; 
+}
+
+.card-image div {
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  height: 10em; 
+  text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+}

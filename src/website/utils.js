@@ -1,4 +1,6 @@
-const { Db } = require("mongodb")
+const { Db, ObjectId } = require("mongodb")
+
+const SCALE_FACTOR = 10000000000
 
 const ACCEPTABLE_NAMES = ["black", "blue", "brown", "green", "grey", "orange", "pink", "purple", "red", "tan", "teal", "white", "yellow"]
 
@@ -6,6 +8,15 @@ const ACCEPTABLE_NAMES = ["black", "blue", "brown", "green", "grey", "orange", "
 let database = null
 let mod = null
 let colorDatas = null
+
+function getRealLab(color) {
+  let c = {}
+  c.l = color.l / SCALE_FACTOR
+  c.a = color.a / SCALE_FACTOR
+  c.b = color.b / SCALE_FACTOR
+
+  return c
+}
 
 module.exports = (db) => {
   // fetch("https://api.color.pizza/v1/?list=default").then(async (response) => {
@@ -23,20 +34,45 @@ module.exports = (db) => {
 
       // let name = mod.getNearestColorName(lab)
 
-      await database.collection("colors").updateOne({ l: Math.floor(lab[0] * 10000000000), a: Math.floor(lab[1] * 10000000000), b: Math.floor(lab[2] * 10000000000) },
+      await database.collection("colors").updateOne({ l: Math.floor(lab[0] * SCALE_FACTOR), a: Math.floor(lab[1] * SCALE_FACTOR), b: Math.floor(lab[2] * SCALE_FACTOR) },
         { $inc: { [`${colorName}`]: 1 } }, { upsert: true })
     },
 
     async getColor(lab) {
-      let color = await database.collection("colors").findOne({ l: Math.floor(lab[0] * 10000000000), a: Math.floor(lab[1] * 10000000000), b: Math.floor(lab[2] * 10000000000) })
-      
+      let color = await database.collection("colors").findOne({ l: Math.floor(lab[0] * SCALE_FACTOR), a: Math.floor(lab[1] * SCALE_FACTOR), b: Math.floor(lab[2] * SCALE_FACTOR) })
+
       if (color) {
         color.l = lab[0]
         color.a = lab[1]
         color.b = lab[2]
       }
-      
+
       return color
+    },
+
+    async getColorsAfter(id) {
+      if (id != null && ObjectId.isValid(id)) {
+        id = new ObjectId(id)
+      }
+
+      let query = {}
+
+      if (id) {
+        query._id = {
+          $gt: id
+        }
+      }
+
+      let colors = await database.collection("colors").find(query).limit(100).toArray()
+
+      for (let color of colors) {
+        let lab = getRealLab(color)
+        color.l = lab.l
+        color.a = lab.a
+        color.b = lab.b
+      }
+
+      return colors
     },
 
     // getNearestColorName(color) {

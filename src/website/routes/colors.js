@@ -16,6 +16,17 @@ router.post("/", async (req, res) => {
   res.sendStatus(200)
 })
 
+router.get("/dataset", async (req, res) => {
+  res.render("colordataset")
+})
+
+router.get("/api/dataset", async (req, res) => {
+  let after = req.query.after
+  let colors = await utils.getColorsAfter(after)
+
+  return res.json(colors)
+})
+
 module.exports = (u) => {
   utils = u
   return router
