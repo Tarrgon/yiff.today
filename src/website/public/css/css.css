@@ -156,10 +156,6 @@ a {
   color: #aaa;
 }
 
-#color-button-container button {
-  width: 50%;
-}
-
 .options button {
   background: #091a25;
   background-image: -webkit-linear-gradient(top, #0d293b, #0c2a3d);
