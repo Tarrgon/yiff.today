@@ -104,7 +104,7 @@ function createColorColumn(color) {
   })
 
   for (let col of cols) {
-    content.appendChild(col)
+    content.appendChild(col.col)
   }
 
   cardContent.appendChild(content)
