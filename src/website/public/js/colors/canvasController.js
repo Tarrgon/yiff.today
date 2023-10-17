@@ -142,6 +142,7 @@ let canvasController = {
 
     canvasController.setColor(r, g, b)
 
+    canvasController.currentColor = [r, g, b]
     uiElements.colorSpan.innerText = `rgb(${Math.floor(r * 100) / 100}, ${Math.floor(g * 100) / 100}, ${Math.floor(b * 100) / 100})`
     uiElements.colorSpan.style.color = "lime"
   },
