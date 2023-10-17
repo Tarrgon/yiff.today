@@ -842,11 +842,10 @@ uiElements.searchText.addEventListener("keyup", async (e) => {
 
 uiElements.searchText.addEventListener('input', (e) => {
   if (e.inputType) return
-  let wantedIndex = parseInt(e.target.value.match(/^(-(\d*)-)/)[2])
-  for (let val of uiElements.searchHistory.options) {
-    let index = parseInt(val.value.match(/^(-(\d*)-)/)[2])
-    if (wantedIndex == index) {
-      uiElements.searchText.value = val.value.replace(/^(-(\d*)-)/, "")
+  for (let option of uiElements.searchHistory.options) {
+    if (option.value == e.target.value) {
+      let index = parseInt(option.getAttribute("data-index"))
+      uiElements.searchText.value = history.history[index]
       return
     }
   }

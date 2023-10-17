@@ -1,4 +1,8 @@
-let calculating = false
+const SCALE_FACTOR = 0.2
+
+function clamp(x, min, max) {
+  return Math.min(Math.max(x, min), max)
+}
 
 let canvasController = {
   /** @type {CanvasRenderingContext2D} */
@@ -6,6 +10,9 @@ let canvasController = {
   colorCtx: null,
   currentImage: null,
   currentColor: null,
+  calculating: false,
+  scale: 1,
+  scroll: [0, 0],
 
   getContext() {
     if (canvasController.ctx) {
@@ -28,12 +35,21 @@ let canvasController = {
   },
 
   setImage(image, width, height, restore = false) {
+    if (!restore) {
+      canvasController.scroll[0] = 0
+      canvasController.scroll[1] = 0
+      canvasController.scale = 1
+    }
+
     uiElements.currentImage.width = width
     uiElements.currentImage.height = height
 
     let ctx = canvasController.getContext()
     ctx.clearRect(0, 0, width, height)
-    ctx.drawImage(image, 0, 0)
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(canvasController.scale, canvasController.scale)
+    ctx.clearRect(0, 0, uiElements.currentImage.width, uiElements.currentImage.height)
+    ctx.drawImage(image, -canvasController.scroll[0], -canvasController.scroll[1])
 
     canvasController.currentImage = image
 
@@ -121,6 +137,14 @@ let canvasController = {
     invisible.width = originCtx.canvas.width
     invisible.height = originCtx.canvas.height
 
+    // if (uiElements.currentImage.nextElementSibling.tagName == "CANVAS") {
+    //   uiElements.currentImage.nextElementSibling.remove()
+    // }
+
+    // invisible.style.maxHeight = uiElements.currentImage.style.maxHeight
+
+    // uiElements.currentImage.after(invisible)
+
     let ctx = invisible.getContext("2d", { willReadFrequently: true })
 
     let path = new Path2D()
@@ -133,7 +157,10 @@ let canvasController = {
 
     ctx.clip(path)
 
-    ctx.drawImage(canvasController.currentImage, 0, 0)
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(canvasController.scale, canvasController.scale)
+    
+    ctx.drawImage(canvasController.currentImage, -canvasController.scroll[0], -canvasController.scroll[1])
 
     let w = biggestDiffX + 10 > ctx.canvas.width ? ctx.canvas.width : biggestDiffX + 10
     let h = biggestDiffY + 10 > ctx.canvas.height ? ctx.canvas.height : biggestDiffY + 10
@@ -171,13 +198,13 @@ let canvasController = {
     for (let index = 0; index < points.length; index++) {
       let point = points[index]
       if (index == 0) {
-        ctx.moveTo(point[0], point[1])
+        ctx.moveTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
       } else {
-        ctx.lineTo(point[0], point[1])
+        ctx.lineTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
       }
     }
 
-    ctx.lineTo(points[0][0], points[0][1])
+    ctx.lineTo(points[0][0] / canvasController.scale, points[0][1] / canvasController.scale)
     ctx.fill()
     ctx.stroke()
     ctx.closePath()
@@ -247,65 +274,80 @@ function getMousePos(canvas, e) {
     scaleY = canvas.height / rect.height
 
   return [
-    (e.clientX - rect.left) * scaleX,
-    (e.clientY - rect.top) * scaleY
+    ((e.clientX - rect.left) * scaleX),
+    ((e.clientY - rect.top) * scaleY)
   ]
 }
 
 let updateSelection = true
 
 let mouseDown = false
+let middleMouseDown = false
 let mouseMoved = false
 
 let saved = false
 
 let points = []
 
+let panStart = []
+
 uiElements.currentImage.addEventListener("mousedown", (e) => {
   e.preventDefault()
 
-  if (calculating) return
+  if (canvasController.calculating) return
 
-  canvasController.restoreCanvas()
+  if (e.button == 0) {
+    canvasController.restoreCanvas()
 
-  let pos = getMousePos(uiElements.currentImage, e)
+    let pos = getMousePos(uiElements.currentImage, e)
 
-  points.push(pos)
+    points.push(pos)
 
-  canvasController.deselect()
-  mouseDown = true
+    canvasController.deselect()
+    mouseDown = true
+  } else if (e.button == 1) {
+    middleMouseDown = true
+    let pos = getMousePos(uiElements.currentImage, e)
+    panStart = pos
+  }
 })
 
 uiElements.currentImage.addEventListener("mouseup", (e) => {
   e.preventDefault()
-  if (calculating) return
-  calculating = true
 
-  mouseDown = false
+  if (canvasController.calculating) return
 
-  updateSelection = false
+  if (e.button == 0) {
+    canvasController.calculating = true
 
-  if (!mouseMoved || points.length < 5) {
-    let pos = getMousePos(uiElements.currentImage, e)
+    mouseDown = false
 
-    canvasController.setColorToPixel(pos[0], pos[1], true)
-  } else {
-    points.push(points[0])
+    updateSelection = false
 
-    canvasController.updateVisibleSelection(points)
-    canvasController.setSelection(points)
+    if (!mouseMoved || points.length < 5) {
+      let pos = getMousePos(uiElements.currentImage, e)
+
+      canvasController.setColorToPixel(pos[0], pos[1], true)
+    } else {
+      points.push(points[0])
+
+      canvasController.updateVisibleSelection(points)
+      canvasController.setSelection(points)
+    }
+
+    mouseMoved = false
+    points.length = 0
+
+    canvasController.calculating = false
+  } else if (e.button == 1) {
+    middleMouseDown = false
   }
-
-  mouseMoved = false
-  points.length = 0
-
-  calculating = false
 })
 
 uiElements.currentImage.addEventListener("mousemove", (e) => {
   e.preventDefault()
 
-  if (calculating) return
+  if (canvasController.calculating) return
 
   if (e.shiftKey) {
     if (!mouseDown) canvasController.restoreCanvas()
@@ -313,6 +355,20 @@ uiElements.currentImage.addEventListener("mousemove", (e) => {
   }
 
   let pos = getMousePos(uiElements.currentImage, e)
+
+  if (middleMouseDown) {
+    let delta = [pos[0] - panStart[0], pos[1] - panStart[1]]
+
+    canvasController.scroll[0] -= delta[0] / canvasController.scale
+    canvasController.scroll[1] -= delta[1] / canvasController.scale
+
+    panStart = pos
+
+    canvasController.scroll[0] = clamp(canvasController.scroll[0], 0, uiElements.currentImage.width * (canvasController.scale - 1))
+    canvasController.scroll[1] = clamp(canvasController.scroll[1], 0, uiElements.currentImage.height * (canvasController.scale - 1))
+
+    canvasController.restoreCanvas()
+  }
 
   if (mouseDown) {
     points.push(pos)
@@ -322,6 +378,34 @@ uiElements.currentImage.addEventListener("mousemove", (e) => {
   } else {
     if (!updateSelection) return
 
+    // uiElements.colorSpan.innerText = `${pos[0]}, ${pos[1]}`
+
     canvasController.setColorToPixel(pos[0], pos[1], false)
   }
+})
+
+
+uiElements.currentImage.addEventListener("wheel", (e) => {
+  e.preventDefault()
+  e.stopImmediatePropagation()
+  let previousScale = canvasController.scale
+
+  let direction = e.deltaY > 0 ? -1 : 1
+  canvasController.scale += SCALE_FACTOR * direction
+  canvasController.scale = Math.max(1, canvasController.scale)
+
+  let pos = getMousePos(uiElements.currentImage, e)
+
+  if (canvasController.scale != 1) {
+    canvasController.scroll[0] += Math.max(0, (pos[0] / previousScale) - (pos[0] / canvasController.scale))
+    canvasController.scroll[1] += Math.max(0, (pos[1] / previousScale) - (pos[1] / canvasController.scale))
+
+    canvasController.scroll[0] = clamp(canvasController.scroll[0], 0, uiElements.currentImage.width * (canvasController.scale - 1))
+    canvasController.scroll[1] = clamp(canvasController.scroll[1], 0, uiElements.currentImage.height * (canvasController.scale - 1))
+  } else {
+    canvasController.scroll[0] = 0
+    canvasController.scroll[1] = 0
+  }
+
+  canvasController.restoreCanvas()
 })

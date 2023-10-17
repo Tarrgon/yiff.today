@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let searchHistoryItem = h[i]
 
     let optionElement = document.createElement("option")
-    optionElement.value = `-${i}-` + searchHistoryItem;
-    optionElement.setAttribute("data-index", i)
+    optionElement.value = searchHistoryItem
+    optionElement.setAttribute("data-index", i.toString())
 
     historyElement.appendChild(optionElement)
   }
@@ -64,8 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let searchHistoryItem = history.history[i]
   
       let optionElement = document.createElement("option")
-      optionElement.value = `-${i}-` + searchHistoryItem;
-      optionElement.setAttribute("data-index", i)
+      optionElement.value = searchHistoryItem
+      optionElement.setAttribute("data-index", i.toString())
   
       historyElement.appendChild(optionElement)
     }
