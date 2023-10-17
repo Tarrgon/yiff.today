@@ -1,26 +1,6 @@
-#pink-button {
-  background: pink;
-  color: black;
-}
-
-#green-button {
-  background: green;
-  color: white;
-}
-
-#brown-button {
-  background: #964B00;
-  color: white;
-}
-
-#red-button {
-  background: red;
-  color: white;
-}
-
-#yellow-button {
-  background: yellow;
-  color: black;
+#color-button-container button {
+  width: 50%;
+  font-weight: bold;
 }
 
 #white-button {
@@ -33,32 +13,57 @@
   color: white;
 }
 
-#blue-button {
-  background: blue;
+#grey-button {
+  background: #828080;
+  color: black;
+}
+
+#red-button {
+  background: #EE592A;
   color: white;
 }
 
-#teal-button {
-  background: teal;
+#yellow-button {
+  background: #F8FF61;
   color: black;
-}
-
-#grey-button {
-  background: grey;
-  color: black;
-}
-
-#tan-button {
-  background: tan;
-  color: black
 }
 
 #orange-button {
-  background: orange;
+  background: #F2B745;
+  color: black;
+}
+
+#brown-button {
+  background: #8F5A20;
+  color: white;
+}
+
+#tan-button {
+  background: #CCBC94;
+  color: black
+}
+
+#pink-button {
+  background: #F8C7CD;
   color: black;
 }
 
 #purple-button {
-  background: purple;
+  background: #7C0D7A;
+  color: black;
+}
+
+#blue-button {
+  background: #4700F3;
+  color: white;
+}
+
+#green-button {
+  background: #268028;
+  color: white;
+}
+
+#teal-button {
+  background: #327B7F;
   color: black;
 }

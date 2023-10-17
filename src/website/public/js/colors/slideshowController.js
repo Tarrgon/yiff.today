@@ -704,7 +704,7 @@ let slideshowController = {
     currentImage.style.maxWidth = null
     currentImage.style.maxHeight = null
 
-    let maxHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) / 2
+    let maxHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 150
 
     if (currentSlide.isImageOrGif()) {
       currentImage.style.maxHeight = maxHeight + "px"

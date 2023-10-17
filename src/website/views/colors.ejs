@@ -6,18 +6,42 @@
   <title>Yiff Today - Color Tagger</title>
 
   <%- include("./partials/head"); %>
-  <link rel="stylesheet" href="/css/color.css">
+    <link rel="stylesheet" href="/css/color.css">
 </head>
 
 <body>
   <p id="warning-message"></p>
   <p id="info-message"></p>
-  <div id="slide-wrapper">
-    <canvas id="current-image"></canvas>
-    <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+  <div id="slide-wrapper" class="columns">
+    <div class="column is-9">
+      <canvas id="current-image" style="border-color: white; border-width: 1px; border-style: solid;"></canvas>
+      <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+      <div class="columns">
+        <div class="column is-8 is-offset-2 has-text-centered">
+          <canvas id="current-color" width="30px" height="30px"></canvas>
+          <span id="color-span"></span>
+        </div>
+      </div>
+    </div>
+    <div id="color-button-container"
+      class="column options is-container box has-text-centered has-vertically-aligned-content">
+      <ul>
+        <li><button id="white-button">White</button></li>
+        <li><button id="black-button">Black</button></li>
+        <li><button id="grey-button">Grey</button></li>
+        <li><button id="red-button">Red</button></li>
+        <li><button id="yellow-button">Yellow</button></li>
+        <li><button id="orange-button">Orange</button></li>
+        <li><button id="brown-button">Brown</button></li>
+        <li><button id="tan-button">Tan</button></li>
+        <li><button id="pink-button">Pink</button></li>
+        <li><button id="purple-button">Purple</button></li>
+        <li><button id="blue-button">Blue</button></li>
+        <li><button id="green-button">Green</button></li>
+        <li><button id="teal-button">Teal</button></li>
+      </ul>
+    </div>
     <br />
-    <canvas id="current-color" width="30px" height="30px"></canvas>
-    <span id="color-span"></span>
   </div>
 
   <div id="navigation" class="columns">
@@ -32,43 +56,6 @@
 
   <div id="thumbnail-list-wrapper">
     <div id="thumbnail-list">
-    </div>
-  </div>
-
-  <!-- ["black", "blue", "brown", "green", "grey", "orange", "pink", "purple", "red", "tan", "teal", "white", "yellow"] -->
-  <div id="color-button-container" class="columns">
-    <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
-      <ul>
-        <li><button id="pink-button">Pink</button></li>
-        <li><button id="green-button">Green</button></li>
-      </ul>
-    </div>
-    <div class="options is-container box column is-2 my-6 has-text-centered">
-      <ul>
-        <li><button id="brown-button">Brown</button></li>
-        <li><button id="red-button">Red</button></li>
-        <li><button id="yellow-button">Yellow</button></li>
-      </ul>
-    </div>
-    <div class="options is-container box column is-2 my-6 has-text-centered">
-      <ul>
-        <li><button id="white-button">White</button></li>
-        <li><button id="black-button">Black</button></li>
-        <li><button id="blue-button">Blue</button></li>
-      </ul>
-    </div>
-    <div class="options is-container box column is-2 my-6 has-text-centered">
-      <ul>
-        <li><button id="teal-button">Teal</button></li>
-        <li><button id="grey-button">Grey</button></li>
-        <li><button id="tan-button">Tan</button></li>
-      </ul>
-    </div>
-    <div class="options is-container box column is-2 my-6 has-text-centered">
-      <ul>
-        <li><button id="orange-button">Orange</button></li>
-        <li><button id="purple-button">Purple</button></li>
-      </ul>
     </div>
   </div>
 
@@ -102,7 +89,8 @@
           <textarea id="local-tags" placeholder="example example2 ( tag1 tag2 ) ( -x -y )"></textarea>
         </li>
         <li class="note">
-          These tags are checked locally, supporting tag grouping and proper "or" tag resolving in those groups. These do not support groups within groups.
+          These tags are checked locally, supporting tag grouping and proper "or" tag resolving in those groups. These
+          do not support groups within groups.
         </li>
       </ul>
 
@@ -139,6 +127,12 @@
         </li>
         <li><button id="clear-history">Clear Search History</button></li>
       </ul>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="options is-container box column is-4 is-offset-4 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light is-underlined"><a>Click to see dataset</a></h4>
     </div>
   </div>
 

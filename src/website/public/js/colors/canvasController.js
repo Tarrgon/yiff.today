@@ -193,7 +193,7 @@ let canvasController = {
     ctx.setLineDash([5, 3])
     ctx.strokeStyle = "#aaaaaa"
     ctx.fillStyle = "rgba(0,0,0,0.3)"
-    ctx.lineWidth = 1
+    ctx.lineWidth = 3
     ctx.beginPath()
     for (let i = 0; i < points.length; i++) {
       let point = points[i]
@@ -206,6 +206,22 @@ let canvasController = {
 
     ctx.lineTo(points[0][0] / canvasController.scale, points[0][1] / canvasController.scale)
     ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+    ctx.lineWidth = 1
+    ctx.strokeStyle = "black"
+    ctx.beginPath()
+    for (let i = 0; i < points.length; i++) {
+      let point = points[i]
+      if (i == 0) {
+        ctx.moveTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
+      } else {
+        ctx.lineTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
+      }
+    }
+
+    ctx.lineTo(points[0][0] / canvasController.scale, points[0][1] / canvasController.scale)
     ctx.stroke()
     ctx.closePath()
   }
