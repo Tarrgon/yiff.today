@@ -708,6 +708,7 @@ let slideshowController = {
 
     if (currentSlide.isImageOrGif()) {
       currentImage.style.maxHeight = maxHeight + "px"
+      uiElements.colorButtonContainer.style.maxHeight = maxHeight + "px"
     } else {
       console.log("Couldn't update slide max height because slide isn't image or video.")
     }

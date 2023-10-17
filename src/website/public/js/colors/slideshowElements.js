@@ -13,6 +13,7 @@ let uiElements = {
   nextButton: document.getElementById("next-button"),
   lastButton: document.getElementById("last-button"),
   thumbnailList: document.getElementById("thumbnail-list"),
+  colorButtonContainer: document.getElementById("color-button-container"),
   searchText: document.getElementById("search-text"),
   startPage: document.getElementById("start-page-number"),
   searchButton: document.getElementById("search-button"),
