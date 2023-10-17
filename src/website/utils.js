@@ -28,7 +28,15 @@ module.exports = (db) => {
     },
 
     async getColor(lab) {
-      return await database.collection("colors").findOne({ l: Math.floor(lab[0] * 10000000000), a: Math.floor(lab[1] * 10000000000), b: Math.floor(lab[2] * 10000000000) })
+      let color = await database.collection("colors").findOne({ l: Math.floor(lab[0] * 10000000000), a: Math.floor(lab[1] * 10000000000), b: Math.floor(lab[2] * 10000000000) })
+      
+      if (color) {
+        color.l = lab[0]
+        color.a = lab[1]
+        color.b = lab[2]
+      }
+      
+      return color
     },
 
     // getNearestColorName(color) {
