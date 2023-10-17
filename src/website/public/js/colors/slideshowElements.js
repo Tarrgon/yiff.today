@@ -3,7 +3,8 @@ let uiElements = {
   infoMessage: document.getElementById("info-message"),
   currentImage: document.getElementById("current-image"),
   loadingAnimation: document.getElementById("loading-animation"),
-  tags: document.getElementById("tags"),
+  currentColor: document.getElementById("current-color"),
+  colorSpan: document.getElementById("color-span"),
   navigation: document.getElementById("navigation"),
   currentSlideNumber: document.getElementById("current-slide-number"),
   totalSlideNumber: document.getElementById("total-slide-number"),
@@ -21,9 +22,6 @@ let uiElements = {
   includeSafe: document.getElementById("include-safe"),
   localTags: document.getElementById("local-tags"),
   blacklist: document.getElementById("blacklist"),
-  maxWidth: document.getElementById("max-width"),
-  maxHeight: document.getElementById("max-height"),
-  autoFitSlide: document.getElementById("auto-fit-slide"),
   storeHistory: document.getElementById("store-history"),
   clearHistory: document.getElementById("clear-history")
 }

@@ -1,6 +1,8 @@
 // Dependencies
 const { MongoClient } = require("mongodb")
 const express = require("express")
+const bodyParser = require("body-parser")
+const cors = require('cors')
 const path = require("path")
 
 const config = require("../config.json")
@@ -20,7 +22,9 @@ module.exports = async () => {
     app.set("view engine", "ejs")
 
     // middleware setup
+    app.use(bodyParser.json({ limit: "1KB" }))
     app.use(express.static(path.join(__dirname, "public")))
+    app.use(cors())
 
     // routers
     app.use("/", require("./routes/main.js")(utils))

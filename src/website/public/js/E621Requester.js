@@ -44,7 +44,8 @@ class E621Requester {
 
     if (res.ok) {
       let data = await res.json()
-      this.hasMore = data.searchAfter != null
+
+      this.hasMore = data.searchAfter != null || data.posts.length == 100
       this._searchAfter = data.searchAfter
       this.requesting = false
       return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))

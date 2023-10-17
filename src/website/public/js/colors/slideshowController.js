@@ -1,8 +1,15 @@
 let e621Requester = new E621Requester()
 
-async function getBufferFromUrl(url) {
-  const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(url))
-  return Buffer.from(await response.arrayBuffer(), "base64")
+let seed = Date.now()
+
+function getBufferFromUrl(url) {
+  return new Promise(async (resolve) => {
+    const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(url))
+
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.readAsDataURL(await response.blob())
+  })
 }
 
 function _min(d0, d1, d2, bx, ay) {
@@ -392,6 +399,7 @@ function slideFilter(slide) {
 }
 
 let slideshowController = {
+  pageNumber: 1,
   currentSlideNumber: 0,
   searchText: "",
   maxThumbnails: getMaxThumbnailsBasedOnScreenSize(),
@@ -478,7 +486,7 @@ let slideshowController = {
   async loadNewSlidesIfNeeded() {
     if (!slideshowController.loadingNewSlides && slideshowController.currentSlideNumber >= slideshowController.slides.length - 11 && e621Requester.hasMore && !e621Requester.requesting) {
       loadingNewSlides = true
-      let slides = await e621Requester.getSlides(slideshowController.searchText, null)
+      let slides = await e621Requester.getSlides(slideshowController.searchText + ` order:random randseed:${seed}`, ++slideshowController.pageNumber)
 
       slideshowController.slides = slideshowController.slides.concat(slides.filter(slideFilter))
       loadingNewSlides = false
@@ -608,14 +616,21 @@ let slideshowController = {
     slideshowController.showThumbnails()
   },
 
-  displayImage(currentSlide) {
+  async displayImage(currentSlide) {
     let currentImage = uiElements.currentImage
 
-    currentImage.src = currentSlide.fileUrl
-    currentImage.setAttribute("alt", currentSlide.id)
     currentImage.style.display = "inline"
 
     slideshowController.updateSlideSize()
+
+    let image = document.createElement("img")
+
+    image.addEventListener("load", () => {
+      canvasController.setImage(image, image.width, image.height)
+      slideshowController.hideLoadingAnimation()
+    })
+
+    image.src = await getBufferFromUrl(currentSlide.fileUrl)
   },
 
   displaySlide() {
@@ -684,64 +699,22 @@ let slideshowController = {
 
     let currentImage = uiElements.currentImage
 
-    let autoFitSlide = presentation.autoFitSlide
-
     currentImage.style.width = null
     currentImage.style.height = null
     currentImage.style.maxWidth = null
     currentImage.style.maxHeight = null
 
-    if (autoFitSlide) {
-      let viewWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-      let viewHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    let maxHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) / 2
 
-      let newWidth = currentSlide.width
-      let newHeight = currentSlide.height
-
-      let viewRatio = viewWidth / viewHeight
-      let newRatio = newWidth / newHeight
-
-      if (newRatio > viewRatio) {
-        newWidth = viewWidth
-        newHeight = viewWidth / newRatio
-      } else {
-        newWidth = viewHeight * newRatio
-        newHeight = viewHeight
-      }
-
-      if (currentSlide.isImageOrGif()) {
-        currentImage.style.width = newWidth + "px"
-        currentImage.style.height = (newHeight - 10) + "px"
-      } else {
-        console.log("Couldn't update slide size because slide isn't image or video.")
-      }
+    if (currentSlide.isImageOrGif()) {
+      currentImage.style.maxHeight = maxHeight + "px"
     } else {
-      if (presentation.maxWidth != null) {
-        let maxWidth = parseInt(presentation.maxWidth)
-
-        if (currentSlide.isImageOrGif()) {
-          currentImage.style.maxWidth = maxWidth + "px"
-        } else {
-          console.log("Couldn't update slide max width because slide isn't image or video.")
-        }
-      }
-
-      if (presentation.maxHeight != null) {
-        let maxHeight = parseInt(presentation.maxHeight)
-
-        if (currentSlide.isImageOrGif()) {
-          currentImage.style.maxHeight = maxHeight + "px"
-        } else {
-          console.log("Couldn't update slide max height because slide isn't image or video.")
-        }
-      }
+      console.log("Couldn't update slide max height because slide isn't image or video.")
     }
   },
 
   windowResized() {
-    if (presentation.autoFitSlide) {
-      slideshowController.tryToUpdateSlideSize()
-    }
+    slideshowController.tryToUpdateSlideSize()
   },
 
   displayWarningMessage(message) {
@@ -766,26 +739,18 @@ let slideshowController = {
 
   previousSlide() {
     slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber - 1)
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   nextSlide() {
     slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber + 1)
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   back10Slides() {
     slideshowController.setCurrentSlideNumber(Math.max(0, slideshowController.currentSlideNumber - 10))
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   forward10Slides() {
     slideshowController.setCurrentSlideNumber(Math.min(slideshowController.slides.length - 1, slideshowController.currentSlideNumber + 10))
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   hasNextSlide() {
@@ -831,10 +796,10 @@ let slideshowController = {
     }
   },
 
-  async exectueSearch() {
+  async executeSearch() {
     let searchText = uiElements.searchText.value
     slideshowController.searchText = searchText
-    let slides = await e621Requester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
+    let slides = await e621Requester.getSlides(slideshowController.searchText + ` order:random randseed:${seed}`, uiElements.startPage.value || 1)
 
     slideshowController.slides = slides.filter(slideFilter)
     slideshowController.setCurrentSlideNumber(0)
@@ -843,10 +808,6 @@ let slideshowController = {
       history.addToHistory(searchText)
     }
   }
-}
-
-uiElements.currentImage.onload = () => {
-  slideshowController.hideLoadingAnimation()
 }
 
 uiElements.nextButton.addEventListener("click", () => {
@@ -870,12 +831,12 @@ uiElements.lastButton.addEventListener("click", () => {
 })
 
 uiElements.searchButton.addEventListener("click", async () => {
-  slideshowController.exectueSearch()
+  slideshowController.executeSearch()
 })
 
 uiElements.searchText.addEventListener("keyup", async (e) => {
   if (e.key == ENTER_KEY_ID) {
-    slideshowController.exectueSearch()
+    slideshowController.executeSearch()
   }
 })
 
@@ -939,8 +900,6 @@ document.addEventListener("keydown", (e) => {
       slideshowController.back10Slides()
     else if (key == DOWN_ARROW_KEY_ID || key == S_KEY_ID)
       slideshowController.forward10Slides()
-    else if (key == F_KEY_ID)
-      presentation.setAutoFitSlide(!presentation.autoFitSlide)
     else if (key == L_KEY_ID || key == NUMPAD_PERIOD_KEY_ID)
       slideshowController.downloadCurrentSlide()
     else if (key == E_KEY_ID)

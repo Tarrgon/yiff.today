@@ -2,7 +2,10 @@ let e621Requester = new E621Requester()
 
 async function getBufferFromUrl(url) {
   const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(url))
-  return Buffer.from(await response.arrayBuffer(), "base64")
+  return btoa(
+    new Uint8Array(await response.arrayBuffer())
+      .reduce((data, byte) => data + String.fromCharCode(byte), "")
+  )
 }
 
 function _min(d0, d1, d2, bx, ay) {
@@ -1038,7 +1041,7 @@ let slideshowController = {
     }
   },
 
-  async exectueSearch() {
+  async executeSearch() {
     let searchText = uiElements.searchText.value
     slideshowController.searchText = searchText
     let slides = await e621Requester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
@@ -1099,12 +1102,12 @@ uiElements.lastButton.addEventListener("click", () => {
 })
 
 uiElements.searchButton.addEventListener("click", async () => {
-  slideshowController.exectueSearch()
+  slideshowController.executeSearch()
 })
 
 uiElements.searchText.addEventListener("keyup", async (e) => {
   if (e.key == ENTER_KEY_ID) {
-    slideshowController.exectueSearch()
+    slideshowController.executeSearch()
   }
 })
 
