@@ -272,6 +272,7 @@ uiElements.currentImage.addEventListener("mousedown", (e) => {
 
   points.push(pos)
 
+  updateSelection = true
   mouseDown = true
 })
 
