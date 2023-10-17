@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let events = {}
 
   for (let [key, value] of Object.entries(history)) {
-    if (key == "history" || key == "seen") continue
+    if (key == "history") continue
     let element = uiElements[key]
     events[`${key}Changed`] = new Event(`${key}Changed`)
     if (element.tagName == "INPUT" && element.type == "checkbox") {

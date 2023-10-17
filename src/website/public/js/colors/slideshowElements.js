@@ -24,5 +24,6 @@ let uiElements = {
   maxWidth: document.getElementById("max-width"),
   maxHeight: document.getElementById("max-height"),
   autoFitSlide: document.getElementById("auto-fit-slide"),
+  storeHistory: document.getElementById("store-history"),
   clearHistory: document.getElementById("clear-history")
 }
