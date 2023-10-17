@@ -84,15 +84,27 @@ function createColorColumn(color) {
   let content = document.createElement("div")
   content.classList.add("columns", "is-multiline", "is-centered", "has-text-centered")
 
+  let cols = []
+
   for (let name of COLORS) {
     let c = color[name] || 0
     let col = document.createElement("div")
     col.classList.add("column", "is-half")
-    content.appendChild(col)
 
     let colContent = document.createElement("p")
     colContent.innerText = `${toTitle(name)}: ${c}`
     col.appendChild(colContent)
+
+    cols.push({ col, hits: c, name })
+  }
+
+  cols.sort((a, b) => {
+    if (a.hits == b.hits) return a.name.localeCompare(b.name)
+    return b.hits - a.hits
+  })
+
+  for (let col of cols) {
+    content.appendChild(col)
   }
 
   cardContent.appendChild(content)
