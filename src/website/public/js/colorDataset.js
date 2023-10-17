@@ -71,7 +71,7 @@ function createColorColumn(color) {
   cardImageContainer.appendChild(cardImageDiv)
 
   let colorHex = document.createElement("span")
-  colorHex.classList.add("is-size-1")
+  colorHex.classList.add("is-size-1-desktop", "is-size-4-touch")
   colorHex.innerText = hex
   cardImageDiv.appendChild(colorHex)
 
