@@ -538,16 +538,6 @@ let slideshowController = {
     uiElements.loadingAnimation.style.display = "none"
   },
 
-  updatePlayPauseButtons() {
-    if (slideshowController.isPlaying) {
-      uiElements.playButton.style.display = "none"
-      uiElements.pauseButton.style.display = "inline"
-    } else {
-      uiElements.playButton.style.display = "inline"
-      uiElements.pauseButton.style.display = "none"
-    }
-  },
-
   updateFirstPreviousButtons() {
     if (slideshowController.currentSlideNumber > 0) {
       uiElements.firstButton.disabled = false
@@ -587,7 +577,6 @@ let slideshowController = {
     slideshowController.updateTotalNumberDisplay()
 
     slideshowController.updateFirstPreviousButtons()
-    slideshowController.updatePlayPauseButtons()
     slideshowController.updateNextLastButtons()
   },
 
