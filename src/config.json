@@ -1,4 +1,6 @@
 {
+  "mongoDatabaseUrl": "mongodb://0.0.0.0:27017",
+  "mongoDatabaseName": "e6SlideshowData",
   "web": {
     "port": 9494
   },
