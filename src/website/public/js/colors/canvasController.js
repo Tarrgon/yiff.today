@@ -159,7 +159,7 @@ let canvasController = {
 
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     ctx.scale(canvasController.scale, canvasController.scale)
-    
+
     ctx.drawImage(canvasController.currentImage, -canvasController.scroll[0], -canvasController.scroll[1])
 
     let w = biggestDiffX + 10 > ctx.canvas.width ? ctx.canvas.width : biggestDiffX + 10
@@ -191,13 +191,13 @@ let canvasController = {
     canvasController.restoreCanvas()
 
     ctx.setLineDash([5, 3])
-    ctx.strokeStyle = "black"
+    ctx.strokeStyle = "#aaaaaa"
     ctx.fillStyle = "rgba(0,0,0,0.3)"
     ctx.lineWidth = 1
     ctx.beginPath()
-    for (let index = 0; index < points.length; index++) {
-      let point = points[index]
-      if (index == 0) {
+    for (let i = 0; i < points.length; i++) {
+      let point = points[i]
+      if (i == 0) {
         ctx.moveTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
       } else {
         ctx.lineTo(point[0] / canvasController.scale, point[1] / canvasController.scale)
@@ -388,6 +388,9 @@ uiElements.currentImage.addEventListener("mousemove", (e) => {
 uiElements.currentImage.addEventListener("wheel", (e) => {
   e.preventDefault()
   e.stopImmediatePropagation()
+
+  canvasController.deselect()
+  
   let previousScale = canvasController.scale
 
   let direction = e.deltaY > 0 ? -1 : 1
