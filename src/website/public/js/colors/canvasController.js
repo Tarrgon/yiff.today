@@ -27,7 +27,7 @@ let canvasController = {
     return canvasController.colorCtx
   },
 
-  setImage(image, width, height) {
+  setImage(image, width, height, restore = false) {
     uiElements.currentImage.width = width
     uiElements.currentImage.height = height
 
@@ -36,6 +36,10 @@ let canvasController = {
     ctx.drawImage(image, 0, 0)
 
     canvasController.currentImage = image
+
+    if (!restore) {
+      canvasController.deselect()
+    }
   },
 
   deselect() {
@@ -148,7 +152,7 @@ let canvasController = {
   },
 
   restoreCanvas() {
-    canvasController.setImage(canvasController.currentImage, canvasController.currentImage.width, canvasController.currentImage.height)
+    canvasController.setImage(canvasController.currentImage, canvasController.currentImage.width, canvasController.currentImage.height, true)
   },
 
   updateVisibleSelection(points) {
