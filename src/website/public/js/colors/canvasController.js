@@ -272,7 +272,7 @@ uiElements.currentImage.addEventListener("mousedown", (e) => {
 
   points.push(pos)
 
-  updateSelection = true
+  canvasController.deselect()
   mouseDown = true
 })
 
