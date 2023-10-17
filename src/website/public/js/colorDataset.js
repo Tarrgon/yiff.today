@@ -57,7 +57,7 @@ function createColorColumn(color) {
   console.log(hex)
 
   let column = document.createElement("div")
-  column.classList.add("column", "is-4")
+  column.classList.add("column", "is-3")
 
   let card = document.createElement("div")
   card.classList.add("card", "large")
