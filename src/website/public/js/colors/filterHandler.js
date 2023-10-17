@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     includeExplicit: getValue("include-explicit", false),
     includeQuestionable: getValue("include-questionable", false),
     includeSafe: getValue("include-safe", true),
-    includeFavorites: getValue("include-favorites", false),
     localTags: getValue("local-tags", ""),
     blacklist: getValue("blacklist", "")
   }

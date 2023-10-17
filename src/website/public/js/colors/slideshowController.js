@@ -304,8 +304,6 @@ function slideFilter(slide) {
 
   if (!isRatingAllowed(slide.rating)) return false
 
-  if (!filtering.includeSeen && history.alreadySeen(slide.id)) return false
-
   if (areSomeTagsAreBlacklisted(slide.tags)) return false
 
   let filterText = filtering.localTags.trim().replace("\n", " ")
@@ -503,8 +501,6 @@ let slideshowController = {
       slideshowController.preloadNextSlides()
       slideshowController.loadNewSlidesIfNeeded()
     })
-
-    if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
   },
 
   clearCallbacksForPreloadingSlides() {
