@@ -3,6 +3,8 @@ const { MongoClient } = require("mongodb")
 const express = require("express")
 const path = require("path")
 
+const config = require("../config.json")
+
 module.exports = async () => {
   console.log("Starting")
   try {
