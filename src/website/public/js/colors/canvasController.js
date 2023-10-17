@@ -41,6 +41,7 @@ let canvasController = {
   deselect() {
     canvasController.currentColor = null
     uiElements.colorSpan.style.color = "red"
+    updateSelection = true
   },
 
   setColor(r, g, b) {
