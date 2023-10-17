@@ -52,9 +52,7 @@ async function getNext() {
 
 function createColorColumn(color) {
   let rgb = lab2rgb([color.l, color.a, color.b])
-  console.log(rgb)
   let hex = rgbToHex(rgb)
-  console.log(hex)
 
   let column = document.createElement("div")
   column.classList.add("column", "is-3")
