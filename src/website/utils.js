@@ -45,7 +45,7 @@ module.exports = (db) => {
     async addVote(color, colorName, type) {
       let lab = type == "rgb" ? scaleLab(mod.rgb2lab(color)) : scaleLab(color)
 
-      await database.collection("votes").insertOne({ l: lab[0], a: lab[1], b: lab[2], colorName })
+      await database.collection("votes").insertOne({ l: lab[0], a: lab[1], b: lab[2], colorName, timestamp: new Date() })
     },
 
     async getColor(lab) {
