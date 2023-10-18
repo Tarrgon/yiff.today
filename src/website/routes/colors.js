@@ -12,12 +12,6 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   await utils.addColor(req.body.color, req.body.selectedName, req.query.type || "rgb")
-
-  res.sendStatus(200)
-})
-
-router.post("/vote", async (req, res) => {
-  await utils.addColor(req.body.color, req.body.selectedName, req.query.type || "rgb")
   await utils.addVote(req.body.color, req.body.selectedName, req.query.type || "rgb")
 
   res.sendStatus(200)
