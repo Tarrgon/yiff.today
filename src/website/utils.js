@@ -18,6 +18,10 @@ function getRealLab(color) {
   return c
 }
 
+function scaleLab(lab) {
+  return [Math.floor(lab[0] * SCALE_FACTOR), Math.floor(lab[1] * SCALE_FACTOR), Math.floor(lab[2] * SCALE_FACTOR)]
+}
+
 module.exports = (db) => {
   // fetch("https://api.color.pizza/v1/?list=default").then(async (response) => {
   //   let data = await response.json()
@@ -30,16 +34,23 @@ module.exports = (db) => {
     async addColor(color, colorName, type) {
       if (!ACCEPTABLE_NAMES.includes(colorName)) return
 
-      let lab = type == "rgb" ? mod.rgb2lab(color) : color
+      let lab = type == "rgb" ? scaleLab(mod.rgb2lab(color)) : scaleLab(color)
 
       // let name = mod.getNearestColorName(lab)
 
-      await database.collection("colors").updateOne({ l: Math.floor(lab[0] * SCALE_FACTOR), a: Math.floor(lab[1] * SCALE_FACTOR), b: Math.floor(lab[2] * SCALE_FACTOR) },
+      await database.collection("colors").updateOne({ l: lab[0], a: lab[1], b: lab[2] },
         { $inc: { [`${colorName}`]: 1 } }, { upsert: true })
     },
 
+    async addVote(color, colorName, type) {
+      let lab = type == "rgb" ? scaleLab(mod.rgb2lab(color)) : scaleLab(color)
+
+      await database.collection("votes").insertOne({ l: lab[0], a: lab[1], b: lab[2], colorName })
+    },
+
     async getColor(lab) {
-      let color = await database.collection("colors").findOne({ l: Math.floor(lab[0] * SCALE_FACTOR), a: Math.floor(lab[1] * SCALE_FACTOR), b: Math.floor(lab[2] * SCALE_FACTOR) })
+      lab = scaleLab(lab)
+      let color = await database.collection("colors").findOne({ l: lab[0], a: lab[1], b: lab[2] })
 
       if (color) {
         color.l = lab[0]

@@ -41,7 +41,7 @@ function rgbToHex(rgb) {
 }
 
 async function voteOnColor(lab, colorName) {
-  fetch("/colors?type=lab", {
+  fetch("/vote?type=lab", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
