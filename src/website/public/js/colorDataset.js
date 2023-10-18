@@ -69,6 +69,7 @@ function createColorColumn(color) {
 
   let card = document.createElement("div")
   card.classList.add("card", "large")
+  card.setAttribute("data-lab", JSON.stringify([color.l, color.a, color.b]))
   column.appendChild(card)
 
   let cardImageContainer = document.createElement("div")
