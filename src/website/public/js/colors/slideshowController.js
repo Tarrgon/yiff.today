@@ -704,13 +704,14 @@ let slideshowController = {
     currentImage.style.maxWidth = null
     currentImage.style.maxHeight = null
 
-    let maxHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 160
+    let maxHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 180
     let maxWidth = ((window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) / 1.3333333) - 50 // 1.33333 since the column is-9 and full is 12/12, so 12/9
 
     if (currentSlide.isImageOrGif()) {
       currentImage.style.maxHeight = maxHeight + "px"
       currentImage.style.maxWidth = maxWidth + "px"
       uiElements.colorButtonContainer.style.maxHeight = maxHeight + "px"
+      uiElements.colorButtonContainer.style.transform = `translate(-${(uiElements.currentImage.parentElement.clientWidth - uiElements.currentImage.clientWidth) / 2 + 10}px, 0px)`
     } else {
       console.log("Couldn't update slide max height because slide isn't image or video.")
     }
