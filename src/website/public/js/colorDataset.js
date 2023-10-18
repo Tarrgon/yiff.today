@@ -40,6 +40,16 @@ function rgbToHex(rgb) {
   }).join("")
 }
 
+async function voteOnColor(lab, colorName) {
+  fetch("/colors?type=lab", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ color: lab, selectedName: colorName })
+  })
+}
+
 async function getNext() {
   let colors = await (await fetch(`/colors/api/dataset?after=${lastId}`)).json()
 
@@ -82,27 +92,43 @@ function createColorColumn(color) {
   let content = document.createElement("div")
   content.classList.add("columns", "is-multiline", "is-centered", "has-text-centered")
 
-  let cols = []
+  let createColumnContent = () => {
+    let cols = []
 
-  for (let name of COLORS) {
-    let c = color[name] || 0
-    let col = document.createElement("div")
-    col.classList.add("column", "is-half")
+    for (let name of COLORS) {
+      let c = color[name] || 0
+      let col = document.createElement("div")
+      col.classList.add("column", "is-half")
 
-    let colContent = document.createElement("p")
-    colContent.innerText = `${toTitle(name)}: ${c}`
-    col.appendChild(colContent)
+      let colContent = document.createElement("a")
+      colContent.addEventListener("click", (e) => {
+        e.preventDefault()
 
-    cols.push({ col, hits: c, name })
-  }
+        voteOnColor([color.l, color.a, color.b], name)
 
-  cols.sort((a, b) => {
-    if (a.hits == b.hits) return a.name.localeCompare(b.name)
-    return b.hits - a.hits
-  })
+        color[name]++
 
-  for (let col of cols) {
-    content.appendChild(col.col)
+        while (content.hasChildNodes()) {
+          content.removeChild(content.firstChild)
+        }
+
+        createColumnContent()
+      })
+      
+      colContent.innerText = `${toTitle(name)}: ${c}`
+      col.appendChild(colContent)
+
+      cols.push({ col, hits: c, name })
+    }
+
+    cols.sort((a, b) => {
+      if (a.hits == b.hits) return a.name.localeCompare(b.name)
+      return b.hits - a.hits
+    })
+
+    for (let col of cols) {
+      content.appendChild(col.col)
+    }
   }
 
   cardContent.appendChild(content)

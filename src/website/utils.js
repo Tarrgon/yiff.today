@@ -27,10 +27,10 @@ module.exports = (db) => {
 
   database = db
   mod = {
-    async addColor(colorRgb, colorName) {
+    async addColor(color, colorName, type) {
       if (!ACCEPTABLE_NAMES.includes(colorName)) return
 
-      let lab = mod.rgb2lab(colorRgb)
+      let lab = type == "rgb" ? mod.rgb2lab(color) : color
 
       // let name = mod.getNearestColorName(lab)
 
