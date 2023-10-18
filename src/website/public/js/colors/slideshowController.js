@@ -711,7 +711,7 @@ let slideshowController = {
       currentImage.style.maxHeight = maxHeight + "px"
       currentImage.style.maxWidth = maxWidth + "px"
       uiElements.colorButtonContainer.style.maxHeight = maxHeight + "px"
-      uiElements.colorButtonContainer.style.transform = `translate(-${(uiElements.currentImage.parentElement.clientWidth - uiElements.currentImage.clientWidth) / 2 + 10}px, 0px)`
+      uiElements.colorButtonContainer.style.transform = `translate(-${(uiElements.currentImage.parentElement.clientWidth - uiElements.currentImage.clientWidth) / 2 - 20}px, 0px)`
     } else {
       console.log("Couldn't update slide max height because slide isn't image or video.")
     }

@@ -57,7 +57,7 @@ let canvasController = {
       canvasController.deselect()
     }
 
-    uiElements.colorButtonContainer.style.transform = `translate(-${(uiElements.currentImage.parentElement.clientWidth - uiElements.currentImage.clientWidth) / 2 + 10}px, 0px)`
+    uiElements.colorButtonContainer.style.transform = `translate(-${(uiElements.currentImage.parentElement.clientWidth - uiElements.currentImage.clientWidth) / 2 - 20}px, 0px)`
   },
 
   deselect() {
