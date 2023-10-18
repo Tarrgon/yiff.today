@@ -93,7 +93,6 @@ function createColorColumn(color) {
   content.classList.add("columns", "is-multiline", "is-centered", "has-text-centered")
 
   let createColumnContent = () => {
-    console.log("Creating content")
     let cols = []
 
     for (let name of COLORS) {
@@ -107,7 +106,8 @@ function createColorColumn(color) {
 
         voteOnColor([color.l, color.a, color.b], name)
 
-        color[name]++
+        if (color[name]) color[name]++
+        else color[name] = 1
 
         while (content.hasChildNodes()) {
           content.removeChild(content.firstChild)
