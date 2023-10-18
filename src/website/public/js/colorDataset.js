@@ -114,7 +114,7 @@ function createColorColumn(color) {
 
         createColumnContent()
       })
-      
+
       colContent.innerText = `${toTitle(name)}: ${c}`
       col.appendChild(colContent)
 
@@ -130,6 +130,8 @@ function createColorColumn(color) {
       content.appendChild(col.col)
     }
   }
+
+  createColumnContent()
 
   cardContent.appendChild(content)
 
