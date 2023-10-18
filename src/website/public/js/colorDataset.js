@@ -93,6 +93,7 @@ function createColorColumn(color) {
   content.classList.add("columns", "is-multiline", "is-centered", "has-text-centered")
 
   let createColumnContent = () => {
+    console.log("Creating content")
     let cols = []
 
     for (let name of COLORS) {
