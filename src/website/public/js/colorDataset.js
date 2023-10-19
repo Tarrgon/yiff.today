@@ -5,8 +5,13 @@ let moreLeft = true
 let lastId = ""
 let columns = document.getElementById("color-container")
 
-function toTitle(text) {
-  return text.toLowerCase().split("_").map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(" ")
+function toTitle(str) {
+  return str.replaceAll("_", " ").replace(
+    /\w\S*/g,
+    (txt) => {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    }
+  )
 }
 
 function lab2rgb(lab) {

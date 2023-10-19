@@ -401,12 +401,11 @@ function slideFilter(slide) {
 let slideshowController = {
   currentSlideNumber: 0,
   searchText: "",
-  maxThumbnails: getMaxThumbnailsBasedOnScreenSize(),
+  maxThumbnails: 8,
   slides: [],
   preloadingSlides: [],
   loadingNewSlides: false,
   isPlaying: false,
-  timer: null,
   videoVolume: Number(localStorage.getItem("video-volume") || 0),
   videoMuted: localStorage.getItem("video-muted") == "true",
 
@@ -553,16 +552,6 @@ let slideshowController = {
     uiElements.loadingAnimation.style.display = "none"
   },
 
-  updatePlayPauseButtons() {
-    if (slideshowController.isPlaying) {
-      uiElements.playButton.style.display = "none"
-      uiElements.pauseButton.style.display = "inline"
-    } else {
-      uiElements.playButton.style.display = "inline"
-      uiElements.pauseButton.style.display = "none"
-    }
-  },
-
   updateFirstPreviousButtons() {
     if (slideshowController.currentSlideNumber > 0) {
       uiElements.firstButton.disabled = false
@@ -602,7 +591,6 @@ let slideshowController = {
     slideshowController.updateTotalNumberDisplay()
 
     slideshowController.updateFirstPreviousButtons()
-    slideshowController.updatePlayPauseButtons()
     slideshowController.updateNextLastButtons()
   },
 
@@ -677,6 +665,8 @@ let slideshowController = {
     } else {
       console.log("Trying to display slide that isn't an image or video.")
     }
+
+    tagTreeHandler.slideUpdated()
   },
 
   displayCurrentSlide() {
@@ -745,79 +735,46 @@ let slideshowController = {
   updateSlideSize() {
     let currentSlide = slideshowController.slides[slideshowController.currentSlideNumber]
 
-    let currentImage = uiElements.currentImage
-    let currentVideo = uiElements.currentVideo
+    let current = currentSlide.isImageOrGif() ? uiElements.currentImage : currentSlide.isVideo() ? uiElements.currentVideo : null
 
-    let autoFitSlide = presentation.autoFitSlide
-
-    currentImage.style.width = null
-    currentImage.style.height = null
-    currentImage.style.maxWidth = null
-    currentImage.style.maxHeight = null
-
-    currentVideo.style.width = null
-    currentVideo.style.height = null
-    currentVideo.style.maxWidth = null
-    currentVideo.style.maxHeight = null
-
-    if (autoFitSlide) {
-      let viewWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-      let viewHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-
-      let newWidth = currentSlide.width
-      let newHeight = currentSlide.height
-
-      let viewRatio = viewWidth / viewHeight
-      let newRatio = newWidth / newHeight
-
-      if (newRatio > viewRatio) {
-        newWidth = viewWidth
-        newHeight = viewWidth / newRatio
-      } else {
-        newWidth = viewHeight * newRatio
-        newHeight = viewHeight
-      }
-
-      if (currentSlide.isImageOrGif()) {
-        currentImage.style.width = newWidth + "px"
-        currentImage.style.height = (newHeight - 10) + "px"
-      } else if (currentSlide.isVideo()) {
-        currentVideo.style.width = newWidth + "px"
-        currentVideo.style.height = (newHeight - 10) + "px"
-      } else {
-        console.log("Couldn't update slide size because slide isn't image or video.")
-      }
-    } else {
-      if (presentation.maxWidth != null) {
-        let maxWidth = parseInt(presentation.maxWidth)
-
-        if (currentSlide.isImageOrGif()) {
-          currentImage.style.maxWidth = maxWidth + "px"
-        } else if (currentSlide.isVideo()) {
-          currentVideo.style.maxWidth = maxWidth + "px"
-        } else {
-          console.log("Couldn't update slide max width because slide isn't image or video.")
-        }
-      }
-
-      if (presentation.maxHeight != null) {
-        let maxHeight = parseInt(presentation.maxHeight)
-
-        if (currentSlide.isImageOrGif()) {
-          currentImage.style.maxHeight = maxHeight + "px"
-        } else if (currentSlide.isVideo()) {
-          currentVideo.style.maxHeight = maxHeight + "px"
-        } else {
-          console.log("Couldn't update slide max height because slide isn't image or video.")
-        }
-      }
+    if (!current) {
+      console.error("Couldn't update slide max height because slide isn't image or video.")
+      return
     }
+
+    current.style.width = null
+    current.style.height = null
+    current.style.maxWidth = null
+    current.style.maxHeight = null
+
+    let viewWidth = (current.parentElement.parentElement.clientWidth / 2) - 50
+    let viewHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 120
+
+    let newWidth = currentSlide.width
+    let newHeight = currentSlide.height
+
+    let viewRatio = viewWidth / viewHeight
+    let newRatio = newWidth / newHeight
+
+    if (newRatio > viewRatio) {
+      newWidth = viewWidth
+      newHeight = viewWidth / newRatio
+    } else {
+      newWidth = viewHeight * newRatio
+      newHeight = viewHeight
+    }
+
+    current.style.width = newWidth + "px"
+    current.style.height = (newHeight - 10) + "px"
+
+    uiElements.tagContainer.style["max-height"] = (newHeight - 10) + "px"
+
+    // uiElements.tagTree.style.transform = `translate(0px, ${current.clientHeight / 2 - uiElements.tagTree.clientHeight / 2}px)`
+
   },
 
   windowResized() {
-    if (presentation.autoFitSlide) {
-      slideshowController.tryToUpdateSlideSize()
-    }
+    slideshowController.tryToUpdateSlideSize()
   },
 
   displayWarningMessage(message) {
@@ -850,26 +807,18 @@ let slideshowController = {
 
   previousSlide() {
     slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber - 1)
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   nextSlide() {
     slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber + 1)
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   back10Slides() {
     slideshowController.setCurrentSlideNumber(Math.max(0, slideshowController.currentSlideNumber - 10))
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   forward10Slides() {
     slideshowController.setCurrentSlideNumber(Math.min(slideshowController.slides.length - 1, slideshowController.currentSlideNumber + 10))
-
-    slideshowController.restartSlideshowIfOn()
   },
 
   hasNextSlide() {
@@ -884,106 +833,6 @@ let slideshowController = {
         callback.call()
       }
     })
-  },
-
-  tryToPlayOrPause() {
-    if (slideshowController.hasSlidesToDisplay()) {
-      if (slideshowController.isPlaying)
-        slideshowController.pauseSlideshow()
-      else
-        slideshowController.startSlideshow()
-    }
-
-    slideshowController.updateNavigation()
-  },
-
-  startSlideshow() {
-    slideshowController.tryToStartCountdown()
-
-    slideshowController.isPlaying = true
-  },
-
-  tryToStartCountdown() {
-    if (slideshowController.getCurrentSlide().isPreloaded) {
-      slideshowController.startCountdown()
-    } else {
-      slideshowController.runCodeWhenCurrentSlideFinishesLoading(() => {
-        slideshowController.startCountdown()
-      })
-    }
-  },
-
-  async startCountdown() {
-    let millisecondsPerSlide = presentation.secondsPerSlide * 1000
-
-    if (presentation.slideshowPlaysFullVideo) {
-      let slide = slideshowController.getCurrentSlide()
-      if (slide.mediaType == MEDIA_TYPE_GIF) {
-        let buffer = await getBufferFromUrl(slide.fileUrl)
-        let frames = await gifFrames({ url: buffer, frames: "all", outputType: "png" })
-        let duration = 0
-        for (let frame of frames) {
-          duration += frame.frameInfo.delay
-        }
-
-        millisecondsPerSlide = duration * 10
-
-        if (millisecondsPerSlide < presentation.slideshowLowDurationMp4Seconds * 1000) {
-          millisecondsPerSlide = duration * 10 * presentation.slideshowGifLoopCount
-
-          while (millisecondsPerSlide < presentation.secondsPerSlide * 1000) {
-            millisecondsPerSlide += duration * 10
-          }
-        }
-
-      } else if (slide.mediaType == MEDIA_TYPE_VIDEO) {
-        if (uiElements.currentVideo.readyState === 4) {
-          millisecondsPerSlide = uiElements.currentVideo.duration * 1000
-        } else {
-          await new Promise(resolve => {
-            uiElements.currentVideo.onloadeddata = () => {
-              resolve()
-            }
-          })
-
-          millisecondsPerSlide = uiElements.currentVideo.duration * 1000
-        }
-
-        if (millisecondsPerSlide < presentation.slideshowLowDurationMp4Seconds * 1000) {
-          millisecondsPerSlide = uiElements.currentVideo.duration * presentation.slideshowGifLoopCount * 1000
-          while (millisecondsPerSlide < presentation.secondsPerSlide * 1000) {
-            millisecondsPerSlide += uiElements.currentVideo.duration * 1000
-          }
-        }
-      }
-    }
-
-    slideshowController.timer = setTimeout(function () {
-      if (slideshowController.hasNextSlide()) {
-        // Continue slideshow
-        slideshowController.nextSlide()
-      }
-      else {
-        // Loop when out of images/videos
-        slideshowController.setSlideNumberToFirst()
-      }
-    }, millisecondsPerSlide)
-  },
-
-  restartSlideshowIfOn() {
-    if (slideshowController.isPlaying) {
-      clearTimeout(slideshowController.timer)
-      slideshowController.clearCallbacksForPreloadingSlides()
-
-      slideshowController.tryToStartCountdown()
-    }
-  },
-
-  pauseSlideshow() {
-    clearTimeout(slideshowController.timer)
-    slideshowController.clearCallbacksForPreloadingSlides()
-
-    slideshowController.isPlaying = false
   },
 
   async downloadCurrentSlide() {
@@ -1072,14 +921,6 @@ uiElements.currentImage.onload = () => {
 uiElements.currentVideo.addEventListener("loadeddata", () => {
   slideshowController.hideLoadingAnimation()
 }, false)
-
-uiElements.playButton.addEventListener("click", () => {
-  slideshowController.startSlideshow()
-})
-
-uiElements.pauseButton.addEventListener("click", () => {
-  slideshowController.pauseSlideshow()
-})
 
 uiElements.nextButton.addEventListener("click", () => {
   slideshowController.nextSlide()
@@ -1170,10 +1011,6 @@ document.addEventListener("keydown", (e) => {
       slideshowController.back10Slides()
     else if (key == DOWN_ARROW_KEY_ID || key == S_KEY_ID)
       slideshowController.forward10Slides()
-    else if (key == ENTER_KEY_ID || key == NUMPAD_ENTER_KEY_ID || key == SPACE_KEY_ID)
-      slideshowController.tryToPlayOrPause()
-    else if (key == F_KEY_ID)
-      presentation.setAutoFitSlide(!presentation.autoFitSlide)
     else if (key == L_KEY_ID || key == NUMPAD_PERIOD_KEY_ID)
       slideshowController.downloadCurrentSlide()
     else if (key == G_KEY_ID || key == NUMPAD_ONE_KEY_ID)

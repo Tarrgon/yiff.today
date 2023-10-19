@@ -491,7 +491,9 @@ let slideshowController = {
       slideshowController.slides = slideshowController.slides.concat(slides.filter(slideFilter))
       loadingNewSlides = false
 
-      slideshowController.updateSlidesAndNavigation()
+      slideshowController.updateNavigation()
+      slideshowController.clearWarningMessage()
+      slideshowController.clearInfoMessage()
 
       await slideshowController.loadNewSlidesIfNeeded()
     } else {
@@ -816,22 +818,18 @@ let slideshowController = {
 
 uiElements.nextButton.addEventListener("click", () => {
   slideshowController.nextSlide()
-  slideshowController.updateSlidesAndNavigation()
 })
 
 uiElements.previousButton.addEventListener("click", () => {
   slideshowController.previousSlide()
-  slideshowController.updateSlidesAndNavigation()
 })
 
 uiElements.firstButton.addEventListener("click", () => {
   slideshowController.setCurrentSlideNumber(0)
-  slideshowController.updateSlidesAndNavigation()
 })
 
 uiElements.lastButton.addEventListener("click", () => {
   slideshowController.setCurrentSlideNumber(slideshowController.slides.length - 1)
-  slideshowController.updateSlidesAndNavigation()
 })
 
 uiElements.searchButton.addEventListener("click", async () => {

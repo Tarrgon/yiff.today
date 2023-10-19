@@ -29,6 +29,7 @@ module.exports = async () => {
     // routers
     app.use("/", require("./routes/main.js")(utils))
     app.use("/colors", require("./routes/colors.js")(utils))
+    app.use("/visualtagger", require("./routes/visualtagger.js")(utils))
 
     return app
   } catch (e) {

@@ -3,34 +3,62 @@
 <html>
 
 <head>
-  <title>Yiff Today - Slideshow Viewer</title>
+  <title>Yiff Today - Visual Tagger</title>
 
   <%- include("./partials/head"); %>
+  <link rel="stylesheet" href="/css/visualtagger.css">
 </head>
 
 <body>
   <p id="warning-message"></p>
   <p id="info-message"></p>
-  <div id="slide-wrapper">
-    <img id="current-image" />
-    <video id="current-video" autoplay="true" loop="true" volume="0" controls>
-      <source type="video/webm">
-      </source>
-    </video>
-    <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
-    <div id="tags" style="display:none;"></div>
-  </div>
+  <div id="slide-wrapper" class="columns mx-6 mt-2">
+    <div class="column is-half">
+      <img id="current-image" />
+      <video id="current-video" autoplay="true" loop="true" volume="0" controls>
+        <source type="video/webm">
+        </source>
+      </video>
+      <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+      <div id="tags" style="display:none;"></div>
 
-  <div id="navigation" class="columns">
-    <div class="column is-8 is-offset-2 mb-6 has-text-centered">
-      <button class="hidden" id="favorite-button">♥</button><br>
-      <span id="current-slide-number"></span> of <span id="total-slide-number"></span><br>
-      <button class="nav-button" id="first-button">&lt;&lt;</button>
-      <button class="nav-button" id="previous-button">&lt;</button>
-      <button class="nav-button" id="play-button">&#9658;</button>
-      <button class="nav-button" id="pause-button">&#9646;&#9646;</button>
-      <button class="nav-button" id="next-button">&gt;</button>
-      <button class="nav-button" id="last-button">&gt;&gt;</button>
+      <div id="navigation" class="columns">
+        <div class="column is-8 is-offset-2 mb-6 has-text-centered">
+          <span id="current-slide-number"></span> of <span id="total-slide-number"></span><br>
+          <button class="nav-button" id="first-button">&lt;&lt;</button>
+          <button class="nav-button" id="previous-button">&lt;</button>
+          <button class="nav-button" id="next-button">&gt;</button>
+          <button class="nav-button" id="last-button">&gt;&gt;</button>
+        </div>
+      </div>
+
+      <div id="thumbnail-list-wrapper">
+        <div id="thumbnail-list">
+        </div>
+      </div>
+    </div>
+    <div class="column is-half has-text-left has-text-light">
+      <div id="tag-container" class="content"></div>
+      <div class="columns">
+        <div class="column is-5">
+          <div class="field has-addons">
+            <div class="control">
+              <input class="input" type="text" placeholder="Add a tag">
+            </div>
+            <div class="control">
+              <a class="button is-success">
+                Add tag
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="column is-3">
+          <div class="control">
+            <button class="button is-primary">Submit changes</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -103,48 +131,24 @@
       </ul>
     </div>
 
-    <div class="options is-container box column is-4 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">Presentation</h4>
-      <ul>
-        <li>
-          Seconds per Slide
-          <br>
-          <input id="seconds-per-slide" type="number" min="1" value="5" />
-        </li>
-        <li>
-          Max. Width
-          <br>
-          <input id="max-width" type="number" min="1" /><br>
-        </li>
-        <li>
-          Max. Height
-          <br>
-          <input id="max-height" type="number" min="1" />
-        </li>
-        <li>
-          <label><input id="auto-fit-slide" type="checkbox" checked />Auto-Fit</label>
-        </li>
-        <li class="hidden">
-          <label><input id="favorite-remotely" type="checkbox" />Favorite Remotely <span class="note">Requires API Key</span></label>
-        </li>
-
-        <li>
-          <label><input id="slideshow-plays-full-video" type="checkbox" />Slideshow Plays Full Video</label>
-        </li>
-
-        <li>
-          Slideshow Gif Loop Count
-          <br>
-          <input id="slideshow-gif-loop-count" type="number" min="1" value="4" />
-        </li>
-
-        <li>
-          Slideshow Low Duration mp4 Seconds
-          <br>
-          <input id="slideshow-low-duration-mp4-seconds" type="number" min="1" value="10" />
-        </li>
+    <div class="is-container box column is-4 is-offset-1 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">Hotkeys</h4>
+      <ul class="has-text-light">
+        <li>Full-screen (F11)</li>
+        <li>Previous slide (&larr; or A)</li>
+        <li>Next slide (&rarr; or D)</li>
+        <li>Back 10 slides (&uarr; or W)</li>
+        <li>Forward 10 slides (&darr; or S)</li>
+        <li>Open current image in new tab (E)</li>
+        <li>Download Current Image (L or Numpad period)</li>
+        <li class="hidden">Favorite/Unfavorite Image (G or Numpad zero - <a id="login" class="is-underlined">Must be logged in</a>)</li>
+        <hr />
+        <li class="is-size-4 has-text-weight-semibold has-text-light">Video Controls</li>
+        <li>Backward 5 seconds (1)</li>
+        <li>Forward 5 seconds (2)</li>
+        <li>Play/pause video (3)</li>
         <li class="note">
-          Slideshow does not respect pausing videos, or buffering.
+          Both regular and numpad work
         </li>
       </ul>
     </div>
@@ -172,61 +176,19 @@
     </div>
   </div>
 
-  <div class="columns">
-    <!-- <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">E621 Login</h4>
-      <ul>
-        <li>
-          <label>E621 Username <input id="e621-username" type="text" /></label>
-        </li>
-        <li>
-          <label>E621 API Key <input id="e621-api-key" type="password" /></label>
-        </li>
-        <li><a href="https://e621.net/users/home" target="_blank">(get API key here)</a></li>
-        <li class="note">
-          This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
-          <br>
-          Allows you to access posts that can't be accessed without an account.
-        </li>
-      </ul>
-    </div> -->
-
-    <div class="is-container box column is-4 is-offset-4 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">Hotkeys</h4>
-      <ul class="has-text-light">
-        <li>Full-screen (F11)</li>
-        <li>Previous slide (&larr; or A)</li>
-        <li>Next slide (&rarr; or D)</li>
-        <li>Back 10 slides (&uarr; or W)</li>
-        <li>Forward 10 slides (&darr; or S)</li>
-        <li>Play/pause slideshow (Enter or space)</li>
-        <li>Auto-Fit (F)</li>
-        <li>Open current image in new tab (E)</li>
-        <li>Download Current Image (L or Numpad period)</li>
-        <li class="hidden">Favorite/Unfavorite Image (G or Numpad zero - <a id="login" class="is-underlined">Must be logged in</a>)</li>
-        <hr />
-        <li class="is-size-4 has-text-weight-semibold has-text-light">Video Controls</li>
-        <li>Backward 5 seconds (1)</li>
-        <li>Forward 5 seconds (2)</li>
-        <li>Play/pause video (3)</li>
-        <li class="note">
-          Both regular and numpad work
-        </li>
-      </ul>
-    </div>
-  </div>
-
   <script src="https://unpkg.com/gif-frames@1.0.1/dist/gif-frames.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuzzysort@2.0.4/fuzzysort.min.js"></script>
   <script src="/js/globals.js"></script>
-  <script src="/js/slideshowElements.js"></script>
+  <script src="/js/visualtagger/slideshowElements.js"></script>
   <script src="/js/Slide.js"></script>
   <script src="/js/E621Requester.js"></script>
   <script src="/js/dataHandler.js"></script>
+  <script src="/js/visualtagger/e621LoginHandler.js"></script>
   <script src="/js/filterHandler.js"></script>
   <script src="/js/historyHandler.js"></script>
-  <script src="/js/presentationHandler.js"></script>
-  <script src="/js/slideshowController.js"></script>
+  <script src="/js/visualtagger/tagImplicationHandler.js"></script>
+  <script src="/js/visualtagger/slideshowController.js"></script>
+  <script src="/js/visualtagger/tagTreeHandler.js"></script>
 </body>
 
 </html>
