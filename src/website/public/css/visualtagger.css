@@ -43,6 +43,11 @@
   color: white !important;
 }
 
+.tag a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .tag {
   width: fit-content;
   border-radius: 5px;

@@ -106,10 +106,7 @@ async function getImplications(tags, allImplications, childrenOnly = false) {
 }
 
 function createImplicationRequester(tagName, depth, parentGroup) {
-  let ul = document.createElement("ul")
-
   let li = document.createElement("li")
-  ul.appendChild(li)
 
   let details = document.createElement("details")
   li.appendChild(details)
@@ -132,10 +129,10 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     let asArray = Object.values(structure)
 
-    let parent = ul.parentElement
+    let parent = li.parentElement
 
-    while (parent.firstChild.nextSibling) {
-      parent.removeChild(parent.firstChild.nextSibling)
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild)
     }
 
     for (let group of asArray) {
@@ -164,18 +161,11 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     }
   })
 
-  return ul
+  return li
 }
 
 function createTagTree(tag, depth = 1) {
-  let ul = document.createElement("ul")
-  if (depth == 1) {
-    ul.classList.add("tree")
-    ul.classList.add("mb-3")
-  }
-
   let li = document.createElement("li")
-  ul.appendChild(li)
 
   let details = document.createElement("details")
   details.open = tag.thisTag.active
@@ -183,9 +173,22 @@ function createTagTree(tag, depth = 1) {
   li.appendChild(details)
 
   let summary = document.createElement("summary")
-  summary.innerText = toTitle(tag.thisTag.name)
   summary.classList.add(`${CATEGORIES[tag.thisTag.category]}-tag-category`, "tag", "px-2")
   details.appendChild(summary)
+
+  let p = document.createElement("p")
+  p.innerText = toTitle(tag.thisTag.name)
+  summary.appendChild(p)
+
+  let a = document.createElement("a")
+  a.href = `https://e621.net/wiki_pages/show_or_new?title=${tag.thisTag.name}`
+  a.target = "_blank"
+  a.innerText = "?"
+  a.classList.add("ml-3")
+  p.appendChild(a)
+
+  let ul = document.createElement("ul")
+  details.append(ul)
 
   if (tag.children.length > 0) {
     tag.children.sort((a, b) => {
@@ -198,15 +201,15 @@ function createTagTree(tag, depth = 1) {
     })
 
     for (let child of tag.children) {
-      details.appendChild(createTagTree(child, depth + 1))
+      ul.appendChild(createTagTree(child, depth + 1))
     }
   }
 
   if (!tag.thisTag.fetchedChildren) {
-    details.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
+    ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
   }
 
-  return ul
+  return li
 }
 
 let tagTreeHandler = {
@@ -241,7 +244,12 @@ let tagTreeHandler = {
       })
 
       for (let group of asArray) {
-        uiElements.tagContainer.appendChild(createTagTree(group))
+        let ul = document.createElement("ul")
+        ul.classList.add("tree")
+        ul.classList.add("mb-3")
+        uiElements.tagContainer.appendChild(ul)
+
+        ul.appendChild(createTagTree(group))
       }
     }
   }
