@@ -747,7 +747,7 @@ let slideshowController = {
     current.style.maxWidth = null
     current.style.maxHeight = null
 
-    let viewWidth = (current.parentElement.parentElement.clientWidth / 2) - 50
+    let viewWidth = (current.parentElement.parentElement.clientWidth / (12/8)) - 50
     let viewHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 120
 
     let newWidth = currentSlide.width
@@ -769,7 +769,7 @@ let slideshowController = {
 
     uiElements.tagContainer.style["max-height"] = (viewHeight - 10) + "px"
 
-    // uiElements.tagTree.style.transform = `translate(0px, ${current.clientHeight / 2 - uiElements.tagTree.clientHeight / 2}px)`
+    uiElements.tagChangerContainer.style.transform = `translate(-${(current.parentElement.clientWidth - current.clientWidth) / 2 - 20}px, 0px)`
 
   },
 

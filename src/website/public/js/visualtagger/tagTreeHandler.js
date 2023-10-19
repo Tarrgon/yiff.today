@@ -27,6 +27,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   for (let [tagName, implications] of Object.entries(unresolvedImplications).toSorted((a, b) => a[1].parents.length - b[1].parents.length)) {
     if (implications.parents.length == 0) {
       implications.thisTag.active = tags.includes(implications.thisTag.name)
+      implications.thisTag.fetchedChildren = false
       let imps = {
         parents: [],
         thisTag: implications.thisTag
@@ -122,11 +123,12 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   summary.addEventListener("click", async (e) => {
     if (requesting) return
     requesting = true
+    parentGroup.thisTag.fetchedChildren = true
 
     let allImplications = {}
     await getImplications(tagName, allImplications, true)
 
-    let structure = resolveTagStructure(allImplications, "")
+    let structure = resolveTagStructure(allImplications, slideshowController.getCurrentSlide().tags)
 
     let asArray = Object.values(structure)
 
@@ -146,11 +148,19 @@ function createImplicationRequester(tagName, depth, parentGroup) {
         return a.thisTag.name.localeCompare(b.thisTag.name)
       })
 
-      parentGroup.children = parentGroup.children.concat(group.children)
+      let added = []
 
       for (let child of group.children) {
         parent.appendChild(createTagTree(child, depth))
+
+        if (parentGroup.children.findIndex(t => t.thisTag.id == child.thisTag.id) != -1) {
+          continue
+        }
+
+        added.push(child)
       }
+
+      parentGroup.children = parentGroup.children.concat(added)
     }
   })
 
@@ -190,7 +200,9 @@ function createTagTree(tag, depth = 1) {
     for (let child of tag.children) {
       details.appendChild(createTagTree(child, depth + 1))
     }
-  } else {
+  }
+
+  if (!tag.thisTag.fetchedChildren) {
     details.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
   }
 

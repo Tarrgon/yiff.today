@@ -14,6 +14,7 @@ let uiElements = {
   nextButton: document.getElementById("next-button"),
   lastButton: document.getElementById("last-button"),
   thumbnailList: document.getElementById("thumbnail-list"),
+  tagChangerContainer: document.getElementById("tag-changer-container"),
   tagContainer: document.getElementById("tag-container"),
   searchText: document.getElementById("search-text"),
   startPage: document.getElementById("start-page-number"),
