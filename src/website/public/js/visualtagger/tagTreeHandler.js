@@ -362,3 +362,7 @@ let tagTreeHandler = {
     }
   }
 }
+
+uiElements.copyTagsButton.addEventListener("click", () => {
+  navigator.clipboard.writeText(tagTreeHandler.tags)
+})
