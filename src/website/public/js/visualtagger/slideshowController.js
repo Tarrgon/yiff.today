@@ -967,10 +967,6 @@ uiElements.clearSeen.addEventListener("click", () => {
   history.clearSeen()
 })
 
-uiElements.copyTagsButton.addEventListener("click", () => {
-  navigator.clipboard.writeText(tagTreeHandler.tags)
-})
-
 window.addEventListener("resize", () => {
   slideshowController.windowResized()
 })
