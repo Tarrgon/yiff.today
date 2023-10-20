@@ -6,7 +6,7 @@ let tagImplicationHandler = {
 
     tags = tags.trim().split(" ")
 
-    if (include != "children") {
+    if (include == "children,parents") {
       for (let i = tags.length - 1; i >= 0; i--) {
         let tag = tags[i]
         if (implicationsCache[tag]) {

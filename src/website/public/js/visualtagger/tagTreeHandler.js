@@ -265,7 +265,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
-      let all = document.querySelectorAll("[data-tag-name='braided_ponytail'] > ul > li .show-implications-button")
+      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > ul > li .show-implications-button`)
 
       for (let child of all) {
         child.parentElement.parentElement.remove()
@@ -419,30 +419,26 @@ let tagTreeHandler = {
 }
 
 function unwind(group, addedTags = []) {
-  let newGroup = {}
-  group.thisTag.active = true
-  group.thisTag.fetchedChildren = false
+  let newGroup = {
+    parents: [],
+    children: [],
+    thisTag: group.thisTag
+  }
 
-  addedTags.push(group.thisTag.name)
+  newGroup.thisTag.active = true
+  newGroup.thisTag.fetchedChildren = false
+
+  addedTags.push(newGroup.thisTag.name)
 
   if (group.parents.length > 0) {
-    let child = {
-      parents: [],
-      children: [],
-      thisTag: group.thisTag
-    }
     for (let parent of group.parents) {
-      newGroup[parent.thisTag.name] = unwind(parent, addedTags)[0]
-      child.parents.push(newGroup[parent.thisTag.name])
-      newGroup[parent.thisTag.name].children.push(child)
+      let unwound = unwind(parent, addedTags)[0]
+      newGroup.parents.push(unwound)
+      unwound.children.push(newGroup)
+      newGroup = unwound
     }
-  } else {
-    newGroup = {
-      parents: [],
-      children: [],
-      thisTag: group.thisTag
-    }
-  }
+  } 
+
   return [newGroup, addedTags]
 }
 
@@ -459,44 +455,46 @@ async function addNewTag(tag) {
   await getImplications(tag.trim(), allImplications, "allparents")
 
   let t = Object.values(allImplications)[0]
+  console.log(t)
 
   let [structure, addedTags] = unwind(t)
+  console.log(structure)
 
-  for (let tag of addedTags) {
-    tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
-    tagTreeHandler.tags = tagTreeHandler.tags.trim()
+  // for (let tag of addedTags) {
+  //   tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
+  //   tagTreeHandler.tags = tagTreeHandler.tags.trim()
 
-  }
+  // }
 
-  // let realStructure = findChildInStructure(tagTreeHandler.currentStructure, t.thisTag.name)
+  // // let realStructure = findChildInStructure(tagTreeHandler.currentStructure, t.thisTag.name)
 
-  // Some parts may be in there, some might not. Need to resolve all of manually :D
+  // // Some parts may be in there, some might not. Need to resolve all of manually :D
 
-  if (!realStructure) {
-    console.log(structure)
-    // let name = Object.keys(structure)[0]
-    // tagTreeHandler.currentStructure[name] = structure[name]
-  }
+  // if (!realStructure) {
+  //   console.log(structure)
+  //   // let name = Object.keys(structure)[0]
+  //   // tagTreeHandler.currentStructure[name] = structure[name]
+  // }
 
-  for (let tag of addedTags) {
-    let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
-    tagTreeHandler.preventClicks = true
+  // for (let tag of addedTags) {
+  //   let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
+  //   tagTreeHandler.preventClicks = true
 
-    for (let child of allTags) {
-      if (!child.open) {
-        child.firstChild.click()
-        child.open = true
-      }
+  //   for (let child of allTags) {
+  //     if (!child.open) {
+  //       child.firstChild.click()
+  //       child.open = true
+  //     }
 
-      let last = child.parentElement.parentElement.lastChild
+  //     let last = child.parentElement.parentElement.lastChild
 
-      if (last.firstChild.firstChild.classList.contains("show-implications-button")) {
-        last.classList.add("has-active-children")
-      }
-    }
+  //     if (last.firstChild.firstChild.classList.contains("show-implications-button")) {
+  //       last.classList.add("has-active-children")
+  //     }
+  //   }
 
-    tagTreeHandler.preventClicks = false
-  }
+  //   tagTreeHandler.preventClicks = false
+  // }
 }
 
 uiElements.addTagButton.addEventListener("click", async () => {
