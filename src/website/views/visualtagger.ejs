@@ -43,22 +43,26 @@
         <div class="column is-5">
           <div class="field has-addons">
             <div class="control">
-              <input class="input" type="text" placeholder="Add a tag">
+              <input id="new-tag-input" class="input" type="text" placeholder="Add a tag">
             </div>
             <div class="control">
-              <a class="button is-success">
+              <button id="add-tag-button" class="button is-success">
                 Add tag
-              </a>
+              </button>
             </div>
           </div>
         </div>
         <div class="column is-3">
           <div class="control">
-            <button class="button is-primary">Submit changes</button>
+            <button id="submit-changes-button" class="button is-primary">Submit changes</button>
+          </div>
+        </div>
+        <div class="column is-2">
+          <div class="control">
+            <button id="copy-tags-button" class="button is-info">Copy tags</button>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -190,7 +194,7 @@
         <li class="note">
           This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
           <br>
-          Allows you to access posts that can't be accessed without an account.
+          Allows you to upload tag changes by pressing submit.
         </li>
       </ul>
     </div>
