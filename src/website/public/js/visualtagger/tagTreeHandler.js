@@ -243,21 +243,14 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     }
 
     for (let child of realStructure.children) {
-      try {
-        let p = child.parents.find(p => p.thisTag.name == tagName)
-        p.thisTag.fetchedChildren = true
-        parent.appendChild(createTagTree(child, depth))
-      } catch (e) {
-        console.error(e)
-        console.error(child)
-        console.error(tagName)
-      }
+      let p = child.parents.find(p => p.thisTag.name == tagName)
+      p.thisTag.fetchedChildren = true
+      parent.appendChild(createTagTree(child, depth))
       
     }
 
     showButton.remove()
     if (realStructure.children.length > 0) {
-      console.log("Adding hide")
       reparent(parent, hideButton)
       if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
