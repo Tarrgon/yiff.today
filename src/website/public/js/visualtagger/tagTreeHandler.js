@@ -216,6 +216,16 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       return
     }
 
+    if (tagTreeHandler.preventNewRequests) {
+      for (let child of parent.children) {
+        child.classList.remove("hidden")
+      }
+
+      parent.classList.remove("has-active-children")
+
+      return
+    }
+
     if (requesting) return
     requesting = true
     parentGroup.thisTag.fetchedChildren = true
@@ -246,7 +256,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
       parent.appendChild(createTagTree(child, depth))
-      
+
     }
 
     showButton.remove()
@@ -443,6 +453,8 @@ function unwind(group, addedTags = []) {
 async function addNewTag(tag) {
   if (tag.trim() == "") return
 
+  tagTreeHandler.preventScroll = false
+
   let allImplications = {}
   await getImplications(tag.trim(), allImplications, "allparents")
 
@@ -502,17 +514,30 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 })
 
 uiElements.showCurrentButton.addEventListener("click", () => {
+  uiElements.collapseAllButton.click()
+
   for (let details of document.querySelectorAll(".hidden > details[open]")) {
     details.parentElement.classList.remove("hidden")
+  }
+
+  for (let active of document.querySelectorAll(".has-active-children")) {
+    active.classList.remove("has-active-children")
   }
 })
 
 uiElements.showAllButton.addEventListener("click", () => {
   tagTreeHandler.preventScroll = true
+  tagTreeHandler.preventNewRequests = true
 
   for (let button of document.querySelectorAll(".show-implications-button")) {
     button.click()
   }
+
+  for (let active of document.querySelectorAll(".has-active-children")) {
+    active.classList.remove("has-active-children")
+  }
+
+  tagTreeHandler.preventNewRequests = false
 })
 
 uiElements.collapseAllButton.addEventListener("click", () => {
