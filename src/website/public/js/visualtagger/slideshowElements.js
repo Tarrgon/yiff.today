@@ -34,4 +34,6 @@ let uiElements = {
   clearHistory: document.getElementById("clear-history"),
   storeSeen: document.getElementById("store-seen"),
   clearSeen: document.getElementById("clear-seen"),
+  e621Username: document.getElementById("e621-username"),
+  e621ApiKey: document.getElementById("e621-api-key")
 }

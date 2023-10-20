@@ -137,14 +137,46 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   let details = document.createElement("details")
   li.appendChild(details)
 
-  let summary = document.createElement("summary")
-  summary.classList.add("show-implications-button")
-  summary.innerText = "Show Implications"
-  details.appendChild(summary)
+  let showButton = document.createElement("summary")
+  showButton.classList.add("show-implications-button")
+  showButton.innerText = "Show Implications"
+  details.appendChild(showButton)
+
+  let hideButton = document.createElement("summary")
+  hideButton.classList.add("hide-implications-button")
+  hideButton.innerText = "Hide Implications"
 
   let requesting = false
 
-  summary.addEventListener("click", async (e) => {
+  let parent = null
+
+  hideButton.addEventListener("click", (e) => {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+
+    for (let child of parent.children) {
+      child.classList.add("hidden")
+    }
+
+    parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+
+    showButton.parentElement.parentElement.classList.remove("hidden")
+  })
+
+  showButton.addEventListener("click", async (e) => {
+    if (parentGroup.thisTag.fetchedChildren) {
+      for (let child of parent.children) {
+        child.classList.remove("hidden")
+      }
+  
+      showButton.parentElement.parentElement.classList.add("hidden")
+
+      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+
+      return
+    }
+
+    if (!parent) parent = li.parentElement
     if (requesting) return
     requesting = true
     parentGroup.thisTag.fetchedChildren = true
@@ -167,8 +199,6 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       return a.thisTag.name.localeCompare(b.thisTag.name)
     })
 
-    let parent = li.parentElement
-
     while (parent.firstChild) {
       parent.removeChild(parent.firstChild)
     }
@@ -177,8 +207,28 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
       parent.appendChild(createTagTree(child, depth))
-      parent.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })
     }
+
+    parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+
+    let reparent = (sum, isHidden) => {
+      let li = document.createElement("li")
+      parent.appendChild(li)
+
+      let newDetails = document.createElement("details")
+      li.appendChild(newDetails)
+
+      if (isHidden) {
+        li.classList.add("hidden")
+      } else {
+        li.classList.remove("hidden")
+      }
+
+      newDetails.appendChild(sum)
+    }
+
+    reparent(showButton, true)
+    reparent(hideButton, false)
   })
 
   return li
