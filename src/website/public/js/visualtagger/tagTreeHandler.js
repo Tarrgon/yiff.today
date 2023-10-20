@@ -21,6 +21,28 @@ function recursiveFindChild(implications, name) {
   return null
 }
 
+function findChildInStructure(structure, name) {
+  let recursion = (struct) => {
+    for (let child of struct.children) {
+      if (child.thisTag.name == name) {
+        return child
+      } else {
+        let c = recursion(child)
+        if (c) return c
+      }
+    }
+  }
+
+  for (let s of Object.values(structure)) {
+    if (s.thisTag.name == name) {
+      return s
+    } else {
+      let child = recursion(s)
+      if (child) return child
+    }
+  }
+}
+
 function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   if (Object.entries(unresolvedImplications).length == 0) return structure
 
@@ -112,7 +134,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   li.appendChild(details)
 
   let summary = document.createElement("summary")
-  summary.innerText = "Request Implications"
+  summary.innerText = "Show Implications"
   details.appendChild(summary)
 
   let requesting = false
@@ -127,7 +149,18 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     let structure = resolveTagStructure(allImplications, slideshowController.getCurrentSlide().tags)
 
-    let asArray = Object.values(structure)
+    let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
+
+    realStructure.children = realStructure.children.concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
+
+    realStructure.children.sort((a, b) => {
+      let startingDigitsA = a.thisTag.name.match(/^\d+/)
+      let startingDigitsB = b.thisTag.name.match(/^\d+/)
+      if (startingDigitsA && startingDigitsB) {
+        return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
+      }
+      return a.thisTag.name.localeCompare(b.thisTag.name)
+    })
 
     let parent = li.parentElement
 
@@ -135,29 +168,10 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       parent.removeChild(parent.firstChild)
     }
 
-    for (let group of asArray) {
-      group.children.sort((a, b) => {
-        let startingDigitsA = a.thisTag.name.match(/^\d+/)
-        let startingDigitsB = b.thisTag.name.match(/^\d+/)
-        if (startingDigitsA && startingDigitsB) {
-          return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-        }
-        return a.thisTag.name.localeCompare(b.thisTag.name)
-      })
-
-      let added = []
-
-      for (let child of group.children) {
-        parent.appendChild(createTagTree(child, depth))
-
-        if (parentGroup.children.findIndex(t => t.thisTag.id == child.thisTag.id) != -1) {
-          continue
-        }
-
-        added.push(child)
-      }
-
-      parentGroup.children = parentGroup.children.concat(added)
+    for (let child of realStructure.children) {
+      let p = child.parents.find(p => p.thisTag.name == tagName)
+      p.thisTag.fetchedChildren = true
+      parent.appendChild(createTagTree(child, depth))
     }
   })
 
@@ -166,6 +180,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
 function createTagTree(tag, depth = 1) {
   let li = document.createElement("li")
+  if (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)) li.classList.add("hidden")
 
   let details = document.createElement("details")
   details.open = tag.thisTag.active
@@ -175,6 +190,16 @@ function createTagTree(tag, depth = 1) {
   let summary = document.createElement("summary")
   summary.classList.add(`${CATEGORIES[tag.thisTag.category]}-tag-category`, "tag", "px-2")
   details.appendChild(summary)
+
+  summary.addEventListener("click", (e) => {
+    if (e.target.parentElement.open) {
+      let children = e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")
+
+      for (let child of children) {
+        child.firstChild.click()
+      }
+    }
+  })
 
   let p = document.createElement("p")
   p.innerText = toTitle(tag.thisTag.name)
