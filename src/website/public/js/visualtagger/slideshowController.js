@@ -767,7 +767,7 @@ let slideshowController = {
     current.style.width = newWidth + "px"
     current.style.height = (newHeight - 10) + "px"
 
-    uiElements.tagContainer.style["max-height"] = (viewHeight - 10) + "px"
+    uiElements.tagContainer.style["max-height"] = (viewHeight - 100) + "px"
 
     uiElements.tagChangerContainer.style.transform = `translate(-${(current.parentElement.clientWidth - current.clientWidth) / 2 - 20}px, 0px)`
 

@@ -244,6 +244,13 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       console.log("Adding hide")
       reparent(hideButton)
       parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    } else {
+      // Delete all show buttons under these buttons
+      let all = document.querySelectorAll("[data-tag-name='braided_ponytail'] > ul > li .show-implications-button")
+
+      for (let child of all) {
+        child.parentElement.parentElement.remove()
+      }
     }
   })
 
@@ -323,7 +330,7 @@ function createTagTree(tag, depth = 1) {
     }
   }
 
-  ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
+  if (!tag.thisTag.fetchedChildren) ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
 
   li.addEventListener("click", (e) => {
     e.preventDefault()
@@ -480,4 +487,8 @@ uiElements.newTagInput.addEventListener("keypress", (e) => {
 
 uiElements.copyTagsButton.addEventListener("click", () => {
   navigator.clipboard.writeText(tagTreeHandler.tags)
+})
+
+uiElements.showCurrentButton.addEventListener("click", () => {
+  let active = document.querySelectorAll(".hidden > details[open]")
 })

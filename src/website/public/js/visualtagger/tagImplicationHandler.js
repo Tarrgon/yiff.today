@@ -24,7 +24,7 @@ let tagImplicationHandler = {
         for (let [tagName, implications] of Object.entries(await res.json())) {
           tagImplications[tagName] = implications
   
-          implicationsCache[tagName] = implications
+          if (!implicationsCache[tagName]) implicationsCache[tagName] = implications
         }
       }
     }
