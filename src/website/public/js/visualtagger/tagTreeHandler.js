@@ -14,6 +14,14 @@ function removeFromText(text, toRemove) {
   return text.split(" ").filter(t => t != toRemove).join(" ")
 }
 
+function addToText(text, toAdd) {
+  if (text.split(" ").filter(t => t == toAdd).length == 0) {
+    return text + " " + toAdd
+  }
+
+  return text
+}
+
 function recursiveFindChild(implications, name) {
   if (implications.thisTag.name == name) return implications
 
@@ -170,11 +178,11 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       child.classList.add("hidden")
     }
 
-    parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
-
     hideButton.parentElement.parentElement.remove()
 
     let li = reparent(showButton)
+
+    showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
     if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
       li.classList.add("has-active-children")
@@ -182,6 +190,9 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   })
 
   showButton.addEventListener("click", async (e) => {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    if (!parent) parent = li.parentElement
     if (parentGroup.thisTag.fetchedChildren) {
       for (let child of parent.children) {
         child.classList.remove("hidden")
@@ -191,12 +202,11 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
       reparent(hideButton)
 
-      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
+      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
       return
     }
 
-    if (!parent) parent = li.parentElement
     if (requesting) return
     requesting = true
     parentGroup.thisTag.fetchedChildren = true
@@ -229,10 +239,12 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       parent.appendChild(createTagTree(child, depth))
     }
 
-    parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
-
     showButton.remove()
-    reparent(hideButton)
+    if (realStructure.children.length > 0) {
+      console.log("Adding hide")
+      reparent(hideButton)
+      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    }
   })
 
   return li
@@ -252,19 +264,21 @@ function createTagTree(tag, depth = 1) {
   details.appendChild(summary)
 
   summary.addEventListener("click", (e) => {
-    if (e.target.parentElement.open) {
-      let children = e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")
+    e.stopImmediatePropagation()
 
-      for (let child of children) {
+    if (e.target.parentElement.open) {
+      for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
         child.firstChild.click()
+      }
+
+      for (let child of e.target.parentElement.querySelectorAll(".has-active-children")) {
+        child.classList.remove("has-active-children")
       }
 
       tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
     } else {
-      if (!tagTreeHandler.tags.includes(tag.thisTag.name)) {
-        tagTreeHandler.tags += ` ${tag.thisTag.name}`
-        tagTreeHandler.tags = tagTreeHandler.tags.trim()
-      }
+      tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
+      tagTreeHandler.tags = tagTreeHandler.tags.trim()
     }
 
     if (!tagTreeHandler.preventClicks) {
@@ -309,9 +323,21 @@ function createTagTree(tag, depth = 1) {
     }
   }
 
-  if (!tag.thisTag.fetchedChildren) {
-    ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
-  }
+  ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
+
+  li.addEventListener("click", (e) => {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+
+    if (details.open) {
+      let lastChild = ul.lastChild.firstChild.firstChild
+
+      if (lastChild.classList.contains("hide-implications-button") || lastChild.classList.contains("show-implications-button")) {
+        lastChild.click()
+      }
+    }
+  })
+
 
   return li
 }
@@ -362,6 +388,91 @@ let tagTreeHandler = {
     }
   }
 }
+
+function unwind(group, addedTags = []) {
+  let newGroup = {}
+  group.thisTag.active = true
+  group.thisTag.fetchedChildren = false
+
+  addedTags.push(group.thisTag.name)
+
+  if (group.parents.length > 0) {
+    let child = {
+      parents: [],
+      children: [],
+      thisTag: group.thisTag
+    }
+    for (let parent of group.parents) {
+      newGroup[parent.thisTag.name] = unwind(parent, addedTags)[0]
+      child.parents.push(newGroup[parent.thisTag.name])
+      newGroup[parent.thisTag.name].children.push(child)
+    }
+  } else {
+    newGroup = {
+      parents: [],
+      children: [],
+      thisTag: group.thisTag
+    }
+  }
+  return [newGroup, addedTags]
+}
+
+async function addNewTag(tag) {
+  if (tag.trim() == "") return
+
+  let allImplications = {}
+  await getImplications(tag.trim(), allImplications, "allparents")
+
+  let t = Object.values(allImplications)[0]
+
+  let [structure, addedTags] = unwind(t)
+
+  for (let tag of addedTags) {
+    tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
+    tagTreeHandler.tags = tagTreeHandler.tags.trim()
+
+  }
+
+  // let realStructure = findChildInStructure(tagTreeHandler.currentStructure, t.thisTag.name)
+
+  // Some parts may be in there, some might not. Need to resolve all of manually :D
+
+  if (!realStructure) {
+    console.log(structure)
+    // let name = Object.keys(structure)[0]
+    // tagTreeHandler.currentStructure[name] = structure[name]
+  }
+
+  for (let tag of addedTags) {
+    let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
+    tagTreeHandler.preventClicks = true
+
+    for (let child of allTags) {
+      if (!child.open) {
+        child.firstChild.click()
+        child.open = true
+      }
+
+      let last = child.parentElement.parentElement.lastChild
+
+      if (last.firstChild.firstChild.classList.contains("show-implications-button")) {
+        last.classList.add("has-active-children")
+      }
+    }
+
+    tagTreeHandler.preventClicks = false
+  }
+}
+
+uiElements.addTagButton.addEventListener("click", async () => {
+  addNewTag(uiElements.newTagInput.value)
+})
+
+uiElements.newTagInput.addEventListener("keypress", (e) => {
+  if (e.key == "Enter") {
+    addNewTag(uiElements.newTagInput.value)
+  }
+})
 
 uiElements.copyTagsButton.addEventListener("click", () => {
   navigator.clipboard.writeText(tagTreeHandler.tags)
