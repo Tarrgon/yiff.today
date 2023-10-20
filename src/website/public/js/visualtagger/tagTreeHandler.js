@@ -10,6 +10,10 @@ function toTitle(str) {
   )
 }
 
+function removeFromText(text, toRemove) {
+  return text.split(" ").filter(t => t != toRemove).join(" ")
+}
+
 function recursiveFindChild(implications, name) {
   if (implications.thisTag.name == name) return implications
 
@@ -100,8 +104,8 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   return resolveTagStructure(unresolvedImplications, tags, structure)
 }
 
-async function getImplications(tags, allImplications, childrenOnly = false) {
-  let implications = !childrenOnly ? await tagImplicationHandler.getTagImplications(tags) : await tagImplicationHandler.getTagImplications(tags, childrenOnly)
+async function getImplications(tags, allImplications, include = "children,parents") {
+  let implications = await tagImplicationHandler.getTagImplications(tags, include)
 
   let unresolvedParents = []
 
@@ -123,7 +127,7 @@ async function getImplications(tags, allImplications, childrenOnly = false) {
   }
 
   if (unresolvedParents.length > 0) {
-    await getImplications(unresolvedParents.join(" "), allImplications, childrenOnly)
+    await getImplications(unresolvedParents.join(" "), allImplications, include)
   }
 }
 
@@ -134,6 +138,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   li.appendChild(details)
 
   let summary = document.createElement("summary")
+  summary.classList.add("show-implications-button")
   summary.innerText = "Show Implications"
   details.appendChild(summary)
 
@@ -145,9 +150,9 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     parentGroup.thisTag.fetchedChildren = true
 
     let allImplications = {}
-    await getImplications(tagName, allImplications, true)
+    await getImplications(tagName, allImplications, "children")
 
-    let structure = resolveTagStructure(allImplications, slideshowController.getCurrentSlide().tags)
+    let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
 
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
 
@@ -172,6 +177,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
       parent.appendChild(createTagTree(child, depth))
+      parent.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })
     }
   })
 
@@ -198,6 +204,25 @@ function createTagTree(tag, depth = 1) {
       for (let child of children) {
         child.firstChild.click()
       }
+
+      tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+    } else {
+      if (!tagTreeHandler.tags.includes(tag.thisTag.name)) {
+        tagTreeHandler.tags += ` ${tag.thisTag.name}`
+        tagTreeHandler.tags = tagTreeHandler.tags.trim()
+      }
+    }
+
+    if (!tagTreeHandler.preventClicks) {
+      tagTreeHandler.preventClicks = true
+      let allOfTheSame = document.querySelectorAll(`[data-tag-name='${tag.thisTag.name}']`)
+
+      for (let child of allOfTheSame) {
+        if (child == e.target.parentElement) continue
+        child.firstChild.click()
+      }
+
+      tagTreeHandler.preventClicks = false
     }
   })
 
@@ -239,6 +264,8 @@ function createTagTree(tag, depth = 1) {
 
 let tagTreeHandler = {
   currentStructure: {},
+  tags: "",
+  preventClicks: false,
   async slideUpdated() {
     while (uiElements.tagContainer.firstChild) {
       uiElements.tagContainer.removeChild(uiElements.tagContainer.firstChild)
@@ -250,10 +277,12 @@ let tagTreeHandler = {
 
     let allImplications = {}
 
-    await getImplications(slide.tags, allImplications)
+    tagTreeHandler.tags = slide.tags
+
+    await getImplications(tagTreeHandler.tags, allImplications)
 
     if (slideshowController.currentSlideNumber == index) {
-      let structure = resolveTagStructure(allImplications, slide.tags)
+      let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
 
       tagTreeHandler.currentStructure = structure
 

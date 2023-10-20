@@ -1,12 +1,12 @@
 let implicationsCache = {}
 
 let tagImplicationHandler = {
-  async getTagImplications(tags, childrenOnly) {
+  async getTagImplications(tags, include = "children,parents") {
     let tagImplications = {}
 
     tags = tags.trim().split(" ")
 
-    if (!childrenOnly) {
+    if (include != "children") {
       for (let i = tags.length - 1; i >= 0; i--) {
         let tag = tags[i]
         if (implicationsCache[tag]) {
@@ -17,7 +17,8 @@ let tagImplicationHandler = {
     }
 
     if (tags.length > 0) {
-      let res = await fetch(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}${childrenOnly ? "&include=children" : ""}`)
+      console.log(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
+      let res = await fetch(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
 
       if (res.ok) {
         for (let [tagName, implications] of Object.entries(await res.json())) {

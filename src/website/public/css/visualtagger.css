@@ -123,12 +123,17 @@
   background: #ddd;
 }
 
-.tree summary::before {
+.tree summary.show-implications-button::before {
+  z-index: 1;
+  background: #ddd url("/img/eye-regular.svg") 0;
+}
+
+.tree summary:not(.show-implications-button)::before {
   z-index: 1;
   background: #696 url("/img/expand-collapse.svg") 0 0;
 }
 
-.tree details[open]>summary::before {
+.tree details[open]>summary:not(.show-implications-button)::before {
   background: #d73737 url("/img/expand-collapse.svg") 0 0;
   background-position: calc(-2 * var(--radius)) 0;
 }
