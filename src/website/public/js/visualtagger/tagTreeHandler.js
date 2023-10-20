@@ -150,6 +150,18 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
   let parent = null
 
+  let reparent = (sum) => {
+    let li = document.createElement("li")
+    parent.appendChild(li)
+
+    let newDetails = document.createElement("details")
+    li.appendChild(newDetails)
+
+    newDetails.appendChild(sum)
+
+    return li
+  }
+
   hideButton.addEventListener("click", (e) => {
     e.preventDefault()
     e.stopImmediatePropagation()
@@ -160,7 +172,13 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
 
-    showButton.parentElement.parentElement.classList.remove("hidden")
+    hideButton.parentElement.parentElement.remove()
+
+    let li = reparent(showButton)
+
+    if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
+      li.classList.add("has-active-children")
+    }
   })
 
   showButton.addEventListener("click", async (e) => {
@@ -168,8 +186,10 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       for (let child of parent.children) {
         child.classList.remove("hidden")
       }
-  
-      showButton.parentElement.parentElement.classList.add("hidden")
+
+      showButton.parentElement.parentElement.remove()
+
+      reparent(hideButton)
 
       parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
 
@@ -211,24 +231,8 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     parent.parentElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })
 
-    let reparent = (sum, isHidden) => {
-      let li = document.createElement("li")
-      parent.appendChild(li)
-
-      let newDetails = document.createElement("details")
-      li.appendChild(newDetails)
-
-      if (isHidden) {
-        li.classList.add("hidden")
-      } else {
-        li.classList.remove("hidden")
-      }
-
-      newDetails.appendChild(sum)
-    }
-
-    reparent(showButton, true)
-    reparent(hideButton, false)
+    showButton.remove()
+    reparent(hideButton)
   })
 
   return li

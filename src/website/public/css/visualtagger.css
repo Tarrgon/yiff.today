@@ -53,6 +53,10 @@
   border-radius: 5px;
 }
 
+.has-active-children {
+  text-shadow: 0 0 2px gold, 0 0 2px gold, 0 0 2px gold, 0 0 2px gold;
+}
+
 .tree {
   --spacing: 1.5rem;
   --spacing-y: 0.5rem;
