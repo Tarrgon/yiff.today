@@ -139,6 +139,18 @@ async function getImplications(tags, allImplications, include = "children,parent
   }
 }
 
+function reparent(parent, button) {
+  let li = document.createElement("li")
+  parent.appendChild(li)
+
+  let newDetails = document.createElement("details")
+  li.appendChild(newDetails)
+
+  newDetails.appendChild(button)
+
+  return li
+}
+
 function createImplicationRequester(tagName, depth, parentGroup) {
   let li = document.createElement("li")
 
@@ -154,33 +166,30 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   hideButton.classList.add("hide-implications-button")
   hideButton.innerText = "Hide Implications"
 
+  // if (!tagTreeHandler.buttons[tagName]) tagTreeHandler.buttons[tagName] = []
+
+  // tagTreeHandler.buttons[tagName].push({
+  //   showButton,
+  //   hideButton
+  // })
+
   let requesting = false
 
   let parent = null
-
-  let reparent = (sum) => {
-    let li = document.createElement("li")
-    parent.appendChild(li)
-
-    let newDetails = document.createElement("details")
-    li.appendChild(newDetails)
-
-    newDetails.appendChild(sum)
-
-    return li
-  }
 
   hideButton.addEventListener("click", (e) => {
     e.preventDefault()
     e.stopImmediatePropagation()
 
+    tagTreeHandler.preventScroll = false
+
     for (let child of parent.children) {
       child.classList.add("hidden")
     }
 
-    hideButton.parentElement.parentElement.remove()
+    hideButton?.parentElement?.parentElement?.remove()
 
-    let li = reparent(showButton)
+    let li = reparent(parent, showButton)
 
     if (parent.children.length > 15) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
@@ -198,11 +207,11 @@ function createImplicationRequester(tagName, depth, parentGroup) {
         child.classList.remove("hidden")
       }
 
-      showButton.parentElement.parentElement.remove()
+      showButton?.parentElement?.parentElement?.remove()
 
-      reparent(hideButton)
+      reparent(parent, hideButton)
 
-      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
       return
     }
@@ -234,16 +243,23 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     }
 
     for (let child of realStructure.children) {
-      let p = child.parents.find(p => p.thisTag.name == tagName)
-      p.thisTag.fetchedChildren = true
-      parent.appendChild(createTagTree(child, depth))
+      try {
+        let p = child.parents.find(p => p.thisTag.name == tagName)
+        p.thisTag.fetchedChildren = true
+        parent.appendChild(createTagTree(child, depth))
+      } catch (e) {
+        console.error(e)
+        console.error(child)
+        console.error(tagName)
+      }
+      
     }
 
     showButton.remove()
     if (realStructure.children.length > 0) {
       console.log("Adding hide")
-      reparent(hideButton)
-      parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      reparent(parent, hideButton)
+      if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
       let all = document.querySelectorAll("[data-tag-name='braided_ponytail'] > ul > li .show-implications-button")
@@ -353,7 +369,10 @@ let tagTreeHandler = {
   currentStructure: {},
   tags: "",
   preventClicks: false,
+  preventScroll: false,
   async slideUpdated() {
+    tagTreeHandler.buttons = {}
+
     while (uiElements.tagContainer.firstChild) {
       uiElements.tagContainer.removeChild(uiElements.tagContainer.firstChild)
     }
@@ -490,5 +509,41 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 })
 
 uiElements.showCurrentButton.addEventListener("click", () => {
-  let active = document.querySelectorAll(".hidden > details[open]")
+  for (let details of document.querySelectorAll(".hidden > details[open]")) {
+    details.parentElement.classList.remove("hidden")
+  }
+})
+
+uiElements.showAllButton.addEventListener("click", () => {
+  tagTreeHandler.preventScroll = true
+
+  for (let button of document.querySelectorAll(".show-implications-button")) {
+    button.click()
+  }
+})
+
+uiElements.collapseAllButton.addEventListener("click", () => {
+  tagTreeHandler.preventScroll = true
+
+  for (let button of document.querySelectorAll(".show-implications-button")) {
+    let li = button.parentElement.parentElement
+    let parent = li.parentElement
+    for (let child of parent.children) {
+      child.classList.add("hidden")
+    }
+
+    li.classList.remove("hidden")
+
+    if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
+      li.classList.add("has-active-children")
+    }
+  }
+
+  for (let button of document.querySelectorAll(".hide-implications-button")) {
+    button.click()
+  }
+
+  tagTreeHandler.preventScroll = false
+
+  uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
 })
