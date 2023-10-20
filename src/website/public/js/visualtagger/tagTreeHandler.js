@@ -1,6 +1,22 @@
 const BACKGROUND_COLORS = ["#b4c7d9", "#f2ac08", "god is surely dead since this is empty", "#d0d", "#0a0", "#ed5d1f", "#ff3d3d", "#fff", "#282"]
 const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "species", "invalid", "meta", "lore"]
 
+// (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
+function isOutOfViewport(elem, parent) {
+  let parentBounding = parent.getBoundingClientRect()
+  let bounding = elem.getBoundingClientRect()
+
+  let out = {}
+  out.top = bounding.bottom < parentBounding.top
+  out.left = bounding.right < parentBounding.left
+  out.bottom = bounding.top > (parentBounding.y + parentBounding.height)
+  out.right = bounding.left > (parentBounding.x + parentBounding.width)
+  out.any = out.top || out.left || out.bottom || out.right
+  out.all = out.top && out.left && out.bottom && out.right
+
+  return out
+}
+
 function toTitle(str) {
   return str.replaceAll("_", " ").replace(
     /\w\S*/g,
@@ -191,7 +207,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     let li = reparent(parent, showButton)
 
-    if (parent.children.length > 15) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (isOutOfViewport(showButton, uiElements.tagContainer).top) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
     if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
       li.classList.add("has-active-children")
@@ -211,7 +227,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
       reparent(parent, hideButton)
 
-      if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
       return
     }
@@ -262,7 +278,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     showButton.remove()
     if (realStructure.children.length > 0) {
       reparent(parent, hideButton)
-      if (!tagTreeHandler.preventScroll) parent.parentElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
       let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > ul > li .show-implications-button`)
@@ -437,7 +453,7 @@ function unwind(group, addedTags = []) {
       unwound.children.push(newGroup)
       newGroup = unwound
     }
-  } 
+  }
 
   return [newGroup, addedTags]
 }
