@@ -182,7 +182,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     let li = reparent(showButton)
 
-    showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (parent.children.length > 15) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
     if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
       li.classList.add("has-active-children")
@@ -416,6 +416,10 @@ function unwind(group, addedTags = []) {
   }
   return [newGroup, addedTags]
 }
+
+// TODO: If the tag exists multiple times, it might desync with other instances of the same tag
+//       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
+//       Changing slides breaks tags
 
 async function addNewTag(tag) {
   if (tag.trim() == "") return
