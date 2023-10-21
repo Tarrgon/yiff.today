@@ -463,36 +463,51 @@ let tagTreeHandler = {
   }
 }
 
-function unwind(group, addedTags = []) {
-  let newGroup = {
-    parents: [],
-    children: [],
-    thisTag: group.thisTag
-  }
+function unwind(current, child, newGroup = {}, addedTags = []) {
+  addedTags.push(current.thisTag.name)
+  current.thisTag.active = true
+  current.thisTag.fetchedChildren = false
+  current.thisTag.showedChildren = false
 
-  newGroup.thisTag.active = true
-  newGroup.thisTag.fetchedChildren = false
-  newGroup.thisTag.showedChildren = false
+  if (!current.children) current.children = []
+  if (child) current.children.push(child)
 
-  addedTags.push(newGroup.thisTag.name)
+  current.children.sort(childSorter)
 
-  if (group.parents.length > 0) {
-    for (let parent of group.parents) {
-      let unwound = unwind(parent, addedTags)[0]
-      newGroup.parents.push(unwound)
-      unwound.children.push(newGroup)
-      newGroup = unwound
+  if (current.parents.length > 0) {
+    for (let parent of current.parents) {
+      unwind(parent, current, newGroup, addedTags)[0]
+    }
+  } else {
+    newGroup[current.thisTag.name] = {
+      thisTag: current.thisTag,
+      parents: [],
+      children: current.children
     }
   }
 
   return [newGroup, addedTags]
 }
 
+function deepMergeChildren(structure, withStructure) {
+  for (let child of withStructure.children) {
+    let existing = structure.children.find(t => t.thisTag.name == child.thisTag.name)
+    if (existing) {
+      existing.thisTag.active = true
+      deepMergeChildren(existing, child)
+    } else {
+      structure.children.push(child)
+    }
+  }
+
+  structure.children.sort(childSorter)
+}
+
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
-//       Changing slides breaks tags
 
 async function addNewTag(tag) {
+  uiElements.newTagInput.value = ""
   if (tag.trim() == "") return
 
   tagTreeHandler.preventScroll = false
@@ -501,46 +516,83 @@ async function addNewTag(tag) {
   await getImplications(tag.trim(), allImplications, "allparents")
 
   let t = Object.values(allImplications)[0]
-  console.log(t)
 
   let [structure, addedTags] = unwind(t)
-  console.log(structure)
 
-  // for (let tag of addedTags) {
-  //   tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
-  //   tagTreeHandler.tags = tagTreeHandler.tags.trim()
+  for (let tag of addedTags) {
+    tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
+    tagTreeHandler.tags = tagTreeHandler.tags.trim()
+  }
 
-  // }
+  for (let [parentName, group] of Object.entries(structure)) {
+    let realStructure = findChildInStructure(tagTreeHandler.currentStructure, parentName)
+    // console.log(parentName, group, realStructure)
 
-  // // let realStructure = findChildInStructure(tagTreeHandler.currentStructure, t.thisTag.name)
+    if (realStructure) {
+      deepMergeChildren(realStructure, group)
+    } else {
+      tagTreeHandler.currentStructure[parentName] = group
+    }
+  }
 
-  // // Some parts may be in there, some might not. Need to resolve all of manually :D
+  let orderedKeys = Object.keys(tagTreeHandler.currentStructure).toSorted((a, b) => {
+    let startingDigitsA = a.match(/^\d+/)
+    let startingDigitsB = b.match(/^\d+/)
+    if (startingDigitsA && startingDigitsB) {
+      return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
+    }
+    return a.localeCompare(b)
+  })
 
-  // if (!realStructure) {
-  //   console.log(structure)
-  //   // let name = Object.keys(structure)[0]
-  //   // tagTreeHandler.currentStructure[name] = structure[name]
-  // }
+  for (let [updatedKey, tag] of Object.entries(structure)) {
+    let allTags = document.querySelectorAll(`[data-tag-name='${updatedKey}']`)
 
-  // for (let tag of addedTags) {
-  //   let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
-  //   tagTreeHandler.preventClicks = true
+    if (allTags.length > 0) {
+      for (let child of allTags) {
+        let li = child.parentElement
+        let parent = li.parentElement
 
-  //   for (let child of allTags) {
-  //     if (!child.open) {
-  //       child.firstChild.click()
-  //       child.open = true
-  //     }
+        li.remove()
 
-  //     let last = child.parentElement.parentElement.lastChild
+        parent.appendChild(createTagTree(tag, 1, true))
+      }
+    } else {
+      let next = orderedKeys.indexOf(updatedKey) + 1
 
-  //     if (last.firstChild.firstChild.classList.contains("show-implications-button")) {
-  //       last.classList.add("has-active-children")
-  //     }
-  //   }
+      if (next >= orderedKeys.length) {
+        let ul = document.createElement("ul")
+        ul.classList.add("tree")
+        ul.classList.add("mb-3")
+        uiElements.tagContainer.appendChild(ul)
 
-  //   tagTreeHandler.preventClicks = false
-  // }
+        ul.appendChild(createTagTree(tag, 1, true))
+      } else {
+        let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
+
+        let ul = document.createElement("ul")
+        ul.classList.add("tree")
+        ul.classList.add("mb-3")
+        uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
+
+        ul.appendChild(createTagTree(tag, 1, true))
+      }
+    }
+  }
+
+  tagTreeHandler.preventClicks = true
+
+  for (let tag of addedTags) {
+    let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
+
+    for (let child of allTags) {
+      if (!child.open) {
+        child.firstChild.click()
+        child.open = true
+      }
+    }
+  }
+
+  tagTreeHandler.preventClicks = false
 }
 
 uiElements.addTagButton.addEventListener("click", async () => {
@@ -558,7 +610,9 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 })
 
 uiElements.showCurrentButton.addEventListener("click", () => {
+  tagTreeHandler.preventScroll = true
   uiElements.collapseAllButton.click()
+  tagTreeHandler.preventScroll = false
 
   for (let details of document.querySelectorAll(".hidden > details[open]")) {
     details.parentElement.classList.remove("hidden")
@@ -585,6 +639,7 @@ uiElements.showAllButton.addEventListener("click", () => {
 })
 
 uiElements.collapseAllButton.addEventListener("click", () => {
+  let noScroll = tagTreeHandler.preventScroll
   tagTreeHandler.preventScroll = true
 
   for (let button of document.querySelectorAll(".show-implications-button")) {
@@ -607,5 +662,5 @@ uiElements.collapseAllButton.addEventListener("click", () => {
 
   tagTreeHandler.preventScroll = false
 
-  uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
+  if (!noScroll) uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
 })
