@@ -634,13 +634,19 @@ uiElements.submitChangesButton.addEventListener("click", () => {
   }
 
   changes.sort((a, b) => {
-    if (a.change == 0) return 1
-    if (b.change == 0) return -1
+    if (a.change == 0 && b.change != 0) return 1
+    if (b.change == 0 && a.change != 0) return -1
 
     if (a.change == 1 && b.change == -1) return -1
     if (a.change == -1 && b.change == 1) return 1
 
-    return 0
+    let startingDigitsA = a.tag.match(/^\d+/)
+    let startingDigitsB = b.tag.match(/^\d+/)
+    if (startingDigitsA && startingDigitsB) {
+      return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
+    }
+    
+    return a.tag.localeCompare(b.tag)
   })
 
   for (let change of changes) {
@@ -661,6 +667,8 @@ uiElements.submitChangesButton.addEventListener("click", () => {
       uiElements.tagChangesReview.appendChild(span)
     }
   }
+
+  uiElements.tagChangesReview.style.height = `${uiElements.tagContainer.clientHeight / 1.5}px`
 })
 
 uiElements.closeReviewButton.addEventListener("click", () => {
