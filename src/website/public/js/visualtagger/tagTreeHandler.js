@@ -715,7 +715,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
   let body = new URLSearchParams()
   body.append("post[tag_string_diff]", tagDiff)
   body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
-  body.append("post[edit_reason]", "Visual Tag Editor yiff.today/visualtagger")
+  body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
   body.append("_method", "PATCH")
 
   uiElements.closeReviewButton.click()
