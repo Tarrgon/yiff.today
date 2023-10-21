@@ -423,6 +423,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false) {
 let tagTreeHandler = {
   currentStructure: {},
   tags: "",
+  unchangedTags: "",
   preventClicks: false,
   preventScroll: false,
   async slideUpdated() {
@@ -439,6 +440,7 @@ let tagTreeHandler = {
     let allImplications = {}
 
     tagTreeHandler.tags = slide.tags
+    tagTreeHandler.unchangedTags = slide.tags
 
     await getImplications(tagTreeHandler.tags, allImplications)
 
@@ -605,6 +607,66 @@ uiElements.newTagInput.addEventListener("keypress", (e) => {
   }
 })
 
+uiElements.submitChangesButton.addEventListener("click", () => {
+  uiElements.reviewChangesModal.classList.add("is-active")
+
+  while (uiElements.tagChangesReview.firstChild) {
+    uiElements.tagChangesReview.removeChild(uiElements.tagChangesReview.firstChild)
+  }
+
+  let changes = []
+
+  let tagsNow = tagTreeHandler.tags.split(" ")
+  let tagsBefore = tagTreeHandler.unchangedTags.split(" ")
+
+  for (let tag of tagsNow) {
+    if (tagsBefore.includes(tag)) {
+      changes.push({ tag, change: 0 })
+    } else {
+      changes.push({ tag, change: 1 })
+    }
+  }
+
+  for (let tag of tagsBefore) {
+    if (!tagsNow.includes(tag)) {
+      changes.push({ tag, change: -1 })
+    }
+  }
+
+  changes.sort((a, b) => {
+    if (a.change == 0) return 1
+    if (b.change == 0) return -1
+    
+    if (a.change == 1 && b.change == -1) return -1
+    if (a.change == -1 && b.change == 1) return 1
+
+    return 0
+  })
+
+  for (let change of changes) {
+    if (change.change == 0) {
+      let span = document.createElement("span")
+      span.classList.add("has-text-grey-lighter")
+      span.innerText = `${change.tag} `
+      uiElements.tagChangesReview.appendChild(span)
+    } else if (change.change == -1) {
+      let span = document.createElement("span")
+      span.classList.add("has-text-danger")
+      span.innerText = `-${change.tag} `
+      uiElements.tagChangesReview.appendChild(span)
+    } else if (change.change == 1) {
+      let span = document.createElement("span")
+      span.classList.add("has-text-success")
+      span.innerText = `+${change.tag} `
+      uiElements.tagChangesReview.appendChild(span)
+    }
+  }
+})
+
+uiElements.closeReviewButton.addEventListener("click", () => {
+  uiElements.reviewChangesModal.classList.remove("is-active")
+})
+
 uiElements.copyTagsButton.addEventListener("click", () => {
   navigator.clipboard.writeText(tagTreeHandler.tags)
 })
@@ -663,4 +725,9 @@ uiElements.collapseAllButton.addEventListener("click", () => {
   tagTreeHandler.preventScroll = false
 
   if (!noScroll) uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
+})
+
+hotkeys("enter", (e) => {
+  e.preventDefault()
+  console.log(e)
 })

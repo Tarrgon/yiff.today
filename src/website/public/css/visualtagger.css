@@ -151,3 +151,20 @@ ul {
   list-style: none !important;
   margin: 0 !important;
 }
+
+.custom-modal.is-active {
+  display: flex;
+}
+
+.custom-modal {
+  align-items: center;
+  flex-direction: column;
+  display: none;
+  overflow: hidden;
+  z-index: 40;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}

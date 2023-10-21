@@ -7,6 +7,7 @@
 
   <%- include("./partials/head"); %>
   <link rel="stylesheet" href="/css/visualtagger.css">
+  <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
 </head>
 
 <body>
@@ -38,6 +39,27 @@
       </div>
     </div>
     <div id="tag-changer-container" class="column is-4 has-text-left has-text-light">
+      <div id="review-changes-modal" class="custom-modal">
+        <div class="modal-background"></div>
+        <div class="modal-content is-clipped mt-6" style="width:100%">
+          <div class="columns has-text-centered mt-3">
+            <div class="column is-4 is-offset-4 box is-size-4 has-text-info">
+              Review Changes
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <div id="tag-changes-review" class="textarea is-info has-background-dark" style="overflow-y: scroll;"></div>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column is-4 is-offset-4 has-text-centered">
+              <button id="confirm-submit" class="button is-success">Submit</button>
+            </div>
+          </div>
+        </div>
+        <button id="close-review-button" class="modal-close is-large" aria-label="close"></button>
+      </div>
       <div id="tag-container" class="content"></div>
       <div class="columns">
         <div class="column is-6">
