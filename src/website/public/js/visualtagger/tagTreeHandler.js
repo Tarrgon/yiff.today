@@ -616,8 +616,6 @@ async function addNewTag(tag) {
         uiElements.tagContainer.appendChild(ul)
 
         ul.appendChild(createTagTree(struct, 1, true))
-
-        element = ul
       } else {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
 
@@ -627,13 +625,20 @@ async function addNewTag(tag) {
         uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
 
         ul.appendChild(createTagTree(struct, 1, true))
-
-        element = ul
       }
     }
   }
 
-  element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+  let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
+
+  let ul = document.createElement("ul")
+  ul.classList.add("tree")
+  ul.classList.add("mb-3")
+  uiElements.tagContainer.appendChild(ul)
+
+  ul.appendChild(createTagTree(struct, 1, true))
+
+  ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
   tagTreeHandler.preventClicks = true
 
@@ -731,18 +736,18 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       },
       body
     })
-  
+
     if (res.ok) {
       showSuccessScreen()
     } else {
       showFailureScreen(res.status)
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e)
 
     showFailureScreen("unk")
   }
-  
+
 
   tagTreeHandler.lock = false
 })
