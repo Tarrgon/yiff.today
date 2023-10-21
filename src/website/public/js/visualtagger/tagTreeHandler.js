@@ -566,18 +566,20 @@ async function addNewTag(tag) {
     tagTreeHandler.tags = tagTreeHandler.tags.trim()
   }
 
+  let newTopLevel = []
+
   for (let [parentName, group] of Object.entries(structure)) {
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, parentName)
-    // console.log(parentName, group, realStructure)
 
     if (realStructure) {
       deepMergeChildren(realStructure, group)
     } else {
+      newTopLevel.push(parentName)
       tagTreeHandler.currentStructure[parentName] = group
     }
   }
 
-  let orderedKeys = Object.keys(tagTreeHandler.currentStructure).toSorted((a, b) => {
+  let orderedKeys = Object.keys(tagTreeHandler.currentStructure).filter(k => !newTopLevel.includes(k)).toSorted((a, b) => {
     let startingDigitsA = a.match(/^\d+/)
     let startingDigitsB = b.match(/^\d+/)
     if (startingDigitsA && startingDigitsB) {
@@ -588,7 +590,9 @@ async function addNewTag(tag) {
 
   let element
 
-  for (let [updatedKey, tag] of Object.entries(structure)) {
+  for (let updatedKey of Object.keys(structure)) {
+    let struct = findChildInStructure(tagTreeHandler.currentStructure, updatedKey)
+
     let allTags = document.querySelectorAll(`[data-tag-name='${updatedKey}']`)
 
     if (allTags.length > 0) {
@@ -600,7 +604,7 @@ async function addNewTag(tag) {
 
         element = parent
 
-        parent.appendChild(createTagTree(tag, 1, true))
+        parent.appendChild(createTagTree(struct, 1, true))
       }
     } else {
       let next = orderedKeys.indexOf(updatedKey) + 1
@@ -611,7 +615,7 @@ async function addNewTag(tag) {
         ul.classList.add("mb-3")
         uiElements.tagContainer.appendChild(ul)
 
-        ul.appendChild(createTagTree(tag, 1, true))
+        ul.appendChild(createTagTree(struct, 1, true))
 
         element = ul
       } else {
@@ -622,7 +626,7 @@ async function addNewTag(tag) {
         ul.classList.add("mb-3")
         uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
 
-        ul.appendChild(createTagTree(tag, 1, true))
+        ul.appendChild(createTagTree(struct, 1, true))
 
         element = ul
       }
@@ -718,6 +722,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
   try {
     showLoadingScreen()
+
     let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
       method: "POST",
       headers: {
