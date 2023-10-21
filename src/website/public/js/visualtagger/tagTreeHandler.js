@@ -1,5 +1,6 @@
 const BACKGROUND_COLORS = ["#b4c7d9", "#f2ac08", "god is surely dead since this is empty", "#d0d", "#0a0", "#ed5d1f", "#ff3d3d", "#fff", "#282"]
 const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "species", "invalid", "meta", "lore"]
+const CATEGORIES_SORTED = ["artist", "copyright", "character", "general", "meta", "lore"] // This is how e6 shows categories
 
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
@@ -18,6 +19,13 @@ function isOutOfViewport(elem, parent) {
 }
 
 function childSorter(a, b) {
+  let categoryPositionA = CATEGORIES_SORTED.indexOf(CATEGORIES[a.thisTag.category])
+  let categoryPositionB = CATEGORIES_SORTED.indexOf(CATEGORIES[b.thisTag.category])
+
+  if (categoryPositionA != categoryPositionB) {
+    return categoryPositionA - categoryPositionB
+  }
+
   let startingDigitsA = a.thisTag.name.match(/^\d+/)
   let startingDigitsB = b.thisTag.name.match(/^\d+/)
   if (startingDigitsA && startingDigitsB) {
