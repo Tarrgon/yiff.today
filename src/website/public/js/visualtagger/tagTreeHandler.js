@@ -586,6 +586,8 @@ async function addNewTag(tag) {
     return a.localeCompare(b)
   })
 
+  let element
+
   for (let [updatedKey, tag] of Object.entries(structure)) {
     let allTags = document.querySelectorAll(`[data-tag-name='${updatedKey}']`)
 
@@ -595,6 +597,8 @@ async function addNewTag(tag) {
         let parent = li.parentElement
 
         li.remove()
+
+        element = parent
 
         parent.appendChild(createTagTree(tag, 1, true))
       }
@@ -608,6 +612,8 @@ async function addNewTag(tag) {
         uiElements.tagContainer.appendChild(ul)
 
         ul.appendChild(createTagTree(tag, 1, true))
+
+        element = ul
       } else {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
 
@@ -617,9 +623,13 @@ async function addNewTag(tag) {
         uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
 
         ul.appendChild(createTagTree(tag, 1, true))
+
+        element = ul
       }
     }
   }
+
+  element.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
   tagTreeHandler.preventClicks = true
 
