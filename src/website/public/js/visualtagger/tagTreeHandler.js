@@ -636,7 +636,7 @@ uiElements.submitChangesButton.addEventListener("click", () => {
   changes.sort((a, b) => {
     if (a.change == 0) return 1
     if (b.change == 0) return -1
-    
+
     if (a.change == 1 && b.change == -1) return -1
     if (a.change == -1 && b.change == 1) return 1
 
@@ -729,5 +729,16 @@ uiElements.collapseAllButton.addEventListener("click", () => {
 
 hotkeys("enter", (e) => {
   e.preventDefault()
-  console.log(e)
+  if (!uiElements.reviewChangesModal.classList.contains("is-active")) {
+    uiElements.submitChangesButton.click()
+  } else {
+    uiElements.confirmSubmitButton.click()
+  }
+})
+
+hotkeys("escape", (e) => {
+  e.preventDefault()
+  if (uiElements.reviewChangesModal.classList.contains("is-active")) {
+    uiElements.closeReviewButton.click()
+  }
 })
