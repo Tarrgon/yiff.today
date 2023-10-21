@@ -17,6 +17,15 @@ function isOutOfViewport(elem, parent) {
   return out
 }
 
+function childSorter(a, b) {
+  let startingDigitsA = a.thisTag.name.match(/^\d+/)
+  let startingDigitsB = b.thisTag.name.match(/^\d+/)
+  if (startingDigitsA && startingDigitsB) {
+    return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
+  }
+  return a.thisTag.name.localeCompare(b.thisTag.name)
+}
+
 function toTitle(str) {
   return str.replaceAll("_", " ").replace(
     /\w\S*/g,
@@ -75,6 +84,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   if (Object.entries(unresolvedImplications).length == 0) return structure
 
   for (let [tagName, implications] of Object.entries(unresolvedImplications).toSorted((a, b) => a[1].parents.length - b[1].parents.length)) {
+    implications.thisTag.showedChildren = false
     if (implications.parents.length == 0) {
       implications.thisTag.active = tags.includes(implications.thisTag.name)
       implications.thisTag.fetchedChildren = false
@@ -225,7 +235,42 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
       showButton?.parentElement?.parentElement?.remove()
 
+      if (!parentGroup.thisTag.showedChildren) {
+        let cached = implicationsCache[parentGroup.thisTag.name]
+
+        for (let child of cached.children) {
+          if (!parentGroup.children.find(t => t.thisTag.name == child.name)) {
+            parentGroup.children.push({
+              children: [],
+              parents: [parentGroup],
+              thisTag: {
+                id: child.id,
+                name: child.name,
+                category: child.category,
+                fetchedChildren: implicationsCache[child.name] != null,
+                showedChildren: false
+              }
+            })
+          }
+        }
+
+        parentGroup.children.sort(childSorter)
+
+        while (parent.firstChild) {
+          parent.removeChild(parent.firstChild)
+        }
+
+        for (let child of parentGroup.children) {
+          let p = child.parents.find(p => p.thisTag.name == tagName)
+          p.thisTag.fetchedChildren = true
+          p.thisTag.showedChildren = true
+          parent.appendChild(createTagTree(child, depth))
+        }
+      }
+
       reparent(parent, hideButton)
+
+      parentGroup.thisTag.showedChildren = true
 
       if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
@@ -245,6 +290,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     if (requesting) return
     requesting = true
     parentGroup.thisTag.fetchedChildren = true
+    parentGroup.thisTag.showedChildren = true
 
     let allImplications = {}
     await getImplications(tagName, allImplications, "children")
@@ -255,14 +301,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     realStructure.children = realStructure.children.concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
 
-    realStructure.children.sort((a, b) => {
-      let startingDigitsA = a.thisTag.name.match(/^\d+/)
-      let startingDigitsB = b.thisTag.name.match(/^\d+/)
-      if (startingDigitsA && startingDigitsB) {
-        return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-      }
-      return a.thisTag.name.localeCompare(b.thisTag.name)
-    })
+    realStructure.children.sort(childSorter)
 
     while (parent.firstChild) {
       parent.removeChild(parent.firstChild)
@@ -271,8 +310,8 @@ function createImplicationRequester(tagName, depth, parentGroup) {
     for (let child of realStructure.children) {
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
+      p.thisTag.showedChildren = true
       parent.appendChild(createTagTree(child, depth))
-
     }
 
     showButton.remove()
@@ -292,7 +331,11 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   return li
 }
 
-function createTagTree(tag, depth = 1) {
+function createTagTree(tag, depth = 1, forceShowButton = false) {
+  if (forceShowButton) {
+    tag.thisTag.showedChildren = false
+  }
+
   let li = document.createElement("li")
   if (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)) li.classList.add("hidden")
 
@@ -351,21 +394,14 @@ function createTagTree(tag, depth = 1) {
   details.append(ul)
 
   if (tag.children.length > 0) {
-    tag.children.sort((a, b) => {
-      let startingDigitsA = a.thisTag.name.match(/^\d+/)
-      let startingDigitsB = b.thisTag.name.match(/^\d+/)
-      if (startingDigitsA && startingDigitsB) {
-        return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-      }
-      return a.thisTag.name.localeCompare(b.thisTag.name)
-    })
+    tag.children.sort(childSorter)
 
     for (let child of tag.children) {
-      ul.appendChild(createTagTree(child, depth + 1))
+      ul.appendChild(createTagTree(child, depth + 1, forceShowButton))
     }
   }
 
-  if (!tag.thisTag.fetchedChildren) ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
+  if (!tag.thisTag.fetchedChildren || forceShowButton) ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
 
   li.addEventListener("click", (e) => {
     e.preventDefault()
@@ -413,14 +449,7 @@ let tagTreeHandler = {
 
       let asArray = Object.values(structure)
 
-      asArray.sort((a, b) => {
-        let startingDigitsA = a.thisTag.name.match(/^\d+/)
-        let startingDigitsB = b.thisTag.name.match(/^\d+/)
-        if (startingDigitsA && startingDigitsB) {
-          return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-        }
-        return a.thisTag.name.localeCompare(b.thisTag.name)
-      })
+      asArray.sort(childSorter)
 
       for (let group of asArray) {
         let ul = document.createElement("ul")
@@ -428,7 +457,7 @@ let tagTreeHandler = {
         ul.classList.add("mb-3")
         uiElements.tagContainer.appendChild(ul)
 
-        ul.appendChild(createTagTree(group))
+        ul.appendChild(createTagTree(group, 1, true))
       }
     }
   }
@@ -443,6 +472,7 @@ function unwind(group, addedTags = []) {
 
   newGroup.thisTag.active = true
   newGroup.thisTag.fetchedChildren = false
+  newGroup.thisTag.showedChildren = false
 
   addedTags.push(newGroup.thisTag.name)
 
