@@ -426,6 +426,7 @@ let tagTreeHandler = {
   unchangedTags: "",
   preventClicks: false,
   preventScroll: false,
+  lock: false,
   async slideUpdated() {
     tagTreeHandler.buttons = {}
 
@@ -503,6 +504,45 @@ function deepMergeChildren(structure, withStructure) {
   }
 
   structure.children.sort(childSorter)
+}
+
+function getChanges() {
+  let changes = []
+
+  let tagsNow = tagTreeHandler.tags.split(" ")
+  let tagsBefore = tagTreeHandler.unchangedTags.split(" ")
+
+  for (let tag of tagsNow) {
+    if (tagsBefore.includes(tag)) {
+      changes.push({ tag, change: 0 })
+    } else {
+      changes.push({ tag, change: 1 })
+    }
+  }
+
+  for (let tag of tagsBefore) {
+    if (!tagsNow.includes(tag)) {
+      changes.push({ tag, change: -1 })
+    }
+  }
+
+  changes.sort((a, b) => {
+    if (a.change == 0 && b.change != 0) return 1
+    if (b.change == 0 && a.change != 0) return -1
+
+    if (a.change == 1 && b.change == -1) return -1
+    if (a.change == -1 && b.change == 1) return 1
+
+    let startingDigitsA = a.tag.match(/^\d+/)
+    let startingDigitsB = b.tag.match(/^\d+/)
+    if (startingDigitsA && startingDigitsB) {
+      return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
+    }
+
+    return a.tag.localeCompare(b.tag)
+  })
+
+  return changes
 }
 
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
@@ -614,40 +654,7 @@ uiElements.submitChangesButton.addEventListener("click", () => {
     uiElements.tagChangesReview.removeChild(uiElements.tagChangesReview.firstChild)
   }
 
-  let changes = []
-
-  let tagsNow = tagTreeHandler.tags.split(" ")
-  let tagsBefore = tagTreeHandler.unchangedTags.split(" ")
-
-  for (let tag of tagsNow) {
-    if (tagsBefore.includes(tag)) {
-      changes.push({ tag, change: 0 })
-    } else {
-      changes.push({ tag, change: 1 })
-    }
-  }
-
-  for (let tag of tagsBefore) {
-    if (!tagsNow.includes(tag)) {
-      changes.push({ tag, change: -1 })
-    }
-  }
-
-  changes.sort((a, b) => {
-    if (a.change == 0 && b.change != 0) return 1
-    if (b.change == 0 && a.change != 0) return -1
-
-    if (a.change == 1 && b.change == -1) return -1
-    if (a.change == -1 && b.change == 1) return 1
-
-    let startingDigitsA = a.tag.match(/^\d+/)
-    let startingDigitsB = b.tag.match(/^\d+/)
-    if (startingDigitsA && startingDigitsB) {
-      return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-    }
-    
-    return a.tag.localeCompare(b.tag)
-  })
+  let changes = getChanges()
 
   for (let change of changes) {
     if (change.change == 0) {
@@ -671,8 +678,89 @@ uiElements.submitChangesButton.addEventListener("click", () => {
   uiElements.tagChangesReview.style.height = `${uiElements.tagContainer.clientHeight / 1.5}px`
 })
 
+uiElements.confirmSubmitButton.addEventListener("click", async () => {
+  if (login.e621Username.trim() == "" || login.e621ApiKey.trim() == "") {
+    document.body.scrollTo({
+      top: document.body.scrollHeight,
+      left: 0,
+      behavior: "smooth"
+    })
+
+    return
+  }
+
+  if (tagTreeHandler.lock) return
+  tagTreeHandler.lock = true
+
+  let changes = getChanges().filter(t => t.change != 0)
+
+  let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
+
+  if (tagDiff.length == 0) return
+
+  let body = new URLSearchParams()
+  body.append("post[tag_string_diff]", tagDiff)
+  body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
+  body.append("post[edit_reason]", "Visual Tag Editor yiff.today/visualtagger")
+  body.append("_method", "PATCH")
+
+  uiElements.closeReviewButton.click()
+
+  try {
+    showLoadingScreen()
+    let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
+      method: "POST",
+      headers: {
+        "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      },
+      body
+    })
+  
+    if (res.ok) {
+      showSuccessScreen()
+    } else {
+      showFailureScreen(res.status)
+    }
+  } catch(e) {
+    console.error(e)
+
+    showFailureScreen("unk")
+  }
+  
+
+  tagTreeHandler.lock = false
+})
+
+function showLoadingScreen() {
+  uiElements.responseText.innerText = "Loading"
+
+  uiElements.responseModal.classList.add("is-active")
+  uiElements.closeResponseButton.classList.add("hidden")
+}
+
+function showSuccessScreen() {
+  uiElements.responseText.innerText = "Success"
+
+  uiElements.responseModal.classList.add("is-active")
+
+  uiElements.closeResponseButton.classList.remove("hidden")
+}
+
+function showFailureScreen(status) {
+  uiElements.responseText.innerText = `Failure (${status})`
+
+  uiElements.responseModal.classList.add("is-active")
+
+  uiElements.closeResponseButton.classList.remove("hidden")
+}
+
 uiElements.closeReviewButton.addEventListener("click", () => {
   uiElements.reviewChangesModal.classList.remove("is-active")
+})
+
+uiElements.closeResponseButton.addEventListener("click", () => {
+  uiElements.responseModal.classList.remove("is-active")
 })
 
 uiElements.copyTagsButton.addEventListener("click", () => {
@@ -739,14 +827,18 @@ hotkeys("enter", (e) => {
   e.preventDefault()
   if (!uiElements.reviewChangesModal.classList.contains("is-active")) {
     uiElements.submitChangesButton.click()
-  } else {
+  } /*else {
     uiElements.confirmSubmitButton.click()
-  }
+  }*/
 })
 
 hotkeys("escape", (e) => {
   e.preventDefault()
   if (uiElements.reviewChangesModal.classList.contains("is-active")) {
     uiElements.closeReviewButton.click()
+  }
+
+  if (uiElements.responseModal.classList.contains("is-active")) {
+    uiElements.closeResponseButton.click()
   }
 })
