@@ -185,63 +185,83 @@ function reparent(parent, button) {
   return li
 }
 
-function createImplicationRequester(tagName, depth, parentGroup) {
-  let li = document.createElement("li")
+function createImplicationRequester(parentDetails, tagName, depth, parentGroup) {
+  let expandButton = document.createElement("a")
+  expandButton.classList.add("ml-1", "show-implications-button")
+  parentDetails.appendChild(expandButton)
 
-  let details = document.createElement("details")
-  li.appendChild(details)
+  let sup = document.createElement("sup")
+  sup.innerText = "[expand]"
+  expandButton.appendChild(sup)
 
-  let showButton = document.createElement("summary")
-  showButton.classList.add("show-implications-button")
-  showButton.innerText = "Show Implications"
-  details.appendChild(showButton)
+  if (!parentGroup.thisTag.fetchedChildren) expandButton.classList.add("hidden")
 
-  let hideButton = document.createElement("summary")
-  hideButton.classList.add("hide-implications-button")
-  hideButton.innerText = "Hide Implications"
+  let collapseButton = document.createElement("a")
+  collapseButton.classList.add("ml-1", "hide-implications-button")
+  parentDetails.appendChild(collapseButton)
 
-  // if (!tagTreeHandler.buttons[tagName]) tagTreeHandler.buttons[tagName] = []
+  let sup2 = document.createElement("sup")
+  sup2.innerText = "[collapse]"
+  collapseButton.appendChild(sup2)
 
-  // tagTreeHandler.buttons[tagName].push({
-  //   showButton,
-  //   hideButton
-  // })
+  collapseButton.classList.add("hidden")
+
+  let searchButton = document.createElement("a")
+  searchButton.classList.add("ml-1", "show-implications-button")
+  parentDetails.appendChild(searchButton)
+
+  let sup3 = document.createElement("sup")
+  sup3.innerText = "[search]"
+  searchButton.appendChild(sup3)
+
+  if (parentGroup.thisTag.fetchedChildren) searchButton.classList.add("hidden")
 
   let requesting = false
 
-  let parent = null
+  let relatedList = null
 
-  hideButton.addEventListener("click", (e) => {
+  let collapse = (e) => {
     e.preventDefault()
     e.stopImmediatePropagation()
 
     tagTreeHandler.preventScroll = false
 
-    for (let child of parent.children) {
+    for (let child of relatedList.children) {
       child.classList.add("hidden")
     }
 
-    hideButton?.parentElement?.parentElement?.remove()
+    // hideButton?.parentElement?.parentElement?.remove()
 
-    let li = reparent(parent, showButton)
+    // let li = reparent(parent, showButton)
 
-    if (isOutOfViewport(showButton, uiElements.tagContainer).top) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
-    if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
-      li.classList.add("has-active-children")
+    if (!parentGroup.thisTag.showedChildren) {
+      searchButton.classList.remove("hidden")
+    } else {
+      expandButton.classList.remove("hidden")
     }
-  })
 
-  showButton.addEventListener("click", async (e) => {
+    collapseButton.classList.add("hidden")
+
+    expandButton.classList.remove("has-active-children")
+    searchButton.classList.remove("has-active-children")
+
+    if (relatedList.querySelectorAll("li > details[open]").length != 0) {
+      console.log(relatedList.querySelectorAll("li > details[open]"))
+      expandButton.classList.add("has-active-children")
+      searchButton.classList.add("has-active-children")
+    }
+  }
+
+  let expand = async (e) => {
     e.preventDefault()
     e.stopImmediatePropagation()
-    if (!parent) parent = li.parentElement
+    if (!relatedList) relatedList = parentDetails.lastChild
     if (parentGroup.thisTag.fetchedChildren) {
-      for (let child of parent.children) {
+      for (let child of relatedList.children) {
         child.classList.remove("hidden")
       }
-
-      showButton?.parentElement?.parentElement?.remove()
 
       if (!parentGroup.thisTag.showedChildren) {
         let cached = implicationsCache[parentGroup.thisTag.name]
@@ -264,33 +284,36 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
         parentGroup.children.sort(childSorter)
 
-        while (parent.firstChild) {
-          parent.removeChild(parent.firstChild)
+        while (relatedList.firstChild) {
+          relatedList.removeChild(relatedList.firstChild)
         }
 
         for (let child of parentGroup.children) {
           let p = child.parents.find(p => p.thisTag.name == tagName)
           p.thisTag.fetchedChildren = true
           p.thisTag.showedChildren = true
-          parent.appendChild(createTagTree(child, depth))
+          relatedList.appendChild(createTagTree(child, depth, true))
         }
       }
 
-      reparent(parent, hideButton)
-
       parentGroup.thisTag.showedChildren = true
 
-      if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+      searchButton.classList.add("hidden")
+      expandButton.classList.add("hidden")
+      collapseButton.classList.remove("hidden")
 
       return
     }
 
     if (tagTreeHandler.preventNewRequests) {
-      for (let child of parent.children) {
+      for (let child of relatedList.children) {
         child.classList.remove("hidden")
       }
 
-      li.classList.remove("has-active-children")
+      expandButton.classList.remove("has-active-children")
+      searchButton.classList.remove("has-active-children")
 
       return
     }
@@ -307,46 +330,204 @@ function createImplicationRequester(tagName, depth, parentGroup) {
 
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
 
-    realStructure.children = realStructure.children.concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
+    console.log(tagName)
+
+    realStructure.children = (realStructure.children || []).concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
 
     realStructure.children.sort(childSorter)
 
-    while (parent.firstChild) {
-      parent.removeChild(parent.firstChild)
+    while (relatedList.firstChild) {
+      relatedList.removeChild(relatedList.firstChild)
     }
 
     for (let child of realStructure.children) {
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
       p.thisTag.showedChildren = true
-      parent.appendChild(createTagTree(child, depth))
+      relatedList.appendChild(createTagTree(child, depth, true))
     }
 
-    let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}'] > ul > li > details > .show-implications-button`))
-      .filter(b => b != showButton).map(b => b.parentElement.parentElement.parentElement)
+    let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}']`))
+      .map(b => b.lastChild)
 
     for (let p of otherParents) {
-      let pFirst = p.firstChild
+      if (p == relatedList) continue
       for (let child of realStructure.children) {
-        p.insertBefore(createTagTree(child, depth, false, true), pFirst)
+        p.appendChild(createTagTree(child, depth, true, true))
       }
     }
 
-    showButton.remove()
     if (realStructure.children.length > 0) {
-      reparent(parent, hideButton)
-      if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      searchButton.classList.add("hidden")
+      expandButton.classList.add("hidden")
+      collapseButton.classList.remove("hidden")
+      // reparent(parent, hideButton)
+      if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
-      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > ul > li .show-implications-button`)
+      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > .show-implications-button`)
 
       for (let child of all) {
-        child.parentElement.parentElement.remove()
+        child.remove()
       }
     }
-  })
+  }
 
-  return li
+  expandButton.addEventListener("click", expand)
+  searchButton.addEventListener("click", expand)
+
+  collapseButton.addEventListener("click", collapse)
+
+  // let li = document.createElement("li")
+
+  // let details = document.createElement("details")
+  // li.appendChild(details)
+
+  // let showButton = document.createElement("summary")
+  // showButton.classList.add("show-implications-button")
+  // showButton.innerText = "Show Implications"
+  // details.appendChild(showButton)
+
+  // let hideButton = document.createElement("summary")
+  // hideButton.classList.add("hide-implications-button")
+  // hideButton.innerText = "Hide Implications"
+
+  // hideButton.addEventListener("click", (e) => {
+  //   e.preventDefault()
+  //   e.stopImmediatePropagation()
+
+  //   tagTreeHandler.preventScroll = false
+
+  //   for (let child of parent.children) {
+  //     child.classList.add("hidden")
+  //   }
+
+  //   hideButton?.parentElement?.parentElement?.remove()
+
+  //   let li = reparent(parent, showButton)
+
+  //   if (isOutOfViewport(showButton, uiElements.tagContainer).top) showButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+  //   if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
+  //     li.classList.add("has-active-children")
+  //   }
+  // })
+
+  // showButton.addEventListener("click", async (e) => {
+  //   e.preventDefault()
+  //   e.stopImmediatePropagation()
+  //   if (!parent) parent = li.parentElement
+  //   if (parentGroup.thisTag.fetchedChildren) {
+  //     for (let child of parent.children) {
+  //       child.classList.remove("hidden")
+  //     }
+
+  //     showButton?.parentElement?.parentElement?.remove()
+
+  //     if (!parentGroup.thisTag.showedChildren) {
+  //       let cached = implicationsCache[parentGroup.thisTag.name]
+
+  //       for (let child of cached.children) {
+  //         if (!parentGroup.children.find(t => t.thisTag.name == child.name)) {
+  //           parentGroup.children.push({
+  //             children: [],
+  //             parents: [parentGroup],
+  //             thisTag: {
+  //               id: child.id,
+  //               name: child.name,
+  //               category: child.category,
+  //               fetchedChildren: implicationsCache[child.name] != null,
+  //               showedChildren: false
+  //             }
+  //           })
+  //         }
+  //       }
+
+  //       parentGroup.children.sort(childSorter)
+
+  //       while (parent.firstChild) {
+  //         parent.removeChild(parent.firstChild)
+  //       }
+
+  //       for (let child of parentGroup.children) {
+  //         let p = child.parents.find(p => p.thisTag.name == tagName)
+  //         p.thisTag.fetchedChildren = true
+  //         p.thisTag.showedChildren = true
+  //         parent.appendChild(createTagTree(child, depth))
+  //       }
+  //     }
+
+  //     reparent(parent, hideButton)
+
+  //     parentGroup.thisTag.showedChildren = true
+
+  //     if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+  //     return
+  //   }
+
+  //   if (tagTreeHandler.preventNewRequests) {
+  //     for (let child of parent.children) {
+  //       child.classList.remove("hidden")
+  //     }
+
+  //     li.classList.remove("has-active-children")
+
+  //     return
+  //   }
+
+  //   if (requesting) return
+  //   requesting = true
+  //   parentGroup.thisTag.fetchedChildren = true
+  //   parentGroup.thisTag.showedChildren = true
+
+  //   let allImplications = {}
+  //   await getImplications(tagName, allImplications, "children")
+
+  //   let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
+
+  //   let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
+
+  //   realStructure.children = realStructure.children.concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
+
+  //   realStructure.children.sort(childSorter)
+
+  //   while (parent.firstChild) {
+  //     parent.removeChild(parent.firstChild)
+  //   }
+
+  //   for (let child of realStructure.children) {
+  //     let p = child.parents.find(p => p.thisTag.name == tagName)
+  //     p.thisTag.fetchedChildren = true
+  //     p.thisTag.showedChildren = true
+  //     parent.appendChild(createTagTree(child, depth))
+  //   }
+
+  //   let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}'] > ul > li > details > .show-implications-button`))
+  //     .filter(b => b != showButton).map(b => b.parentElement.parentElement.parentElement)
+
+  //   for (let p of otherParents) {
+  //     let pFirst = p.firstChild
+  //     for (let child of realStructure.children) {
+  //       p.insertBefore(createTagTree(child, depth, false, true), pFirst)
+  //     }
+  //   }
+
+  //   showButton.remove()
+  //   if (realStructure.children.length > 0) {
+  //     reparent(parent, hideButton)
+  //     if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+  //   } else {
+  //     // Delete all show buttons under these buttons
+  //     let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > ul > li .show-implications-button`)
+
+  //     for (let child of all) {
+  //       child.parentElement.parentElement.remove()
+  //     }
+  //   }
+  // })
+
+  // return li
 }
 
 function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) {
@@ -409,11 +590,13 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   p.innerText = toTitle(tag.thisTag.name)
   summary.appendChild(p)
 
+  if (!tag.thisTag.fetchedChildren || forceShowButton) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
+
   let a = document.createElement("a")
   a.href = `https://e621.net/wiki_pages/show_or_new?title=${tag.thisTag.name}`
   a.target = "_blank"
   a.innerText = "?"
-  a.classList.add("ml-3")
+  a.classList.add("ml-1")
   p.appendChild(a)
 
   let ul = document.createElement("ul")
@@ -426,8 +609,6 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
       ul.appendChild(createTagTree(child, depth + 1, forceShowButton, hidden))
     }
   }
-
-  if (!tag.thisTag.fetchedChildren || forceShowButton) ul.appendChild(createImplicationRequester(tag.thisTag.name, depth + 1, tag))
 
   li.addEventListener("click", (e) => {
     e.preventDefault()

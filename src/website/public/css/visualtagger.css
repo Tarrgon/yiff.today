@@ -54,7 +54,8 @@
 }
 
 .has-active-children {
-  text-shadow: 0 0 2px gold, 0 0 2px gold, 0 0 2px gold, 0 0 2px gold;
+  color: gold;
+  /* text-shadow: 0 0 2px gold, 0 0 2px gold, 0 0 2px gold, 0 0 2px gold; */
 }
 
 .tree {
@@ -96,7 +97,7 @@
 }
 
 .tree summary {
-  display: block;
+  display: inline-block;
   cursor: pointer;
   line-height: 24px;
 }
