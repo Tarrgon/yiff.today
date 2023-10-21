@@ -290,7 +290,7 @@ function createImplicationRequester(tagName, depth, parentGroup) {
         child.classList.remove("hidden")
       }
 
-      parent.classList.remove("has-active-children")
+      li.classList.remove("has-active-children")
 
       return
     }
@@ -322,6 +322,16 @@ function createImplicationRequester(tagName, depth, parentGroup) {
       parent.appendChild(createTagTree(child, depth))
     }
 
+    let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}'] > ul > li > details > .show-implications-button`))
+      .filter(b => b != showButton).map(b => b.parentElement.parentElement.parentElement)
+
+    for (let p of otherParents) {
+      let pFirst = p.firstChild
+      for (let child of realStructure.children) {
+        p.insertBefore(createTagTree(child, depth, false, true), pFirst)
+      }
+    }
+
     showButton.remove()
     if (realStructure.children.length > 0) {
       reparent(parent, hideButton)
@@ -339,13 +349,13 @@ function createImplicationRequester(tagName, depth, parentGroup) {
   return li
 }
 
-function createTagTree(tag, depth = 1, forceShowButton = false) {
+function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) {
   if (forceShowButton) {
     tag.thisTag.showedChildren = false
   }
 
   let li = document.createElement("li")
-  if (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)) li.classList.add("hidden")
+  if (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren))) li.classList.add("hidden")
 
   let details = document.createElement("details")
   details.open = tag.thisTag.active
@@ -380,6 +390,14 @@ function createTagTree(tag, depth = 1, forceShowButton = false) {
 
       for (let child of allOfTheSame) {
         if (child == e.target.parentElement) continue
+
+        let anyActive = !e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
+
+        if (!e.target.parentElement.open && !child.parentElement.parentElement.querySelector("details[open]")) {
+          child.parentElement.parentElement.querySelector(":scope > li > details > .show-implications-button")?.parentElement?.parentElement?.classList?.add("has-active-children")
+        } else if (!anyActive) {
+          child.parentElement.parentElement.querySelector(":scope > li > details > .show-implications-button")?.parentElement?.parentElement?.classList?.remove("has-active-children")
+        }
         child.firstChild.click()
       }
 
@@ -405,7 +423,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false) {
     tag.children.sort(childSorter)
 
     for (let child of tag.children) {
-      ul.appendChild(createTagTree(child, depth + 1, forceShowButton))
+      ul.appendChild(createTagTree(child, depth + 1, forceShowButton, hidden))
     }
   }
 
