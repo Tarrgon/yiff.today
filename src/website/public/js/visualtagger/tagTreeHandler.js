@@ -187,6 +187,7 @@ function reparent(parent, button) {
 
 function createImplicationRequester(parentDetails, tagName, depth, parentGroup) {
   let expandButton = document.createElement("a")
+  expandButton.style.position = "absolute"
   expandButton.classList.add("ml-1", "show-implications-button")
   parentDetails.appendChild(expandButton)
 
@@ -197,6 +198,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   if (!parentGroup.thisTag.fetchedChildren) expandButton.classList.add("hidden")
 
   let collapseButton = document.createElement("a")
+  collapseButton.style.position = "absolute"
   collapseButton.classList.add("ml-1", "hide-implications-button")
   parentDetails.appendChild(collapseButton)
 
@@ -207,6 +209,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   collapseButton.classList.add("hidden")
 
   let searchButton = document.createElement("a")
+  searchButton.style.position = "absolute"
   searchButton.classList.add("ml-1", "show-implications-button")
   parentDetails.appendChild(searchButton)
 
