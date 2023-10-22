@@ -840,6 +840,8 @@ async function addNewTag(tag) {
 
   let t = Object.values(allImplications)[0]
 
+  console.log(t)
+
   let [structure, addedTags] = unwind(t)
 
   for (let tag of addedTags) {
@@ -1300,11 +1302,7 @@ uiElements.reviewAddTagButton.addEventListener("click", async () => {
 
   let t = Object.values(allImplications)[0]
 
-  console.log(t)
-
   let [structure] = unwind(t, null, false)
-
-  console.log(structure)
 
   uiElements.reviewAddTagModal.classList.add("is-active")
 
