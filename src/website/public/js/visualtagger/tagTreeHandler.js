@@ -925,6 +925,8 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
 
       uiElements.autoCompleteMenu.appendChild(a)
     }
+  } else {
+    uiElements.autoCompleteContainer.classList.remove("is-active")
   }
 })
 
