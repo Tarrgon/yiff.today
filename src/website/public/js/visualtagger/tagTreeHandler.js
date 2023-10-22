@@ -251,7 +251,6 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     searchButton.classList.remove("has-active-children")
 
     if (relatedList.querySelectorAll("li > details[open]").length != 0) {
-      console.log(relatedList.querySelectorAll("li > details[open]"))
       expandButton.classList.add("has-active-children")
       searchButton.classList.add("has-active-children")
     }
@@ -361,6 +360,16 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     }
 
     if (realStructure.children.length > 0) {
+      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > .show-implications-button`)
+
+      for (let child of all) {
+        if (child.innerText == "[search]") {
+          child.classList.add("hidden")
+        } else {
+          child.classList.remove("hidden")
+        }
+      }
+
       searchButton.classList.add("hidden")
       expandButton.classList.add("hidden")
       collapseButton.classList.remove("hidden")
@@ -543,6 +552,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
 
   let details = document.createElement("details")
   details.open = tag.thisTag.active
+  console.log(tag)
   details.setAttribute("data-tag-name", tag.thisTag.name)
   li.appendChild(details)
 
@@ -553,7 +563,13 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   summary.addEventListener("click", (e) => {
     e.stopImmediatePropagation()
 
-    if (e.target.parentElement.open) {
+    if (!tagTreeHandler.preventClicks) {
+      tag.thisTag.active = !tag.thisTag.active
+
+      console.log(tag)
+    }
+
+    if (!tag.thisTag.active) {
       for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
         child.firstChild.click()
       }
@@ -577,12 +593,23 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
 
         let anyActive = !e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
 
-        if (!e.target.parentElement.open && !child.parentElement.parentElement.querySelector("details[open]")) {
-          child.parentElement.parentElement.querySelector(":scope > li > details > .show-implications-button")?.parentElement?.parentElement?.classList?.add("has-active-children")
-        } else if (!anyActive) {
-          child.parentElement.parentElement.querySelector(":scope > li > details > .show-implications-button")?.parentElement?.parentElement?.classList?.remove("has-active-children")
+        if (anyActive) {
+          if (!child.open) {
+            child.firstChild.click()
+          }
+
+          for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
+            c.classList.add("has-active-children")
+          }
+        } else {
+          if (child.open) {
+            child.firstChild.click()
+          }
+
+          for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
+            c.classList.remove("has-active-children")
+          }
         }
-        child.firstChild.click()
       }
 
       tagTreeHandler.preventClicks = false
