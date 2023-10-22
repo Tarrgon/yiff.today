@@ -10,7 +10,7 @@ let e621AutoComplete = {
       item.reject(res)
     }
 
-    await wait(1000)
+    await wait(10)
     e621AutoComplete.queue.shift()
 
     if (e621AutoComplete.queue.length > 0) {

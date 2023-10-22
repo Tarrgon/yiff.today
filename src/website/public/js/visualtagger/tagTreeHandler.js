@@ -790,14 +790,7 @@ async function addNewTag(tag) {
     }
   }
 
-  let orderedKeys = Object.keys(tagTreeHandler.currentStructure).filter(k => !newTopLevel.includes(k)).toSorted((a, b) => {
-    let startingDigitsA = a.match(/^\d+/)
-    let startingDigitsB = b.match(/^\d+/)
-    if (startingDigitsA && startingDigitsB) {
-      return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
-    }
-    return a.localeCompare(b)
-  })
+  let orderedKeys = Object.values(tagTreeHandler.currentStructure).toSorted(childSorter).map(t => t.thisTag.name)
 
   for (let updatedKey of Object.keys(structure)) {
     let struct = findChildInStructure(tagTreeHandler.currentStructure, updatedKey)
@@ -838,16 +831,18 @@ async function addNewTag(tag) {
     }
   }
 
-  let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
+  if (!newTopLevel.includes(tag.trim())) {
+    let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
 
-  let ul = document.createElement("ul")
-  ul.classList.add("tree")
-  ul.classList.add("mb-3")
-  uiElements.tagContainer.appendChild(ul)
+    let ul = document.createElement("ul")
+    ul.classList.add("tree")
+    ul.classList.add("mb-3")
+    uiElements.tagContainer.appendChild(ul)
 
-  ul.appendChild(createTagTree(struct, 1, true))
+    ul.appendChild(createTagTree(struct, 1, true))
 
-  ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+  }
 
   tagTreeHandler.preventClicks = true
 
@@ -878,6 +873,7 @@ uiElements.newTagInput.addEventListener("keypress", (e) => {
 uiElements.newTagInput.addEventListener("input", async (e) => {
   if (uiElements.newTagInput.value.length >= 3) {
     let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
+    if (uiElements.newTagInput.value.length < 3) return // Async hell
     uiElements.autoCompleteContainer.classList.add("is-active")
 
     while (uiElements.autoCompleteMenu.firstChild) {
