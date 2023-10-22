@@ -856,18 +856,16 @@ async function addNewTag(tag) {
     }
   }
 
-  if (!newTopLevel.includes(tag.trim())) {
-    let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
+  let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
 
-    let ul = document.createElement("ul")
-    ul.classList.add("tree")
-    ul.classList.add("mb-3")
-    uiElements.tagContainer.appendChild(ul)
+  let ul = document.createElement("ul")
+  ul.classList.add("tree")
+  ul.classList.add("mb-3")
+  uiElements.tagContainer.appendChild(ul)
 
-    ul.appendChild(createTagTree(struct, 1, true))
+  ul.appendChild(createTagTree(struct, 1, true))
 
-    // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
-  }
+  // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
   tagTreeHandler.preventClicks = true
 
