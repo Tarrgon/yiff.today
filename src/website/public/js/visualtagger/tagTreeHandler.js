@@ -1232,8 +1232,8 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 uiElements.showCurrentButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
 
-  for (let details of document.querySelectorAll(`.is-review-added-tag`)) {
-    details.firstChild.classList.remove("is-review-added-tag")
+  for (let c of document.querySelectorAll(`.is-review-added-tag`)) {
+    c.classList.remove("is-review-added-tag")
   }
 
   tagTreeHandler.preventScroll = true
@@ -1295,8 +1295,8 @@ uiElements.showChangedButton.addEventListener("click", () => {
 uiElements.showAllButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
 
-  for (let details of document.querySelectorAll(`.is-review-added-tag`)) {
-    details.firstChild.classList.remove("is-review-added-tag")
+  for (let c of document.querySelectorAll(`.is-review-added-tag`)) {
+    c.classList.remove("is-review-added-tag")
   }
 
   tagTreeHandler.preventScroll = true
