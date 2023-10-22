@@ -930,7 +930,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         a2.target = "_blank"
         a2.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.name}`
         span.appendChild(a2)
-        a2.addEventListener("click", (e) => {
+        a2.addEventListener("mousedown", (e) => {
           e.stopImmediatePropagation()
         })
       } else {
@@ -946,7 +946,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         a2.target = "_blank"
         a2.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.antecedent_name}`
         span.appendChild(a2)
-        a2.addEventListener("click", (e) => {
+        a2.addEventListener("mousedown", (e) => {
           e.stopImmediatePropagation()
         })
 
@@ -967,7 +967,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         a3.target = "_blank"
         a3.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.name}`
         span3.appendChild(a3)
-        a3.addEventListener("click", (e) => {
+        a3.addEventListener("mousedown", (e) => {
           e.stopImmediatePropagation()
         })
       }
@@ -977,8 +977,11 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
       span.innerText = ` (${completion.post_count})`
       a.appendChild(span)
 
-      a.addEventListener("click", (e) => {
-        addNewTag(completion.name)
+      a.addEventListener("mousedown", (e) => {
+        e.preventDefault()
+
+        if (e.button == 0) addNewTag(completion.name)
+        else if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
       })
 
       uiElements.autoCompleteMenu.appendChild(a)
