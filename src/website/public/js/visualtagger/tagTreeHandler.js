@@ -740,7 +740,7 @@ function unwind(current, child, active = true, newGroup = {}, addedTags = []) {
   if (child) current.children.push(child)
 
   current.children.sort(childSorter)
-  
+
   if (current.parents.length > 0) {
     for (let parent of current.parents) {
       unwind(parent, current, active, newGroup, addedTags)[0]
@@ -828,6 +828,8 @@ async function addNewTag(tag) {
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
   if (tag.trim() == "") return
+
+  hotkeys.setScope("tagging")
 
   tagTreeHandler.preventScroll = false
 
@@ -925,8 +927,6 @@ async function addNewTag(tag) {
 
   tagTreeHandler.preventClicks = false
 
-  hotkeys.setScope("tagging")
-
   for (let i = 0; i < 6; i++) {
     uiElements.newTagInput.classList.toggle("has-background-success")
     await wait(150)
@@ -968,6 +968,7 @@ uiElements.newTagInput.addEventListener("focusout", () => {
 })
 
 uiElements.newTagInput.addEventListener("input", async (e) => {
+  hotkeys.setScope("addingnewtag")
   currentAutocompleteItem = -1
   updateAutocompleteDropdown()
   if (uiElements.newTagInput.value.length >= 3) {
