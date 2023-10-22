@@ -840,8 +840,6 @@ async function addNewTag(tag) {
 
   let t = Object.values(allImplications)[0]
 
-  console.log(t)
-
   let [structure, addedTags] = unwind(t)
 
   for (let tag of addedTags) {
