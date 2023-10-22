@@ -294,13 +294,13 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
           let p = child.parents.find(p => p.thisTag.name == tagName)
           p.thisTag.fetchedChildren = true
           p.thisTag.showedChildren = true
-          relatedList.appendChild(createTagTree(child, depth, true))
+          relatedList.appendChild(createTagTree(child, depth, false))
         }
       }
 
       parentGroup.thisTag.showedChildren = true
 
-      if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll && relatedList.lastChild && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
       searchButton.classList.add("hidden")
       expandButton.classList.add("hidden")
@@ -344,7 +344,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
       let p = child.parents.find(p => p.thisTag.name == tagName)
       p.thisTag.fetchedChildren = true
       p.thisTag.showedChildren = true
-      relatedList.appendChild(createTagTree(child, depth, true))
+      relatedList.appendChild(createTagTree(child, depth, false))
     }
 
     let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}']`))
@@ -353,7 +353,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     for (let p of otherParents) {
       if (p == relatedList) continue
       for (let child of realStructure.children) {
-        p.appendChild(createTagTree(child, depth, true, true))
+        p.appendChild(createTagTree(child, depth, false, true))
       }
     }
 
@@ -372,7 +372,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
       expandButton.classList.add("hidden")
       collapseButton.classList.remove("hidden")
       // reparent(parent, hideButton)
-      if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+      if (!tagTreeHandler.preventScroll && relatedList.lastChild && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
       let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > .show-implications-button`)
@@ -557,18 +557,12 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   summary.classList.add(`${CATEGORIES[tag.thisTag.category]}-tag-category`, "tag", "px-2")
   details.appendChild(summary)
 
-  summary.addEventListener("mousedown", (e) => {
-    e.stopImmediatePropagation()
-
-    if (e.button == 1) {
-      window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
-
-      return
-    }
-
+  let handle = (e) => {
     if (!tagTreeHandler.preventClicks) {
       tag.thisTag.active = !tag.thisTag.active
     }
+
+    summary.parentElement.open = tag.thisTag.active
 
     if (!tag.thisTag.active) {
       for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
@@ -592,21 +586,15 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
       for (let child of allOfTheSame) {
         if (child == e.target.parentElement) continue
 
-        let anyActive = !e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
+        let anyActive = e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
+
+        child.firstChild.click()
 
         if (anyActive) {
-          if (!child.open) {
-            child.firstChild.click()
-          }
-
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
             c.classList.add("has-active-children")
           }
         } else {
-          if (child.open) {
-            child.firstChild.click()
-          }
-
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
             c.classList.remove("has-active-children")
           }
@@ -615,13 +603,22 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
 
       tagTreeHandler.preventClicks = false
     }
+  }
+
+  summary.addEventListener("mousedown", (e) => {
+    if (e.button == 1) {
+      e.stopImmediatePropagation()
+      window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
+    }
   })
+
+  summary.addEventListener("click", handle)
 
   let p = document.createElement("p")
   p.innerText = toTitle(tag.thisTag.name)
   summary.appendChild(p)
 
-  if (!tag.thisTag.fetchedChildren || forceShowButton) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
+  createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
 
   let a = document.createElement("a")
   a.href = `https://e621.net/wiki_pages/show_or_new?title=${tag.thisTag.name}`
@@ -1150,17 +1147,17 @@ uiElements.collapseAllButton.addEventListener("click", () => {
   let noScroll = tagTreeHandler.preventScroll
   tagTreeHandler.preventScroll = true
 
-  for (let button of document.querySelectorAll(".show-implications-button")) {
-    let li = button.parentElement.parentElement
-    let parent = li.parentElement
-    for (let child of parent.children) {
+  for (let button of document.querySelectorAll(".show-implications-button:not(.hidden)")) {
+    let parent = button.parentElement
+    let ul = parent.lastChild
+    for (let child of ul.children) {
       child.classList.add("hidden")
     }
 
-    li.classList.remove("hidden")
+    // li.classList.remove("hidden")
 
-    if (parent.querySelectorAll("ul > li > details[open]").length != 0) {
-      li.classList.add("has-active-children")
+    if (parent.querySelectorAll("details[open]").length != 0) {
+      button.classList.add("has-active-children")
     }
   }
 
