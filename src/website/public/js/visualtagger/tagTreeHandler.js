@@ -740,27 +740,35 @@ function unwind(current, child, active = true, newGroup = {}, addedTags = []) {
   if (child) current.children.push(child)
 
   current.children.sort(childSorter)
-
+  
   if (current.parents.length > 0) {
     for (let parent of current.parents) {
       unwind(parent, current, active, newGroup, addedTags)[0]
     }
   } else {
-    newGroup[current.thisTag.name] = {
-      thisTag: current.thisTag,
-      parents: [],
-      children: current.children
+    if (newGroup[current.thisTag.name]) {
+      deepMergeChildren(newGroup[current.thisTag.name], {
+        thisTag: current.thisTag,
+        parents: [],
+        children: current.children
+      }, !active)
+    } else {
+      newGroup[current.thisTag.name] = {
+        thisTag: current.thisTag,
+        parents: [],
+        children: current.children
+      }
     }
   }
 
   return [newGroup, addedTags]
 }
 
-function deepMergeChildren(structure, withStructure) {
+function deepMergeChildren(structure, withStructure, isReview = false) {
   for (let child of withStructure.children) {
     let existing = structure.children.find(t => t.thisTag.name == child.thisTag.name)
     if (existing) {
-      existing.thisTag.active = true
+      if (!isReview) existing.thisTag.active = true
       deepMergeChildren(existing, child)
     } else {
       structure.children.push(child)
@@ -1285,7 +1293,11 @@ uiElements.reviewAddTagButton.addEventListener("click", async () => {
 
   let t = Object.values(allImplications)[0]
 
+  console.log(t)
+
   let [structure] = unwind(t, null, false)
+
+  console.log(structure)
 
   uiElements.reviewAddTagModal.classList.add("is-active")
 
