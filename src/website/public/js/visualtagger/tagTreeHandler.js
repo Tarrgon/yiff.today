@@ -906,8 +906,9 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
     }
 
     for (let completion of autoComplete) {
-      let a = document.createElement("a")
+      let a = document.createElement("button")
       a.classList.add("dropdown-item", "mb-1")
+      a.style.cursor = "pointer"
       a.style.border = "1px solid black"
 
 
@@ -916,11 +917,33 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
         a.appendChild(span)
         span.innerText = completion.name
+
+        let a2 = document.createElement("a")
+        a2.classList.add("is-underlined", "ml-1")
+        a2.style.cursor = "help"
+        a2.innerText = `?`
+        a2.target = "_blank"
+        a2.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.name}`
+        span.appendChild(a2)
+        a2.addEventListener("click", (e) => {
+          e.stopImmediatePropagation()
+        })
       } else {
         let span = document.createElement("span")
         span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
         a.appendChild(span)
-        span.innerText = `${completion.antecedent_name} `
+        span.innerText = `${completion.antecedent_name}`
+
+        let a2 = document.createElement("a")
+        a2.classList.add("is-underlined", "ml-1", "mr-1")
+        a2.style.cursor = "help"
+        a2.innerText = `?`
+        a2.target = "_blank"
+        a2.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.antecedent_name}`
+        span.appendChild(a2)
+        a2.addEventListener("click", (e) => {
+          e.stopImmediatePropagation()
+        })
 
         let span2 = document.createElement("span")
         span2.classList.add("has-text-light")
@@ -931,6 +954,17 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         span3.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
         a.appendChild(span3)
         span3.innerText = ` ${completion.name}`
+
+        let a3 = document.createElement("a")
+        a3.classList.add("is-underlined", "ml-1")
+        a3.style.cursor = "help"
+        a3.innerText = `?`
+        a3.target = "_blank"
+        a3.href = `https://e621.net/wiki_pages/show_or_new?title=${completion.name}`
+        span3.appendChild(a3)
+        a3.addEventListener("click", (e) => {
+          e.stopImmediatePropagation()
+        })
       }
 
       let span = document.createElement("span")
@@ -939,8 +973,6 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
       a.appendChild(span)
 
       a.addEventListener("click", (e) => {
-        e.preventDefault()
-
         addNewTag(completion.name)
       })
 
