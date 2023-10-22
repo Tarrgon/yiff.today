@@ -893,7 +893,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
           parent.appendChild(createTagTree(struct, 1, true))
 
           if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
-          parent.lastChild.firstChild.firstChild.classList.add("new-tag")
+            parent.lastChild.firstChild.firstChild.classList.add("new-tag")
         }
       }
     } else {
@@ -905,10 +905,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         ul.classList.add("mb-3")
         uiElements.tagContainer.appendChild(ul)
 
+        ul.appendChild(createTagTree(struct, 1, true))
+
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
           ul.firstChild.firstChild.firstChild.classList.add("new-tag")
-
-        ul.appendChild(createTagTree(struct, 1, true))
       } else {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
 
@@ -919,10 +919,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         ul.classList.add("mb-3")
         uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
 
+        ul.appendChild(createTagTree(struct, 1, true))
+
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
           ul.firstChild.firstChild.firstChild.classList.add("new-tag")
-
-        ul.appendChild(createTagTree(struct, 1, true))
       }
     }
   }
