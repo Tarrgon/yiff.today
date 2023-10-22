@@ -565,7 +565,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     summary.classList.add("no-icon")
 
     if (!tagTreeHandler.tags.split(" ").includes(tag.thisTag.name)) {
-      summary.classList.add("is-review-added-tag")
+      summary.classList.add("new-tag")
     } else {
       summary.classList.add("is-review-existing-tag")
     }
@@ -590,12 +590,20 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       }
 
       if (!tagTreeHandler.preventClicks) tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+
+      if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+        summary.classList.remove("new-tag")
+      }
     } else {
       if (!tagTreeHandler.preventClicks) {
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
 
         addNewTag(tag.thisTag.name, false, false)
+
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+          summary.classList.add("new-tag")
+        }
       }
     }
 
@@ -924,6 +932,9 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   ul.appendChild(createTagTree(struct, 1, true))
 
+  if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
+    ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+
   // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
   tagTreeHandler.preventClicks = true
@@ -1240,9 +1251,9 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 uiElements.showCurrentButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
 
-  for (let c of document.querySelectorAll(`.is-review-added-tag`)) {
-    c.classList.remove("is-review-added-tag")
-  }
+  // for (let c of document.querySelectorAll(`.new-tag`)) {
+  //   c.classList.remove("new-tag")
+  // }
 
   tagTreeHandler.preventScroll = true
   uiElements.collapseAllButton.click()
@@ -1293,7 +1304,7 @@ uiElements.showChangedButton.addEventListener("click", () => {
 
   for (let change of newChanges) {
     for (let details of document.querySelectorAll(`[data-tag-name="${change.tag}"]`)) {
-      details.firstChild.classList.add("is-review-added-tag")
+      details.firstChild.classList.add("new-tag")
     }
   }
 
@@ -1303,9 +1314,9 @@ uiElements.showChangedButton.addEventListener("click", () => {
 uiElements.showAllButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
 
-  for (let c of document.querySelectorAll(`.is-review-added-tag`)) {
-    c.classList.remove("is-review-added-tag")
-  }
+  // for (let c of document.querySelectorAll(`.new-tag`)) {
+  //   c.classList.remove("new-tag")
+  // }
 
   tagTreeHandler.preventScroll = true
   tagTreeHandler.preventNewRequests = true
