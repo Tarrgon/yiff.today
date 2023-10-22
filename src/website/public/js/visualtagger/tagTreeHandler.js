@@ -574,6 +574,9 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   } else {
     if (tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && !details.open) {
       summary.classList.add("removed-tag")
+    } 
+    if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+      summary.classList.add("new-tag")
     }
   }
 
