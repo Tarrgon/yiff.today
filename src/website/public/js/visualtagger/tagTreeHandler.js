@@ -544,22 +544,32 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   // return li
 }
 
-function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) {
+function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, isReview = false) {
   if (forceShowButton) {
     tag.thisTag.showedChildren = false
   }
 
   let li = document.createElement("li")
-  if (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren))) li.classList.add("hidden")
+  if (!isReview && (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)))) li.classList.add("hidden")
 
   let details = document.createElement("details")
-  details.open = tag.thisTag.active
+  details.open = isReview || tag.thisTag.active
   details.setAttribute("data-tag-name", tag.thisTag.name)
   li.appendChild(details)
 
   let summary = document.createElement("summary")
   summary.classList.add(`${CATEGORIES[tag.thisTag.category]}-tag-category`, "tag", "px-2")
   details.appendChild(summary)
+
+  if (isReview) {
+    summary.classList.add("no-icon")
+
+    if (!tagTreeHandler.tags.split(" ").includes(tag.thisTag.name)) {
+      summary.classList.add("is-review-added-tag")
+    } else {
+      summary.classList.add("is-review-existing-tag")
+    }
+  }
 
   let handle = (e) => {
     hotkeys.setScope("tagging")
@@ -611,20 +621,22 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
     }
   }
 
-  summary.addEventListener("mousedown", (e) => {
-    if (e.button == 1) {
-      e.stopImmediatePropagation()
-      window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
-    }
-  })
+  if (!isReview) {
+    summary.addEventListener("mousedown", (e) => {
+      if (e.button == 1) {
+        e.stopImmediatePropagation()
+        window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
+      }
+    })
 
-  summary.addEventListener("click", handle)
+    summary.addEventListener("click", handle)
+  }
 
   let p = document.createElement("p")
   p.innerText = toTitle(tag.thisTag.name)
   summary.appendChild(p)
 
-  createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
+  if (!isReview) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
 
   let a = document.createElement("a")
   a.href = `https://e621.net/wiki_pages/show_or_new?title=${tag.thisTag.name}`
@@ -645,27 +657,28 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
     tag.children.sort(childSorter)
 
     for (let child of tag.children) {
-      ul.appendChild(createTagTree(child, depth + 1, forceShowButton, hidden))
+      ul.appendChild(createTagTree(child, depth + 1, forceShowButton, hidden, isReview))
     }
   }
 
-  li.addEventListener("click", (e) => {
-    e.preventDefault()
-    e.stopImmediatePropagation()
+  if (!isReview) {
+    li.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopImmediatePropagation()
 
-    hotkeys.setScope("tagging")
+      hotkeys.setScope("tagging")
 
-    if (details.open) {
-      if (!ul.lastChild) return
+      if (details.open) {
+        if (!ul.lastChild) return
 
-      let lastChild = ul.lastChild.firstChild.firstChild
+        let lastChild = ul.lastChild.firstChild.firstChild
 
-      if (lastChild.classList.contains("hide-implications-button") || lastChild.classList.contains("show-implications-button")) {
-        lastChild.click()
+        if (lastChild.classList.contains("hide-implications-button") || lastChild.classList.contains("show-implications-button")) {
+          lastChild.click()
+        }
       }
-    }
-  })
-
+    })
+  }
 
   return li
 }
@@ -716,9 +729,10 @@ let tagTreeHandler = {
   }
 }
 
-function unwind(current, child, newGroup = {}, addedTags = []) {
+function unwind(current, child, active = true, newGroup = {}, addedTags = []) {
   addedTags.push(current.thisTag.name)
-  current.thisTag.active = true
+  if (active) current.thisTag.active = true
+  else current.thisTag.active = tagTreeHandler.tags.split(" ").includes(current.thisTag.name)
   current.thisTag.fetchedChildren = false
   current.thisTag.showedChildren = false
 
@@ -729,7 +743,7 @@ function unwind(current, child, newGroup = {}, addedTags = []) {
 
   if (current.parents.length > 0) {
     for (let parent of current.parents) {
-      unwind(parent, current, newGroup, addedTags)[0]
+      unwind(parent, current, active, newGroup, addedTags)[0]
     }
   } else {
     newGroup[current.thisTag.name] = {
@@ -865,6 +879,8 @@ async function addNewTag(tag) {
       } else {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
 
+        if (!topLevelAfter) continue
+
         let ul = document.createElement("ul")
         ul.classList.add("tree")
         ul.classList.add("mb-3")
@@ -918,6 +934,16 @@ uiElements.newTagInput.addEventListener("keypress", (e) => {
     addNewTag(uiElements.newTagInput.value)
   }
 })
+
+function updateAutocompleteDropdown() {
+  let item = uiElements.autoCompleteMenu.children.item(currentAutocompleteItem)
+
+  for (let child of uiElements.autoCompleteMenu.children) {
+    child.classList.remove("active")
+  }
+
+  if (item) item.classList.add("active")
+}
 
 let currentAutocompleteItem = -1
 
@@ -1016,7 +1042,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
 
       a.addEventListener("mousedown", (e) => {
         e.preventDefault()
-        
+
         if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
       })
 
@@ -1166,6 +1192,17 @@ uiElements.closeResponseButton.addEventListener("click", () => {
   uiElements.responseModal.classList.remove("is-active")
 })
 
+uiElements.closeReviewAddTagButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+  uiElements.reviewAddTagModal.classList.remove("is-active")
+})
+
+uiElements.reviewTagAddButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+  uiElements.reviewAddTagModal.classList.remove("is-active")
+  addNewTag(tagTreeHandler.reviewingTag)
+})
+
 uiElements.copyTagsButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
   navigator.clipboard.writeText(tagTreeHandler.tags)
@@ -1233,6 +1270,43 @@ uiElements.collapseAllButton.addEventListener("click", () => {
   if (!noScroll) uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
 })
 
+uiElements.reviewAddTagButton.addEventListener("click", async () => {
+  let tag = uiElements.newTagInput.value.trim()
+  uiElements.autoCompleteContainer.classList.remove("is-active")
+  uiElements.newTagInput.value = ""
+  if (tag == "") return
+
+  tagTreeHandler.reviewingTag = tag
+
+  tagTreeHandler.preventScroll = false
+
+  let allImplications = {}
+  await getImplications(tag, allImplications, "allparents")
+
+  let t = Object.values(allImplications)[0]
+
+  let [structure] = unwind(t, null, false)
+
+  uiElements.reviewAddTagModal.classList.add("is-active")
+
+  while (uiElements.reviewTagTreeContainer.firstChild) {
+    uiElements.reviewTagTreeContainer.removeChild(uiElements.reviewTagTreeContainer.firstChild)
+  }
+
+  let asArray = Object.values(structure)
+
+  asArray.sort(childSorter)
+
+  for (let group of asArray) {
+    let ul = document.createElement("ul")
+    ul.classList.add("tree")
+    ul.classList.add("mb-3")
+    uiElements.reviewTagTreeContainer.appendChild(ul)
+
+    ul.appendChild(createTagTree(group, 1, true, false, true))
+  }
+})
+
 hotkeys("enter", "tagging", (e) => {
   e.preventDefault()
   if (!uiElements.reviewChangesModal.classList.contains("is-active")) {
@@ -1252,16 +1326,6 @@ hotkeys("escape", "review", (e) => {
     uiElements.closeResponseButton.click()
   }
 })
-
-function updateAutocompleteDropdown() {
-  let item = uiElements.autoCompleteMenu.children.item(currentAutocompleteItem)
-
-  for (let child of uiElements.autoCompleteMenu.children) {
-    child.classList.remove("active")
-  }
-
-  if (item) item.classList.add("active")
-}
 
 hotkeys("up", "addingnewtag", (e) => {
   e.preventDefault()
@@ -1289,8 +1353,8 @@ hotkeys("enter", "addingnewtag", (e) => {
 })
 
 hotkeys.filter = function (event) {
-  var target = event.target || event.srcElement
-  var tagName = target.tagName
+  let target = event.target || event.srcElement
+  let tagName = target.tagName
   return !(target.isContentEditable || tagName == "SELECT" || tagName == "TEXTAREA")
 }
 

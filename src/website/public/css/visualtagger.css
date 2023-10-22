@@ -170,12 +170,12 @@
   background: no-repeat #ddd url("/img/eye-slash-regular.svg") 0;
 }
 
-.tree summary:not(.show-implications-button, .hide-implications-button)::before {
+.tree summary:not(.no-icon)::before {
   z-index: 1;
   background: #696 url("/img/expand-collapse.svg") 0 0;
 }
 
-.tree details[open]>summary:not(.show-implications-button, .hide-implications-button)::before {
+.tree details[open]>summary:not(.no-icon)::before {
   background: #d73737 url("/img/expand-collapse.svg") 0 0;
   background-position: calc(-2 * var(--radius)) 0;
 }
@@ -218,4 +218,12 @@ button.dropdown-item {
 button.dropdown-item.active {
   background-color: var(--background-color);
   border: 1px solid red !important;
+}
+
+.is-review-added-tag {
+  border: 1px solid lime !important;
+}
+
+.is-review-existing-tag {
+  border: 1px solid yellow !important;
 }
