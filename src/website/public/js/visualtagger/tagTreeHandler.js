@@ -621,14 +621,14 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     }
   }
 
-  if (!isReview) {
-    summary.addEventListener("mousedown", (e) => {
-      if (e.button == 1) {
-        e.stopImmediatePropagation()
-        window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
-      }
-    })
+  summary.addEventListener("mousedown", (e) => {
+    if (e.button == 1) {
+      e.stopImmediatePropagation()
+      window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
+    }
+  })
 
+  if (!isReview) {
     summary.addEventListener("click", handle)
   }
 
@@ -642,6 +642,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   a.href = `https://e621.net/wiki_pages/show_or_new?title=${tag.thisTag.name}`
   a.target = "_blank"
   a.innerText = "?"
+  a.style.cursor = "help"
   a.classList.add("ml-1")
 
   a.addEventListener("click", (e) => {
