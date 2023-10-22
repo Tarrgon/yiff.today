@@ -908,9 +908,11 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
       uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
     }
 
-    for (let completion of autoComplete) {
+    for (let i = 0; i < autoComplete.length; i++) {
+      let completion = autoComplete[i]
       let a = document.createElement("button")
-      a.classList.add("dropdown-item", "mb-1")
+      a.classList.add("dropdown-item")
+      if (i != autoComplete.length - 1) a.classList.add("mb-1")
       a.style.cursor = "pointer"
       a.style.border = "1px solid black"
 
