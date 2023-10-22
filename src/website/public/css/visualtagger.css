@@ -221,9 +221,9 @@ button.dropdown-item.active {
 }
 
 .is-review-added-tag {
-  border: 2px solid lime !important;
+  border: 3px solid rgb(0, 116, 0) !important;
 }
 
 .is-review-existing-tag {
-  border: 2px solid yellow !important;
+  border: 3px solid yellow !important;
 }

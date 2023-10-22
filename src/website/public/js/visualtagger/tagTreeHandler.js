@@ -594,6 +594,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       if (!tagTreeHandler.preventClicks) {
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
+
+        addNewTag(tag.thisTag.name, false, false)
       }
     }
 
@@ -620,8 +622,6 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       }
 
       tagTreeHandler.preventClicks = false
-
-      addNewTag(tag.thisTag.name, false)
     }
   }
 
@@ -829,7 +829,7 @@ function getChanges() {
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
-async function addNewTag(tag, flash = true) {
+async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   e621AutoComplete.queue.length = 0
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
@@ -872,15 +872,15 @@ async function addNewTag(tag, flash = true) {
     let allTags = document.querySelectorAll(`[data-tag-name='${updatedKey}']`)
 
     if (allTags.length > 0) {
-      for (let child of allTags) {
-        let li = child.parentElement
-        let parent = li.parentElement
+      if (replaceExistingTopLevel) {
+        for (let child of allTags) {
+          let li = child.parentElement
+          let parent = li.parentElement
 
-        li.remove()
+          li.remove()
 
-        element = parent
-
-        parent.appendChild(createTagTree(struct, 1, true))
+          parent.appendChild(createTagTree(struct, 1, true))
+        }
       }
     } else {
       let next = orderedKeys.indexOf(updatedKey) + 1
