@@ -565,8 +565,6 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
 
     if (!tagTreeHandler.preventClicks) {
       tag.thisTag.active = !tag.thisTag.active
-
-      console.log(tag)
     }
 
     if (!tag.thisTag.active) {
