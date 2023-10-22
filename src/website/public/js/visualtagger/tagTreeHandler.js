@@ -557,8 +557,14 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   summary.classList.add(`${CATEGORIES[tag.thisTag.category]}-tag-category`, "tag", "px-2")
   details.appendChild(summary)
 
-  summary.addEventListener("click", (e) => {
+  summary.addEventListener("mousedown", (e) => {
     e.stopImmediatePropagation()
+
+    if (e.button == 1) {
+      window.open(`https://e621.net/posts?tags=${tag.thisTag.name}`)
+
+      return
+    }
 
     if (!tagTreeHandler.preventClicks) {
       tag.thisTag.active = !tag.thisTag.active
@@ -640,6 +646,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
     e.stopImmediatePropagation()
 
     if (details.open) {
+      if (!ul.lastChild) return
+
       let lastChild = ul.lastChild.firstChild.firstChild
 
       if (lastChild.classList.contains("hide-implications-button") || lastChild.classList.contains("show-implications-button")) {
