@@ -866,7 +866,7 @@ async function addNewTag(tag) {
 
     ul.appendChild(createTagTree(struct, 1, true))
 
-    ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
   }
 
   tagTreeHandler.preventClicks = true
@@ -883,6 +883,11 @@ async function addNewTag(tag) {
   }
 
   tagTreeHandler.preventClicks = false
+
+  for (let i = 0; i < 6; i++) {
+    uiElements.newTagInput.classList.toggle("has-background-success")
+    await wait(150)
+  }
 }
 
 uiElements.addTagButton.addEventListener("click", async () => {
