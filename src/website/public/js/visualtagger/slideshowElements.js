@@ -35,6 +35,7 @@ let uiElements = {
   submitChangesButton: document.getElementById("submit-changes-button"),
   copyTagsButton: document.getElementById("copy-tags-button"),
   showCurrentButton: document.getElementById("show-current-button"),
+  showChangedButton: document.getElementById("show-changed-button"),
   collapseAllButton: document.getElementById("collapse-all-button"),
   showAllButton: document.getElementById("show-all-button"),
   searchText: document.getElementById("search-text"),

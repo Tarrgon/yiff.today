@@ -589,10 +589,12 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         child.classList.remove("has-active-children")
       }
 
-      tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+      if (!tagTreeHandler.preventClicks) tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
     } else {
-      tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
-      tagTreeHandler.tags = tagTreeHandler.tags.trim()
+      if (!tagTreeHandler.preventClicks) {
+        tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
+        tagTreeHandler.tags = tagTreeHandler.tags.trim()
+      }
     }
 
     if (!tagTreeHandler.preventClicks) {
@@ -618,6 +620,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       }
 
       tagTreeHandler.preventClicks = false
+
+      addNewTag(tag.thisTag.name, false)
     }
   }
 
@@ -825,7 +829,7 @@ function getChanges() {
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
-async function addNewTag(tag) {
+async function addNewTag(tag, flash = true) {
   e621AutoComplete.queue.length = 0
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
@@ -929,9 +933,11 @@ async function addNewTag(tag) {
 
   tagTreeHandler.preventClicks = false
 
-  for (let i = 0; i < 6; i++) {
-    uiElements.newTagInput.classList.toggle("has-background-success")
-    await wait(150)
+  if (flash) {
+    for (let i = 0; i < 6; i++) {
+      uiElements.newTagInput.classList.toggle("has-background-success")
+      await wait(150)
+    }
   }
 }
 
@@ -1226,9 +1232,17 @@ uiElements.copyTagsButton.addEventListener("click", () => {
 uiElements.showCurrentButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
 
+  for (let details of document.querySelectorAll(`.is-review-added-tag`)) {
+    details.firstChild.classList.remove("is-review-added-tag")
+  }
+
   tagTreeHandler.preventScroll = true
   uiElements.collapseAllButton.click()
   tagTreeHandler.preventScroll = false
+
+  for (let ul of document.querySelectorAll("ul.hidden")) {
+    ul.classList.remove("hidden")
+  }
 
   for (let details of document.querySelectorAll(".hidden > details[open]")) {
     details.parentElement.classList.remove("hidden")
@@ -1239,11 +1253,58 @@ uiElements.showCurrentButton.addEventListener("click", () => {
   }
 })
 
-uiElements.showAllButton.addEventListener("click", () => {
+uiElements.showChangedButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
+
+  uiElements.showCurrentButton.click()
 
   tagTreeHandler.preventScroll = true
   tagTreeHandler.preventNewRequests = true
+
+  let newChanges = getChanges().filter(t => t.change == 1)
+
+  let toHide = Object.keys(tagTreeHandler.currentStructure)
+
+  for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
+    for (let newTag of newChanges) {
+      if (newTag.tag != tagName) {
+        let existing = findChildInStructure({ [tagName]: structure }, newTag.tag)
+
+        if (existing) {
+          toHide.splice(toHide.indexOf(tagName), 1)
+        }
+      }
+    }
+  }
+
+  for (let tagName of toHide) {
+    for (let details of document.querySelectorAll(`.tree > li > [data-tag-name='${tagName}']`)) {
+      details.parentElement.parentElement.classList.add("hidden")
+    }
+  }
+
+  for (let change of newChanges) {
+    for (let details of document.querySelectorAll(`[data-tag-name="${change.tag}"]`)) {
+      details.firstChild.classList.add("is-review-added-tag")
+    }
+  }
+
+  tagTreeHandler.preventNewRequests = false
+})
+
+uiElements.showAllButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+
+  for (let details of document.querySelectorAll(`.is-review-added-tag`)) {
+    details.firstChild.classList.remove("is-review-added-tag")
+  }
+
+  tagTreeHandler.preventScroll = true
+  tagTreeHandler.preventNewRequests = true
+
+  for (let ul of document.querySelectorAll("ul.hidden")) {
+    ul.classList.remove("hidden")
+  }
 
   for (let button of document.querySelectorAll(".show-implications-button:not(.hidden)")) {
     button.click()
