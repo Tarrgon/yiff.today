@@ -25,6 +25,8 @@ let uiElements = {
   tagContainer: document.getElementById("tag-container"),
   newTagInput: document.getElementById("new-tag-input"),
   addTagButton: document.getElementById("add-tag-button"),
+  autoCompleteContainer: document.getElementById("autocomplete-dropdown-container"),
+  autoCompleteMenu: document.getElementById("autocomplete-menu"),
   submitChangesButton: document.getElementById("submit-changes-button"),
   copyTagsButton: document.getElementById("copy-tags-button"),
   showCurrentButton: document.getElementById("show-current-button"),

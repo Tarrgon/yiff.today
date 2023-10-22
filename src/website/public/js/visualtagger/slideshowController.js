@@ -897,6 +897,10 @@ let slideshowController = {
     slideshowController.searchText = searchText
     let slides = await e621Requester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
 
+    if (slides.length == 0) {
+      slideshowController.displayInfoMessage("No posts found")
+    }
+
     slideshowController.slides = slides.filter(slideFilter)
     slideshowController.setCurrentSlideNumber(0)
 

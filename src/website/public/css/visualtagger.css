@@ -43,6 +43,38 @@
   color: white !important;
 }
 
+.general-tag-color {
+  color: #b4c7d9 !important;
+}
+
+.artist-tag-color {
+  color: #f2ac08 !important;
+}
+
+.copyright-tag-color {
+  color: #d0d !important;
+}
+
+.character-tag-color {
+  color: #0a0 !important;
+}
+
+.species-tag-color {
+  color: #ed5d1f !important;
+}
+
+.invalid-tag-color {
+  color: #ff3d3d !important;
+}
+
+.meta-tag-color {
+  color: #fff !important;
+}
+
+.lore-tag-color {
+  color: #282 !important;
+}
+
 .tag a {
   color: inherit;
   text-decoration: underline;
@@ -168,4 +200,13 @@ ul {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+#autocomplete-menu {
+  background-color: var(--background-color);
+}
+
+a.dropdown-item:hover {
+  background-color: var(--background-color);
+  border: 1px solid red !important;
 }

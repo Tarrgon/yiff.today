@@ -74,7 +74,15 @@
         <div class="column is-6 is-12-touch">
           <div class="field has-addons">
             <div class="control">
-              <input id="new-tag-input" class="input" type="text" placeholder="Add a tag">
+              <div class="dropdown" id="autocomplete-dropdown-container">
+                <div class="dropdown-trigger">
+                  <input id="new-tag-input" class="input" type="text" placeholder="Add a tag">
+                </div>
+                <div class="dropdown-menu" role="menu">
+                  <div class="dropdown-content" id="autocomplete-menu"></div>
+                </div>
+              </div>
+
             </div>
             <div class="control">
               <button id="add-tag-button" class="button is-success">
@@ -238,6 +246,7 @@
   <script src="/js/visualtagger/slideshowElements.js"></script>
   <script src="/js/Slide.js"></script>
   <script src="/js/E621Requester.js"></script>
+  <script src="/js/e621AutoCompleter.js"></script>
   <script src="/js/dataHandler.js"></script>
   <script src="/js/visualtagger/e621LoginHandler.js"></script>
   <script src="/js/filterHandler.js"></script>

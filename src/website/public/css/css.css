@@ -125,7 +125,6 @@ button:disabled {
   position: relative;
   display: absolute;
   text-align: center;
-  overflow: hidden;
   clear: both;
   /*padding:0px 50px 10px 50px;*/
 }

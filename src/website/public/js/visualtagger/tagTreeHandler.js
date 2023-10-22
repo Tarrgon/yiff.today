@@ -759,6 +759,7 @@ function getChanges() {
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
 async function addNewTag(tag) {
+  uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
   if (tag.trim() == "") return
 
@@ -797,8 +798,6 @@ async function addNewTag(tag) {
     }
     return a.localeCompare(b)
   })
-
-  let element
 
   for (let updatedKey of Object.keys(structure)) {
     let struct = findChildInStructure(tagTreeHandler.currentStructure, updatedKey)
@@ -873,6 +872,59 @@ uiElements.addTagButton.addEventListener("click", async () => {
 uiElements.newTagInput.addEventListener("keypress", (e) => {
   if (e.key == "Enter") {
     addNewTag(uiElements.newTagInput.value)
+  }
+})
+
+uiElements.newTagInput.addEventListener("input", async (e) => {
+  if (uiElements.newTagInput.value.length >= 3) {
+    let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
+    uiElements.autoCompleteContainer.classList.add("is-active")
+
+    while (uiElements.autoCompleteMenu.firstChild) {
+      uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
+    }
+
+    for (let completion of autoComplete) {
+      let a = document.createElement("a")
+      a.classList.add("dropdown-item", "mb-1")
+      a.style.border = "1px solid black"
+
+
+      if (!completion.antecedent_name) {
+        let span = document.createElement("span")
+        span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+        a.appendChild(span)
+        span.innerText = completion.name
+      } else {
+        let span = document.createElement("span")
+        span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+        a.appendChild(span)
+        span.innerText = `${completion.antecedent_name} `
+
+        let span2 = document.createElement("span")
+        span2.classList.add("has-text-light")
+        a.appendChild(span2)
+        span2.innerHTML = `&rarr;`
+
+        let span3 = document.createElement("span")
+        span3.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+        a.appendChild(span3)
+        span3.innerText = ` ${completion.name}`
+      }
+
+      let span = document.createElement("span")
+      span.classList.add("has-text-light")
+      span.innerText = ` (${completion.post_count})`
+      a.appendChild(span)
+
+      a.addEventListener("click", (e) => {
+        e.preventDefault()
+
+        addNewTag(completion.name)
+      })
+
+      uiElements.autoCompleteMenu.appendChild(a)
+    }
   }
 })
 
