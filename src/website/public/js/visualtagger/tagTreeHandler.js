@@ -826,6 +826,7 @@ function getChanges() {
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
 async function addNewTag(tag) {
+  e621AutoComplete.queue.length = 0
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
   if (tag.trim() == "") return
@@ -955,6 +956,10 @@ function updateAutocompleteDropdown() {
 }
 
 let currentAutocompleteItem = -1
+
+uiElements.searchText.addEventListener("focus", () => {
+  hotkeys.setScope("searching")
+})
 
 uiElements.newTagInput.addEventListener("focus", () => {
   currentAutocompleteItem = -1
