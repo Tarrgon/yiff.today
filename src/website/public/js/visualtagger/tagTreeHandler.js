@@ -909,10 +909,18 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
 
+  let existing = document.querySelector(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.trim()}']`)
+
+  let after = null
+
+  if (existing) {
+    after = existing.parentElement.parentElement.nextSibling
+    existing.parentElement.parentElement.remove()
+  }
+
   let ul = document.createElement("ul")
-  ul.classList.add("tree")
-  ul.classList.add("mb-3")
-  uiElements.tagContainer.appendChild(ul)
+  ul.classList.add("tree", "mb-3", "added-tag")
+  uiElements.tagContainer.insertBefore(ul, after)
 
   ul.appendChild(createTagTree(struct, 1, true))
 
