@@ -593,8 +593,11 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
         summary.classList.remove("new-tag")
+      } else {
+        summary.classList.add("removed-tag")
       }
     } else {
+      summary.classList.remove("removed-tag")
       if (!tagTreeHandler.preventClicks) {
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
@@ -620,7 +623,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
         if (anyActive) {
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
-            c.classList.add("has-active-children")
+            if (!c.parentElement.open) c.classList.add("has-active-children")
           }
         } else {
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {

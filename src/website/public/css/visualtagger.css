@@ -224,6 +224,10 @@ button.dropdown-item.active {
   border: 4.5px solid rgb(0, 116, 0) !important;
 }
 
+.removed-tag {
+  border: 4.5px solid red !important;
+}
+
 .is-review-existing-tag {
   border: 4.5px solid yellow !important;
 }
