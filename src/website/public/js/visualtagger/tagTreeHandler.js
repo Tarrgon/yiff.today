@@ -603,10 +603,10 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
 
         addNewTag(tag.thisTag.name, false, false)
+      }
 
-        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
-          summary.classList.add("new-tag")
-        }
+      if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+        summary.classList.add("new-tag")
       }
     }
 
@@ -958,6 +958,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
       if (!child.open) {
         child.firstChild.click()
         child.open = true
+      }
+
+      if (!tagTreeHandler.unchangedTags.split(" ").includes(tag)) {
+        child.firstChild.classList.add("new-tag")
       }
     }
   }
