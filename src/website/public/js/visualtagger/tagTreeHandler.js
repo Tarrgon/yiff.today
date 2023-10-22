@@ -575,7 +575,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     if (tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && !details.open) {
       summary.classList.add("removed-tag")
     } 
-    if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+
+    if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && details.open) {
       summary.classList.add("new-tag")
     }
   }
@@ -583,11 +584,9 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   let handle = (e) => {
     hotkeys.setScope("tagging")
 
-    if (!tagTreeHandler.preventClicks) {
-      tag.thisTag.active = !tag.thisTag.active
-    }
+    summary.parentElement.open = !summary.parentElement.open
 
-    summary.parentElement.open = tag.thisTag.active
+    tag.thisTag.active = summary.parentElement.open
 
     if (!tag.thisTag.active) {
       for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
@@ -611,7 +610,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
 
-        addNewTag(tag.thisTag.name, false, false)
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) addNewTag(tag.thisTag.name, false, false)
       }
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
@@ -1304,7 +1303,7 @@ uiElements.showChangedButton.addEventListener("click", () => {
 
   let newChanges = getChanges().filter(t => t.change == 1)
 
-  let toHide = Object.keys(tagTreeHandler.currentStructure)
+  let toHide = Array.from(document.querySelectorAll(`.tree.mb-3 > li > [data-tag-name]`)).map(c => c.getAttribute("data-tag-name"))
 
   for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
     for (let newTag of newChanges) {
@@ -1314,6 +1313,8 @@ uiElements.showChangedButton.addEventListener("click", () => {
         if (existing) {
           toHide.splice(toHide.indexOf(tagName), 1)
         }
+      } else {
+        toHide.splice(toHide.indexOf(tagName), 1)
       }
     }
   }
