@@ -569,6 +569,10 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     } else {
       summary.classList.add("is-review-existing-tag")
     }
+  } else {
+    if (tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && !details.open) {
+      summary.classList.add("removed-tag")
+    }
   }
 
   let handle = (e) => {
