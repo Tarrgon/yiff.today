@@ -227,7 +227,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     e.preventDefault()
     e.stopImmediatePropagation()
 
-    tagTreeHandler.preventScroll = false
+    if (!relatedList) relatedList = parentDetails.lastChild
 
     for (let child of relatedList.children) {
       child.classList.add("hidden")
@@ -237,7 +237,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
 
     // let li = reparent(parent, showButton)
 
-    if (isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
     if (!parentGroup.thisTag.showedChildren) {
       searchButton.classList.remove("hidden")
@@ -331,8 +331,6 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
 
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
-
-    console.log(tagName)
 
     realStructure.children = (realStructure.children || []).concat(structure[tagName].children).filter((c, i, arr) => arr.findIndex(a => a.thisTag.name == c.thisTag.name) == i)
 
@@ -552,7 +550,6 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
 
   let details = document.createElement("details")
   details.open = tag.thisTag.active
-  console.log(tag)
   details.setAttribute("data-tag-name", tag.thisTag.name)
   li.appendChild(details)
 
@@ -1130,7 +1127,7 @@ uiElements.showAllButton.addEventListener("click", () => {
   tagTreeHandler.preventScroll = true
   tagTreeHandler.preventNewRequests = true
 
-  for (let button of document.querySelectorAll(".show-implications-button")) {
+  for (let button of document.querySelectorAll(".show-implications-button:not(.hidden)")) {
     button.click()
   }
 
