@@ -224,6 +224,8 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   let relatedList = null
 
   let collapse = (e) => {
+    hotkeys.setScope("tagging")
+
     e.preventDefault()
     e.stopImmediatePropagation()
 
@@ -257,6 +259,8 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   }
 
   let expand = async (e) => {
+    hotkeys.setScope("tagging")
+
     e.preventDefault()
     e.stopImmediatePropagation()
     if (!relatedList) relatedList = parentDetails.lastChild
@@ -558,6 +562,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   details.appendChild(summary)
 
   let handle = (e) => {
+    hotkeys.setScope("tagging")
+
     if (!tagTreeHandler.preventClicks) {
       tag.thisTag.active = !tag.thisTag.active
     }
@@ -625,6 +631,11 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   a.target = "_blank"
   a.innerText = "?"
   a.classList.add("ml-1")
+
+  a.addEventListener("click", (e) => {
+    e.stopImmediatePropagation()
+  })
+
   p.appendChild(a)
 
   let ul = document.createElement("ul")
@@ -641,6 +652,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false) 
   li.addEventListener("click", (e) => {
     e.preventDefault()
     e.stopImmediatePropagation()
+
+    hotkeys.setScope("tagging")
 
     if (details.open) {
       if (!ul.lastChild) return
@@ -750,6 +763,8 @@ function getChanges() {
   let tagsBefore = tagTreeHandler.unchangedTags.split(" ")
 
   for (let tag of tagsNow) {
+    if (tag.trim() == "") continue
+
     if (tagsBefore.includes(tag)) {
       changes.push({ tag, change: 0 })
     } else {
@@ -758,6 +773,8 @@ function getChanges() {
   }
 
   for (let tag of tagsBefore) {
+    if (tag.trim() == "") continue
+
     if (!tagsNow.includes(tag)) {
       changes.push({ tag, change: -1 })
     }
@@ -884,6 +901,8 @@ async function addNewTag(tag) {
 
   tagTreeHandler.preventClicks = false
 
+  hotkeys.setScope("tagging")
+
   for (let i = 0; i < 6; i++) {
     uiElements.newTagInput.classList.toggle("has-background-success")
     await wait(150)
@@ -900,7 +919,23 @@ uiElements.newTagInput.addEventListener("keypress", (e) => {
   }
 })
 
+let currentAutocompleteItem = -1
+
+uiElements.newTagInput.addEventListener("focus", () => {
+  currentAutocompleteItem = -1
+  updateAutocompleteDropdown()
+  hotkeys.setScope("addingnewtag")
+})
+
+uiElements.newTagInput.addEventListener("focusout", () => {
+  currentAutocompleteItem = -1
+  updateAutocompleteDropdown()
+  hotkeys.setScope("tagging")
+})
+
 uiElements.newTagInput.addEventListener("input", async (e) => {
+  currentAutocompleteItem = -1
+  updateAutocompleteDropdown()
   if (uiElements.newTagInput.value.length >= 3) {
     let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
     if (uiElements.newTagInput.value.length < 3) return // Async hell
@@ -981,9 +1016,19 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
 
       a.addEventListener("mousedown", (e) => {
         e.preventDefault()
+        
+        if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
+      })
+
+      a.addEventListener("click", (e) => {
+        e.preventDefault()
 
         if (e.button == 0) addNewTag(completion.name)
-        else if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
+      })
+
+      a.addEventListener("mouseover", (e) => {
+        currentAutocompleteItem = Array.from(uiElements.autoCompleteMenu.children).findIndex(x => x == a)
+        updateAutocompleteDropdown()
       })
 
       uiElements.autoCompleteMenu.appendChild(a)
@@ -994,6 +1039,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
 })
 
 uiElements.submitChangesButton.addEventListener("click", () => {
+  hotkeys.setScope("review")
   uiElements.reviewChangesModal.classList.add("is-active")
 
   while (uiElements.tagChangesReview.firstChild) {
@@ -1038,6 +1084,8 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
   if (tagTreeHandler.lock) return
   tagTreeHandler.lock = true
 
+  hotkeys.setScope("review")
+
   let changes = getChanges().filter(t => t.change != 0)
 
   let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
@@ -1080,6 +1128,8 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 })
 
 function showLoadingScreen() {
+  hotkeys.setScope("review")
+
   uiElements.responseText.innerText = "Loading"
 
   uiElements.responseModal.classList.add("is-active")
@@ -1087,6 +1137,8 @@ function showLoadingScreen() {
 }
 
 function showSuccessScreen() {
+  hotkeys.setScope("review")
+
   uiElements.responseText.innerText = "Success"
 
   uiElements.responseModal.classList.add("is-active")
@@ -1095,6 +1147,8 @@ function showSuccessScreen() {
 }
 
 function showFailureScreen(status) {
+  hotkeys.setScope("review")
+
   uiElements.responseText.innerText = `Failure (${status})`
 
   uiElements.responseModal.classList.add("is-active")
@@ -1103,18 +1157,23 @@ function showFailureScreen(status) {
 }
 
 uiElements.closeReviewButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
   uiElements.reviewChangesModal.classList.remove("is-active")
 })
 
 uiElements.closeResponseButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
   uiElements.responseModal.classList.remove("is-active")
 })
 
 uiElements.copyTagsButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
   navigator.clipboard.writeText(tagTreeHandler.tags)
 })
 
 uiElements.showCurrentButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+
   tagTreeHandler.preventScroll = true
   uiElements.collapseAllButton.click()
   tagTreeHandler.preventScroll = false
@@ -1129,6 +1188,8 @@ uiElements.showCurrentButton.addEventListener("click", () => {
 })
 
 uiElements.showAllButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+
   tagTreeHandler.preventScroll = true
   tagTreeHandler.preventNewRequests = true
 
@@ -1144,6 +1205,8 @@ uiElements.showAllButton.addEventListener("click", () => {
 })
 
 uiElements.collapseAllButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+
   let noScroll = tagTreeHandler.preventScroll
   tagTreeHandler.preventScroll = true
 
@@ -1170,7 +1233,7 @@ uiElements.collapseAllButton.addEventListener("click", () => {
   if (!noScroll) uiElements.tagContainer.scroll({ behavior: "smooth", top: 0 })
 })
 
-hotkeys("enter", (e) => {
+hotkeys("enter", "tagging", (e) => {
   e.preventDefault()
   if (!uiElements.reviewChangesModal.classList.contains("is-active")) {
     uiElements.submitChangesButton.click()
@@ -1179,7 +1242,7 @@ hotkeys("enter", (e) => {
   }*/
 })
 
-hotkeys("escape", (e) => {
+hotkeys("escape", "review", (e) => {
   e.preventDefault()
   if (uiElements.reviewChangesModal.classList.contains("is-active")) {
     uiElements.closeReviewButton.click()
@@ -1189,3 +1252,46 @@ hotkeys("escape", (e) => {
     uiElements.closeResponseButton.click()
   }
 })
+
+function updateAutocompleteDropdown() {
+  let item = uiElements.autoCompleteMenu.children.item(currentAutocompleteItem)
+
+  for (let child of uiElements.autoCompleteMenu.children) {
+    child.classList.remove("active")
+  }
+
+  if (item) item.classList.add("active")
+}
+
+hotkeys("up", "addingnewtag", (e) => {
+  e.preventDefault()
+
+  currentAutocompleteItem = Math.max(-1, currentAutocompleteItem - 1)
+
+  updateAutocompleteDropdown()
+})
+
+hotkeys("down", "addingnewtag", (e) => {
+  e.preventDefault()
+
+  currentAutocompleteItem = Math.min(uiElements.autoCompleteMenu.children.length - 1, currentAutocompleteItem + 1)
+
+  updateAutocompleteDropdown()
+})
+
+hotkeys("enter", "addingnewtag", (e) => {
+  let item = uiElements.autoCompleteMenu.children.item(currentAutocompleteItem)
+
+  if (item) {
+    e.preventDefault()
+    item.click()
+  }
+})
+
+hotkeys.filter = function (event) {
+  var target = event.target || event.srcElement
+  var tagName = target.tagName
+  return !(target.isContentEditable || tagName == "SELECT" || tagName == "TEXTAREA")
+}
+
+hotkeys.setScope("tagging")

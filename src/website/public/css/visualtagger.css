@@ -210,7 +210,12 @@ button.dropdown-item {
   background-color: transparent;
 }
 
-button.dropdown-item:hover {
+/* button.dropdown-item:hover {
+  background-color: var(--background-color);
+  border: 1px solid red !important;
+} */
+
+button.dropdown-item.active {
   background-color: var(--background-color);
   border: 1px solid red !important;
 }
