@@ -91,10 +91,12 @@ function findChildInStructure(structure, name) {
 function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   if (Object.entries(unresolvedImplications).length == 0) return structure
 
+  let splitTags = tags.split(" ")
+
   for (let [tagName, implications] of Object.entries(unresolvedImplications).toSorted((a, b) => a[1].parents.length - b[1].parents.length)) {
     implications.thisTag.showedChildren = false
     if (implications.parents.length == 0) {
-      implications.thisTag.active = tags.includes(implications.thisTag.name)
+      implications.thisTag.active = splitTags.includes(implications.thisTag.name)
       implications.thisTag.fetchedChildren = false
       let imps = {
         parents: [],
@@ -102,7 +104,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
       }
 
       imps.children = implications.children.map(imp => {
-        imp.active = tags.includes(imp.name)
+        imp.active = splitTags.includes(imp.name)
         return {
           parents: [imps],
           children: [],
@@ -129,7 +131,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
           let index = thisParent.children.findIndex(c => c.thisTag.id == implications.thisTag.id)
 
           if (index == -1) {
-            implications.thisTag.active = tags.includes(implications.thisTag.name)
+            implications.thisTag.active = splitTags.includes(implications.thisTag.name)
             thisParent.children.push({
               parents: [thisParent],
               children: [],
@@ -610,6 +612,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       }
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+        console.log("new tag")
         summary.classList.add("new-tag")
       }
     }
