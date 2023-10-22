@@ -612,7 +612,6 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       }
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
-        console.log("new tag")
         summary.classList.add("new-tag")
       }
     }
@@ -898,9 +897,6 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
           li.remove()
 
           parent.appendChild(createTagTree(struct, 1, true))
-
-          if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
-            parent.lastChild.firstChild.firstChild.classList.add("new-tag")
         }
       }
     } else {
