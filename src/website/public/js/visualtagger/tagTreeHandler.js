@@ -1024,9 +1024,9 @@ function createWikiLink(tagName, classes) {
     e.stopImmediatePropagation()
   })
 
-  a.addEventListener("mouseover", (e) => {
-    console.log(e)
-  })
+  // a.addEventListener("mouseover", (e) => {
+  //   console.log(e)
+  // })
 
   return a
 }
