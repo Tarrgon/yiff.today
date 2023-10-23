@@ -668,7 +668,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   a.style.cursor = "help"
   a.classList.add("ml-1")
 
-  a.addEventListener("click", (e) => {
+  a.addEventListener("mousedown", (e) => {
     e.stopImmediatePropagation()
   })
 
