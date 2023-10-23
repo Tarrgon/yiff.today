@@ -31,6 +31,7 @@ function childSorter(a, b) {
   if (startingDigitsA && startingDigitsB) {
     return parseInt(startingDigitsA[0]) - parseInt(startingDigitsB[0])
   }
+
   return a.thisTag.name.localeCompare(b.thisTag.name)
 }
 
@@ -1297,10 +1298,18 @@ uiElements.showChangedButton.addEventListener("click", () => {
         let existing = findChildInStructure({ [tagName]: structure }, newTag.tag)
 
         if (existing) {
-          toHide.splice(toHide.indexOf(tagName), 1)
+          let index = toHide.indexOf(tagName)
+          while (index != -1) {
+            toHide.splice(index, 1)
+            index = toHide.indexOf(tagName)
+          }
         }
       } else {
-        toHide.splice(toHide.indexOf(tagName), 1)
+        let index = toHide.indexOf(tagName)
+        while (index != -1) {
+          toHide.splice(index, 1)
+          index = toHide.indexOf(tagName)
+        }
       }
     }
   }
@@ -1309,6 +1318,10 @@ uiElements.showChangedButton.addEventListener("click", () => {
     for (let details of document.querySelectorAll(`.tree > li > [data-tag-name='${tagName}']`)) {
       details.parentElement.parentElement.classList.add("hidden")
     }
+  }
+
+  for (let ul of document.querySelectorAll(`.tree.added-tag`)) {
+    ul.classList.add("hidden")
   }
 
   for (let change of newChanges) {
@@ -1403,8 +1416,7 @@ uiElements.reviewAddTagButton.addEventListener("click", async () => {
 
   for (let group of asArray) {
     let ul = document.createElement("ul")
-    ul.classList.add("tree")
-    ul.classList.add("mb-3")
+    ul.classList.add("tree", "mb-3")
     uiElements.reviewTagTreeContainer.appendChild(ul)
 
     ul.appendChild(createTagTree(group, 1, true, false, true))
