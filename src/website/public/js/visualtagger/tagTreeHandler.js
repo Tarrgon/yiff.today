@@ -241,7 +241,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
 
     // let li = reparent(parent, showButton)
 
-    if (!tagTreeHandler.preventScroll && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (!tagTreeHandler.preventScroll && relatedList.lastChild && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
     if (!parentGroup.thisTag.showedChildren) {
       searchButton.classList.remove("hidden")
@@ -574,7 +574,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   } else {
     if (tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && !details.open) {
       summary.classList.add("removed-tag")
-    } 
+    }
 
     if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name) && details.open) {
       summary.classList.add("new-tag")
@@ -675,6 +675,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   p.appendChild(a)
 
   let ul = document.createElement("ul")
+  ul.classList.add("tag-tree-list-container")
   details.append(ul)
 
   if (tag.children.length > 0) {
@@ -685,24 +686,21 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     }
   }
 
-  if (!isReview) {
-    li.addEventListener("click", (e) => {
-      e.preventDefault()
-      e.stopImmediatePropagation()
+  // if (!isReview) {
+  //   li.addEventListener("click", (e) => {
+  //     e.preventDefault()
+  //     e.stopImmediatePropagation()
 
-      hotkeys.setScope("tagging")
+  //     hotkeys.setScope("tagging")
 
-      if (details.open) {
-        if (!ul.lastChild) return
-
-        let lastChild = ul.lastChild.firstChild.firstChild
-
-        if (lastChild.classList.contains("hide-implications-button") || lastChild.classList.contains("show-implications-button")) {
-          lastChild.click()
-        }
-      }
-    })
-  }
+  //     if (details.open) {
+  //       let collapse = details.querySelector(".hide-implications-button")
+  //       if (collapse) {
+  //         collapse.click()
+  //       }
+  //     }
+  //   })
+  // }
 
   return li
 }
@@ -743,8 +741,7 @@ let tagTreeHandler = {
 
       for (let group of asArray) {
         let ul = document.createElement("ul")
-        ul.classList.add("tree")
-        ul.classList.add("mb-3")
+        ul.classList.add("tree", "mb-3")
         uiElements.tagContainer.appendChild(ul)
 
         ul.appendChild(createTagTree(group, 1, true))
@@ -1477,3 +1474,27 @@ hotkeys.filter = function (event) {
 }
 
 hotkeys.setScope("tagging")
+
+window.addEventListener("mousedown", (e) => {
+  let all = document.querySelectorAll(".tag-tree-list-container")
+
+  for (let list of all) {
+    let bound = list.getBoundingClientRect()
+    // - 10 for feathering + 12 for 2px border width + feathering
+    if ((e.clientX >= bound.x - 10 && e.clientX <= bound.x + 12) &&
+      (e.clientY >= bound.y - 10 && e.clientY <= bound.y + bound.height)) {
+      let details = list.parentElement
+      e.preventDefault()
+      e.stopImmediatePropagation()
+
+      hotkeys.setScope("tagging")
+
+      if (details.open) {
+        let collapse = details.querySelector(".hide-implications-button")
+        if (collapse) {
+          collapse.click()
+        }
+      }
+    }
+  }
+})
