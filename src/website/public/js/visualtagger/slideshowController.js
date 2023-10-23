@@ -1031,3 +1031,7 @@ document.addEventListener("keydown", (e) => {
       slideshowController.playVideo()
   }
 })
+
+uiElements.currentImage.addEventListener("click", () => {
+  slideshowController.openCurrentSlide()
+})
