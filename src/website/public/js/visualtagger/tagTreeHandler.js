@@ -1001,27 +1001,27 @@ function updateAutocompleteDropdown() {
   if (item) item.classList.add("active")
 }
 
-let currentAutocompleteItem = -1
+let currentAutocompleteItem = 0
 
 uiElements.searchText.addEventListener("focus", () => {
   hotkeys.setScope("searching")
 })
 
 uiElements.newTagInput.addEventListener("focus", () => {
-  currentAutocompleteItem = -1
+  currentAutocompleteItem = 0
   updateAutocompleteDropdown()
   hotkeys.setScope("addingnewtag")
 })
 
 uiElements.newTagInput.addEventListener("focusout", () => {
-  currentAutocompleteItem = -1
+  currentAutocompleteItem = 0
   updateAutocompleteDropdown()
   hotkeys.setScope("tagging")
 })
 
 uiElements.newTagInput.addEventListener("input", async (e) => {
   hotkeys.setScope("addingnewtag")
-  currentAutocompleteItem = -1
+  currentAutocompleteItem = 0
   updateAutocompleteDropdown()
   if (uiElements.newTagInput.value.length >= 3) {
     let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
