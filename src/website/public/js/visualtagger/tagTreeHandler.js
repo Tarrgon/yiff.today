@@ -554,6 +554,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   let li = document.createElement("li")
   if (!isReview && (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)))) li.classList.add("hidden")
 
+  tag.thisTag.active = tagTreeHandler.tags.split(" ").includes(tag.thisTag.name)
+
   let details = document.createElement("details")
   details.open = isReview || tag.thisTag.active
   details.setAttribute("data-tag-name", tag.thisTag.name)
@@ -582,11 +584,12 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   }
 
   let handle = (e) => {
+    e.preventDefault()
     hotkeys.setScope("tagging")
 
-    summary.parentElement.open = !summary.parentElement.open
+    details.open = !details.open
 
-    tag.thisTag.active = summary.parentElement.open
+    tag.thisTag.active = details.open
 
     if (!tag.thisTag.active) {
       for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
@@ -1495,6 +1498,8 @@ window.addEventListener("mousedown", (e) => {
           collapse.click()
         }
       }
+
+      return
     }
   }
 })
