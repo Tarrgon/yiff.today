@@ -920,22 +920,18 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
         ul.appendChild(createTagTree(struct, 1, true))
 
-        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
-          ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       } else {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
-
-        if (!topLevelAfter) continue
 
         let ul = document.createElement("ul")
         ul.classList.add("tree")
         ul.classList.add("mb-3")
-        uiElements.tagContainer.insertBefore(ul, topLevelAfter.parentElement.parentElement)
+        uiElements.tagContainer.insertBefore(ul, topLevelAfter?.parentElement?.parentElement)
 
         ul.appendChild(createTagTree(struct, 1, true))
 
-        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
-          ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       }
     }
   }
