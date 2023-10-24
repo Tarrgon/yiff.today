@@ -607,6 +607,28 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       } else {
         summary.classList.add("removed-tag")
       }
+
+      // if (li.parentElement.parentElement?.firstChild?.classList?.contains("added-via-implication")) {
+      //   if (li.parentElement.parentElement.querySelectorAll(":scope > ul > li > details[open]").length == 0) {
+      //     li.parentElement.parentElement.firstChild.click()
+      //     let tagName = li.parentElement.parentElement.getAttribute("data-tag-name")
+
+      //     for (let [topLevelTagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
+      //       if (tagName == topLevelTagName) {
+      //         tagTreeHandler.currentStructure[topLevelTagName].thisTag.active = false
+      //         break
+      //       } else {
+      //         let s = findChildInStructure({ [tagName]: structure }, tagName)
+      //         if (s) {
+      //           s.thisTag.active = false
+      //         }
+      //       }
+      //     }
+
+      //     tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tagName).trim()
+      //     li.parentElement.parentElement.parentElement.parentElement.remove()
+      //   }
+      // }
     } else {
       summary.classList.remove("removed-tag")
       if (!tagTreeHandler.preventClicks) {
@@ -639,13 +661,15 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
         child.firstChild.click()
 
-        if (anyActive) {
-          for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
-            c.classList.add("has-active-children")
-          }
-        } else {
-          for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
-            c.classList.remove("has-active-children")
+        if (child.parentElement.parentElement.parentElement) {
+          if (anyActive) {
+            for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
+              c.classList.add("has-active-children")
+            }
+          } else {
+            for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
+              c.classList.remove("has-active-children")
+            }
           }
         }
       }
@@ -957,8 +981,8 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   tagTreeHandler.preventClicks = true
 
-  for (let tag of addedTags) {
-    let allTags = document.querySelectorAll(`[data-tag-name='${tag}']`)
+  for (let addedTag of addedTags) {
+    let allTags = document.querySelectorAll(`[data-tag-name='${addedTag}']`)
 
     for (let child of allTags) {
       if (!child.open) {
@@ -966,8 +990,12 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         child.open = true
       }
 
-      if (!tagTreeHandler.unchangedTags.split(" ").includes(tag)) {
+      if (!tagTreeHandler.unchangedTags.split(" ").includes(addedTag)) {
         child.firstChild.classList.add("new-tag")
+
+        // if (tag != addedTag) {
+        //   child.firstChild.classList.add("added-via-implication")
+        // }
       }
     }
   }
