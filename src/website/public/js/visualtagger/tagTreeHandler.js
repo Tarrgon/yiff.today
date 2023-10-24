@@ -991,20 +991,20 @@ function updateAutocompleteDropdown() {
   if (item) item.classList.add("active")
 }
 
-let currentAutocompleteItem = 0
+let currentAutocompleteItem = -1
 
 uiElements.searchText.addEventListener("focus", () => {
   hotkeys.setScope("searching")
 })
 
 uiElements.newTagInput.addEventListener("focus", () => {
-  currentAutocompleteItem = 0
+  currentAutocompleteItem = -1
   updateAutocompleteDropdown()
   hotkeys.setScope("addingnewtag")
 })
 
 uiElements.newTagInput.addEventListener("focusout", () => {
-  currentAutocompleteItem = 0
+  currentAutocompleteItem = -1
   updateAutocompleteDropdown()
   hotkeys.setScope("tagging")
 })
@@ -1034,7 +1034,7 @@ function createWikiLink(tagName, classes) {
 
 uiElements.newTagInput.addEventListener("input", async (e) => {
   hotkeys.setScope("addingnewtag")
-  currentAutocompleteItem = 0
+  currentAutocompleteItem = -1
   if (uiElements.newTagInput.value.length >= 3) {
     let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
     if (uiElements.newTagInput.value.length < 3) return // Async hell
