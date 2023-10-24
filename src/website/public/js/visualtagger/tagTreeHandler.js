@@ -635,7 +635,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
         if (anyActive) {
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
-            if (!c.parentElement.open) c.classList.add("has-active-children")
+            c.classList.add("has-active-children")
           }
         } else {
           for (let c of child.parentElement.parentElement.parentElement.querySelectorAll(":scope > .show-implications-button")) {
@@ -839,7 +839,7 @@ function getChanges() {
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
 async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
-  e621AutoComplete.queue.length = 0
+  e621AutoComplete.next = null
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
   if (tag.trim() == "") return
