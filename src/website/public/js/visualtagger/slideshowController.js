@@ -1035,3 +1035,5 @@ document.addEventListener("keydown", (e) => {
 uiElements.currentImage.addEventListener("click", () => {
   slideshowController.openCurrentSlide()
 })
+
+uiElements.tagContainer.style["max-height"] = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 220 + "px"
