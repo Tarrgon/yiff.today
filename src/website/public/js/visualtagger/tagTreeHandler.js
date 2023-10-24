@@ -624,6 +624,13 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
     if (!tagTreeHandler.preventClicks) {
       tagTreeHandler.preventClicks = true
+
+      if (!tag.thisTag.active) {
+        let existing = document.querySelector(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.thisTag.name}']`)
+
+        existing.parentElement.parentElement.remove()
+      }
+
       let allOfTheSame = document.querySelectorAll(`[data-tag-name='${tag.thisTag.name}']`)
 
       for (let child of allOfTheSame) {
