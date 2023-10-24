@@ -625,9 +625,9 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       tagTreeHandler.preventClicks = true
 
       if (!tag.thisTag.active) {
-        let existing = document.querySelector(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.thisTag.name}']`)
+        let existing = document.querySelectorAll(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.thisTag.name}']`)
 
-        existing.parentElement.parentElement.remove()
+        for (let e of existing) e.parentElement.parentElement.remove()
       }
 
       let allOfTheSame = document.querySelectorAll(`[data-tag-name='${tag.thisTag.name}']`)
@@ -914,8 +914,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
       if (next >= orderedKeys.length) {
         let ul = document.createElement("ul")
-        ul.classList.add("tree")
-        ul.classList.add("mb-3")
+        ul.classList.add("tree", "mb-3", "added-tag")
         uiElements.tagContainer.appendChild(ul)
 
         ul.appendChild(createTagTree(struct, 1, true))
@@ -925,8 +924,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
 
         let ul = document.createElement("ul")
-        ul.classList.add("tree")
-        ul.classList.add("mb-3")
+        ul.classList.add("tree", "mb-3", "added-tag")
         uiElements.tagContainer.insertBefore(ul, topLevelAfter?.parentElement?.parentElement)
 
         ul.appendChild(createTagTree(struct, 1, true))
@@ -938,7 +936,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
 
-  let existing = document.querySelector(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.trim()}']`)
+  let existing = document.querySelector(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name='${tag.trim()}']`)
 
   let after = null
 
@@ -948,7 +946,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   }
 
   let ul = document.createElement("ul")
-  ul.classList.add("tree", "mb-3", "added-tag")
+  ul.classList.add("tree", "mb-3", "added-tag", "duplicate-added-tag")
   uiElements.tagContainer.insertBefore(ul, after)
 
   ul.appendChild(createTagTree(struct, 1, true))
@@ -1344,7 +1342,7 @@ uiElements.showChangedButton.addEventListener("click", () => {
     }
   }
 
-  for (let ul of document.querySelectorAll(`.tree.added-tag`)) {
+  for (let ul of document.querySelectorAll(`.tree.duplicate-added-tag`)) {
     ul.classList.add("hidden")
   }
 
