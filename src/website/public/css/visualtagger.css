@@ -43,6 +43,11 @@
   color: white !important;
 }
 
+.NEWTAG-tag-category {
+  background: #03fcdb !important;
+  color: black !important;
+}
+
 .general-tag-color {
   color: #b4c7d9 !important;
 }
@@ -73,6 +78,10 @@
 
 .lore-tag-color {
   color: #282 !important;
+}
+
+.NEWTAG-tag-color {
+  color: #03fcdb !important;
 }
 
 .tag a {

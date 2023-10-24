@@ -1,6 +1,6 @@
-const BACKGROUND_COLORS = ["#b4c7d9", "#f2ac08", "god is surely dead since this is empty", "#d0d", "#0a0", "#ed5d1f", "#ff3d3d", "#fff", "#282"]
-const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "species", "invalid", "meta", "lore"]
-const CATEGORIES_SORTED = ["artist", "copyright", "character", "species", "general", "meta", "lore"] // This is how e6 shows categories
+const BACKGROUND_COLORS = ["#b4c7d9", "#f2ac08", "god is surely dead since this is empty", "#d0d", "#0a0", "#ed5d1f", "#ff3d3d", "#fff", "#282", "#03fcdb"]
+const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "species", "invalid", "meta", "lore", "NEWTAG"]
+const CATEGORIES_SORTED = ["NEWTAG", "artist", "copyright", "character", "species", "general", "meta", "lore"] // This is how e6 shows categories
 
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
@@ -553,9 +553,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   }
 
   let li = document.createElement("li")
-  if (!isReview && (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)))) li.classList.add("hidden")
-
   tag.thisTag.active = tagTreeHandler.tags.split(" ").includes(tag.thisTag.name)
+  if (!isReview && (hidden || (!tag.thisTag.active && !tag.parents.some(t => t.thisTag.fetchedChildren)))) li.classList.add("hidden")
 
   let details = document.createElement("details")
   details.open = isReview || tag.thisTag.active
@@ -670,7 +669,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
   p.innerText = toTitle(tag.thisTag.name)
   summary.appendChild(p)
 
-  if (!isReview) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
+  if (!isReview && tag.thisTag.category != 9) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
 
   p.appendChild(createWikiLink(tag.thisTag.name, ["ml-1"]))
 
@@ -859,8 +858,20 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   await getImplications(tag.trim(), allImplications, "allparents")
 
   let t = Object.values(allImplications)[0]
+  let structure, addedTags
+  if (Object.keys(t).length > 0) {
+    [structure, addedTags] = unwind(t)
+  } else {
+    structure = {
+      [tag.trim()]: {
+        children: [],
+        parents: [],
+        thisTag: { id: -1, name: tag.trim(), category: 9, active: true, fetchedChildren: true, showedChildren: true }
+      }
+    }
 
-  let [structure, addedTags] = unwind(t)
+    addedTags = [tag.trim()]
+  }
 
   for (let tag of addedTags) {
     tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
