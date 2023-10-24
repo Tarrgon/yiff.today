@@ -881,7 +881,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
     if (existing) {
       for (let i = 0; i < 6; i++) {
-        uiElements.newTagInput.classList.toggle("has-background-grey-light")
+        uiElements.newTagInput.classList.toggle("has-background-grey")
         await wait(150)
       }
 
