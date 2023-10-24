@@ -879,7 +879,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
     let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
 
-    if (existing) {
+    if (existing && existing.thisTag.active) {
       for (let i = 0; i < 6; i++) {
         uiElements.newTagInput.classList.toggle("has-background-grey")
         await wait(150)
