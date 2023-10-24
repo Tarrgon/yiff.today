@@ -951,8 +951,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   ul.appendChild(createTagTree(struct, 1, true))
 
-  if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim()))
-    ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+  if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
 
   // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
