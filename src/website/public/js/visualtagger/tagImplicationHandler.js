@@ -17,7 +17,7 @@ let tagImplicationHandler = {
     }
 
     if (tags.length > 0) {
-      console.log(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
+      // console.log(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
       let res = await fetch(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
 
       if (res.ok) {
