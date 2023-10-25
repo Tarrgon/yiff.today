@@ -607,7 +607,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     tag.thisTag.active = details.open
 
     if (!tag.thisTag.active) {
-      for (let child of e.target.parentElement.querySelectorAll(":scope > ul > li > details[open]")) {
+      for (let child of details.querySelectorAll(":scope > ul > li > details[open]")) {
         child.firstChild.click()
       }
 
