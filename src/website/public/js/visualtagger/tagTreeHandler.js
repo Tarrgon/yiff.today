@@ -370,6 +370,10 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
 
     for (let p of otherParents) {
       if (p == relatedList) continue
+      while (p.firstChild) {
+        p.removeChild(p.firstChild)
+      }
+      
       for (let child of realStructure.children) {
         p.appendChild(createTagTree(child, depth, false, true))
       }
