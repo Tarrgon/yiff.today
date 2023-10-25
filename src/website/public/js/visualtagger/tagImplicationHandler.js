@@ -18,13 +18,17 @@ let tagImplicationHandler = {
 
     if (tags.length > 0) {
       // console.log(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
-      let res = await fetch(`https://search.yiff.today/tagrelationships?tags=${tags.join("%20")}&include=${include}`)
+      for (let i = 0; i < tags.length / 150; i++) {
+        let theseTags = tags.slice(i * 150, i * 150 + 150)
 
-      if (res.ok) {
-        for (let [tagName, implications] of Object.entries(await res.json())) {
-          tagImplications[tagName] = implications
-  
-          if (!implicationsCache[tagName]) implicationsCache[tagName] = implications
+        let res = await fetch(`https://search.yiff.today/tagrelationships?tags=${theseTags.map(t => encodeURIComponent(t)).join("%20")}&include=${include}`)
+
+        if (res.ok) {
+          for (let [tagName, implications] of Object.entries(await res.json())) {
+            tagImplications[tagName] = implications
+
+            if (!implicationsCache[tagName]) implicationsCache[tagName] = implications
+          }
         }
       }
     }

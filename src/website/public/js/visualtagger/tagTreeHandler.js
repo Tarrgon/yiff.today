@@ -89,14 +89,24 @@ function findChildInStructure(structure, name) {
   }
 }
 
+let progressMade = true
+
 function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   if (Object.entries(unresolvedImplications).length == 0) return structure
+
+  if (!progressMade) {
+    console.log(unresolvedImplications, structure)
+    return
+  }
+
+  progressMade = false
 
   let splitTags = tags.split(" ")
 
   for (let [tagName, implications] of Object.entries(unresolvedImplications).toSorted((a, b) => a[1].parents.length - b[1].parents.length)) {
     implications.thisTag.showedChildren = false
     if (implications.parents.length == 0) {
+      progressMade = true
       implications.thisTag.active = splitTags.includes(implications.thisTag.name)
       implications.thisTag.fetchedChildren = false
       let imps = {
@@ -129,6 +139,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
         }
 
         if (thisParent) {
+          progressMade = true
           let index = thisParent.children.findIndex(c => c.thisTag.id == implications.thisTag.id)
 
           if (index == -1) {
@@ -1067,7 +1078,7 @@ function createWikiLink(tagName, classes) {
   a.style.cursor = "help"
   a.innerText = "?"
   a.target = "_blank"
-  a.href = `https://e621.net/wiki_pages/show_or_new?title=${tagName}`
+  a.href = `https://e621.net/wiki_pages/show_or_new?title=${encodeURIComponent(tagName)}`
 
   a.addEventListener("mousedown", (e) => {
     e.stopImmediatePropagation()

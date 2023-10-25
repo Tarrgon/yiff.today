@@ -4,7 +4,7 @@ let e621AutoComplete = {
   processQueue: async () => {
     let current = e621AutoComplete.current = e621AutoComplete.next
     e621AutoComplete.next = null
-    let res = await fetch(`https://e621.net/tags/autocomplete.json?search%5Bname_matches%5D=${current.query}&expiry=7`)
+    let res = await fetch(`https://e621.net/tags/autocomplete.json?search%5Bname_matches%5D=${encodeURIComponent(current.query)}&expiry=7`)
 
     if (res.ok) {
       current.resolve(await res.json())
