@@ -373,7 +373,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
       while (p.firstChild) {
         p.removeChild(p.firstChild)
       }
-      
+
       for (let child of realStructure.children) {
         p.appendChild(createTagTree(child, depth, false, true))
       }
@@ -676,7 +676,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       let allOfTheSame = document.querySelectorAll(`[data-tag-name=\"${tag.thisTag.name}\"]`)
 
       for (let child of allOfTheSame) {
-        if (child == e.target.parentElement) continue
+        if (child == details) continue
 
         let anyActive = e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
 
