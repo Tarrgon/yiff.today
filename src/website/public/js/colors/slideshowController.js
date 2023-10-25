@@ -907,3 +907,9 @@ document.addEventListener("keydown", (e) => {
       slideshowController.openCurrentSlide()
   }
 })
+
+uiElements.startPage.addEventListener("input", (e) => {
+  if (uiElements.startPage.value <= 0) {
+    uiElements.startPage.value = null
+  }
+})

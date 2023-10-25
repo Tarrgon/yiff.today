@@ -1190,3 +1190,9 @@ document.addEventListener("keydown", (e) => {
       slideshowController.playVideo()
   }
 })
+
+uiElements.startPage.addEventListener("input", (e) => {
+  if (uiElements.startPage.value <= 0) {
+    uiElements.startPage.value = null
+  }
+})

@@ -1037,3 +1037,9 @@ uiElements.currentImage.addEventListener("click", () => {
 })
 
 uiElements.tagContainer.style["max-height"] = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 220 + "px"
+
+uiElements.startPage.addEventListener("input", (e) => {
+  if (uiElements.startPage.value <= 0) {
+    uiElements.startPage.value = null
+  }
+})
