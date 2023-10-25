@@ -948,6 +948,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
     if (allTags.length > 0) {
       if (replaceExistingTopLevel) {
+        console.log(3)
         for (let child of allTags) {
           let li = child.parentElement
           let parent = li.parentElement
@@ -961,9 +962,11 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
       let next = orderedKeys.indexOf(updatedKey) + 1
 
       if (next >= orderedKeys.length) {
+        let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name=\"${orderedKeys[orderedKeys.length - 2]}\"]`)?.parentElement?.parentElement?.nextElementSibling
+
         let ul = document.createElement("ul")
         ul.classList.add("tree", "mb-3", "added-tag")
-        uiElements.tagContainer.appendChild(ul)
+        uiElements.tagContainer.insertBefore(ul, topLevelAfter)
 
         ul.appendChild(createTagTree(struct, 1, true))
 
