@@ -611,7 +611,13 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         child.classList.remove("has-active-children")
       }
 
-      if (!tagTreeHandler.preventClicks) tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+      if (!tagTreeHandler.preventClicks) {
+        tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+
+        for (let duplicateDetails of document.querySelectorAll(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name=\"${tag.thisTag.name}\"]`)) {
+          duplicateDetails.parentElement.parentElement.remove()
+        }
+      }
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
         summary.classList.remove("new-tag")
@@ -961,6 +967,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
           newLi.classList.remove("hidden")
 
           parent.appendChild(newLi)
+
+          for (let c of parent.firstChild.firstChild.querySelectorAll(":scope > .show-implications-button")) {
+            c.classList.add("has-active-children")
+          }
         }
       }
     } else {
