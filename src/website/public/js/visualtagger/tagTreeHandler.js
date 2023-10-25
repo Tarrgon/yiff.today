@@ -365,7 +365,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
       relatedList.appendChild(createTagTree(child, depth, false))
     }
 
-    let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}']`))
+    let otherParents = Array.from(document.querySelectorAll(`[data-tag-name=\"${parentGroup.thisTag.name}\"]`))
       .map(b => b.lastChild)
 
     for (let p of otherParents) {
@@ -376,7 +376,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     }
 
     if (realStructure.children.length > 0) {
-      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > .show-implications-button`)
+      let all = document.querySelectorAll(`[data-tag-name=\"${tagName}\"] > .show-implications-button`)
 
       for (let child of all) {
         if (child.innerText == "[search]") {
@@ -393,7 +393,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
       if (!tagTreeHandler.preventScroll && relatedList.lastChild && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).bottom) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
     } else {
       // Delete all show buttons under these buttons
-      let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > .show-implications-button`)
+      let all = document.querySelectorAll(`[data-tag-name=\"${tagName}\"] > .show-implications-button`)
 
       for (let child of all) {
         child.remove()
@@ -531,7 +531,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   //     parent.appendChild(createTagTree(child, depth))
   //   }
 
-  //   let otherParents = Array.from(document.querySelectorAll(`[data-tag-name='${parentGroup.thisTag.name}'] > ul > li > details > .show-implications-button`))
+  //   let otherParents = Array.from(document.querySelectorAll(`[data-tag-name=\"${parentGroup.thisTag.name}\"] > ul > li > details > .show-implications-button`))
   //     .filter(b => b != showButton).map(b => b.parentElement.parentElement.parentElement)
 
   //   for (let p of otherParents) {
@@ -547,7 +547,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   //     if (!tagTreeHandler.preventScroll && isOutOfViewport(hideButton, uiElements.tagContainer).bottom) hideButton.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
   //   } else {
   //     // Delete all show buttons under these buttons
-  //     let all = document.querySelectorAll(`[data-tag-name='${tagName}'] > ul > li .show-implications-button`)
+  //     let all = document.querySelectorAll(`[data-tag-name=\"${tagName}\"] > ul > li .show-implications-button`)
 
   //     for (let child of all) {
   //       child.parentElement.parentElement.remove()
@@ -658,12 +658,12 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       tagTreeHandler.preventClicks = true
 
       if (!tag.thisTag.active) {
-        let existing = document.querySelectorAll(`.tree.mb-3.added-tag > li > details[data-tag-name='${tag.thisTag.name}']`)
+        let existing = document.querySelectorAll(`.tree.mb-3.added-tag > li > details[data-tag-name=\"${tag.thisTag.name}\"]`)
 
         for (let e of existing) e.parentElement.parentElement.remove()
       }
 
-      let allOfTheSame = document.querySelectorAll(`[data-tag-name='${tag.thisTag.name}']`)
+      let allOfTheSame = document.querySelectorAll(`[data-tag-name=\"${tag.thisTag.name}\"]`)
 
       for (let child of allOfTheSame) {
         if (child == e.target.parentElement) continue
@@ -944,7 +944,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   for (let updatedKey of Object.keys(structure)) {
     let struct = findChildInStructure(tagTreeHandler.currentStructure, updatedKey)
 
-    let allTags = document.querySelectorAll(`[data-tag-name='${updatedKey}']`)
+    let allTags = document.querySelectorAll(`[data-tag-name=\"${updatedKey}\"]`)
 
     if (allTags.length > 0) {
       if (replaceExistingTopLevel) {
@@ -969,7 +969,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       } else {
-        let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name='${orderedKeys[next]}']`)
+        let topLevelAfter = document.querySelector(`.tree > li > [data-tag-name=\"${orderedKeys[next]}\"]`)
 
         let ul = document.createElement("ul")
         ul.classList.add("tree", "mb-3", "added-tag")
@@ -984,7 +984,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
 
-  let existing = document.querySelector(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name='${tag.trim()}']`)
+  let existing = document.querySelector(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name=\"${tag.trim()}\"]`)
 
   let after = null
 
@@ -1006,7 +1006,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   tagTreeHandler.preventClicks = true
 
   for (let addedTag of addedTags) {
-    let allTags = document.querySelectorAll(`[data-tag-name='${addedTag}']`)
+    let allTags = document.querySelectorAll(`[data-tag-name=\"${addedTag}\"]`)
 
     for (let child of allTags) {
       if (!child.open) {
@@ -1388,7 +1388,7 @@ uiElements.showChangedButton.addEventListener("click", () => {
   }
 
   for (let tagName of toHide) {
-    for (let details of document.querySelectorAll(`.tree > li > [data-tag-name='${tagName}']`)) {
+    for (let details of document.querySelectorAll(`.tree > li > [data-tag-name=\"${tagName}\"]`)) {
       details.parentElement.parentElement.classList.add("hidden")
     }
   }
