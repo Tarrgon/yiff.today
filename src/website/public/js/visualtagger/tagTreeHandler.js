@@ -1208,61 +1208,61 @@ uiElements.submitChangesButton.addEventListener("click", () => {
 })
 
 uiElements.confirmSubmitButton.addEventListener("click", async () => {
-  showGeneralScreen("Submitting changes is currently disabled.")
-  // if (login.e621Username.trim() == "" || login.e621ApiKey.trim() == "") {
-  //   document.body.scrollTo({
-  //     top: document.body.scrollHeight,
-  //     left: 0,
-  //     behavior: "smooth"
-  //   })
+  // showGeneralScreen("Submitting changes is currently disabled.")
+  if (login.e621Username.trim() == "" || login.e621ApiKey.trim() == "") {
+    document.body.scrollTo({
+      top: document.body.scrollHeight,
+      left: 0,
+      behavior: "smooth"
+    })
 
-  //   return
-  // }
+    return
+  }
 
-  // if (tagTreeHandler.lock) return
-  // tagTreeHandler.lock = true
+  if (tagTreeHandler.lock) return
+  tagTreeHandler.lock = true
 
-  // hotkeys.setScope("review")
+  hotkeys.setScope("review")
 
-  // let changes = getChanges().filter(t => t.change != 0)
+  let changes = getChanges().filter(t => t.change != 0)
 
-  // let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
+  let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
 
-  // if (tagDiff.length == 0) return
+  if (tagDiff.length == 0) return
 
-  // let body = new URLSearchParams()
-  // body.append("post[tag_string_diff]", tagDiff)
-  // body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
-  // body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
-  // body.append("_method", "PATCH")
+  let body = new URLSearchParams()
+  body.append("post[tag_string_diff]", tagDiff)
+  body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
+  body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
+  body.append("_method", "PATCH")
 
-  // uiElements.closeReviewButton.click()
+  uiElements.closeReviewButton.click()
 
-  // try {
-  //   showLoadingScreen()
+  try {
+    showLoadingScreen()
 
-  //   let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
-  //     method: "POST",
-  //     headers: {
-  //       "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
-  //       Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-  //     },
-  //     body
-  //   })
+    let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
+      method: "POST",
+      headers: {
+        "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      },
+      body
+    })
 
-  //   if (res.ok) {
-  //     showSuccessScreen()
-  //   } else {
-  //     showFailureScreen(res.status)
-  //   }
-  // } catch (e) {
-  //   console.error(e)
+    if (res.ok) {
+      showSuccessScreen()
+    } else {
+      showFailureScreen(res.status)
+    }
+  } catch (e) {
+    console.error(e)
 
-  //   showFailureScreen("unk")
-  // }
+    showFailureScreen("unk")
+  }
 
 
-  // tagTreeHandler.lock = false
+  tagTreeHandler.lock = false
 })
 
 function showGeneralScreen(text) {
