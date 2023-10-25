@@ -891,9 +891,11 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
     let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
 
     if (existing && existing.thisTag.active) {
-      for (let i = 0; i < 6; i++) {
-        uiElements.newTagInput.classList.toggle("has-background-grey")
-        await wait(150)
+      if (flash) {
+        for (let i = 0; i < 6; i++) {
+          uiElements.newTagInput.classList.toggle("has-background-grey")
+          await wait(150)
+        }
       }
 
       return
@@ -948,14 +950,17 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
     if (allTags.length > 0) {
       if (replaceExistingTopLevel) {
-        console.log(3)
         for (let child of allTags) {
           let li = child.parentElement
           let parent = li.parentElement
 
           li.remove()
 
-          parent.appendChild(createTagTree(struct, 1, true))
+          let newLi = createTagTree(struct, 1, true, true)
+
+          newLi.classList.remove("hidden")
+
+          parent.appendChild(newLi)
         }
       }
     } else {
@@ -968,7 +973,11 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         ul.classList.add("tree", "mb-3", "added-tag")
         uiElements.tagContainer.insertBefore(ul, topLevelAfter)
 
-        ul.appendChild(createTagTree(struct, 1, true))
+        let newLi = createTagTree(struct, 1, true, true)
+
+        newLi.classList.remove("hidden")
+
+        ul.appendChild(newLi)
 
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       } else {
@@ -978,7 +987,11 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         ul.classList.add("tree", "mb-3", "added-tag")
         uiElements.tagContainer.insertBefore(ul, topLevelAfter?.parentElement?.parentElement)
 
-        ul.appendChild(createTagTree(struct, 1, true))
+        let newLi = createTagTree(struct, 1, true, true)
+
+        newLi.classList.remove("hidden")
+
+        ul.appendChild(newLi)
 
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       }
@@ -1000,7 +1013,11 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   ul.classList.add("tree", "mb-3", "added-tag", "duplicate-added-tag")
   uiElements.tagContainer.insertBefore(ul, after)
 
-  ul.appendChild(createTagTree(struct, 1, true))
+  let newLi = createTagTree(struct, 1, true, true)
+
+  newLi.classList.remove("hidden")
+
+  ul.appendChild(newLi)
 
   if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
 
