@@ -611,7 +611,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         child.firstChild.click()
       }
 
-      for (let child of e.target.parentElement.querySelectorAll(".has-active-children")) {
+      for (let child of details.querySelectorAll(".has-active-children")) {
         child.classList.remove("has-active-children")
       }
 
@@ -678,7 +678,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
       for (let child of allOfTheSame) {
         if (child == details) continue
 
-        let anyActive = e.target.parentElement.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
+        let anyActive = details.open || child.parentElement.parentElement.querySelectorAll(`:scope > li > details[open]`).length - 1 > 0
 
         child.firstChild.click()
 
