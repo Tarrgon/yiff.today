@@ -1127,6 +1127,7 @@ uiElements.newTagInput.addEventListener("focusout", () => {
 function createWikiLink(tagName, classes) {
   let a = document.createElement("a")
   a.classList.add(...classes)
+  a.classList.add("has-tooltip-arrow", "has-tooltip-multiline", "has-tooltip-bottom")
   a.style.cursor = "help"
   a.innerText = "?"
   a.target = "_blank"
@@ -1138,6 +1139,14 @@ function createWikiLink(tagName, classes) {
 
   a.addEventListener("click", (e) => {
     e.stopImmediatePropagation()
+  })
+
+  a.addEventListener("mouseover", async (e) => {
+    if (!a.getAttribute("data-tooltip")) {
+      let shortWiki = await e621WikiFetcher.fetchShortWiki(tagName)
+
+      a.setAttribute("data-tooltip", shortWiki)
+    }
   })
 
   // a.addEventListener("mouseover", (e) => {
