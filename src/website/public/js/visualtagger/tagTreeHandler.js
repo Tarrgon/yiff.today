@@ -1246,23 +1246,28 @@ uiElements.submitChangesButton.addEventListener("click", () => {
 
   let changes = getChanges()
 
-  for (let change of changes) {
-    if (change.change == 0) {
-      let span = document.createElement("span")
-      span.classList.add("has-text-grey-lighter")
-      span.innerText = `${change.tag} `
-      uiElements.tagChangesReview.appendChild(span)
-    } else if (change.change == -1) {
-      let span = document.createElement("span")
-      span.classList.add("has-text-danger")
-      span.innerText = `-${change.tag} `
-      uiElements.tagChangesReview.appendChild(span)
-    } else if (change.change == 1) {
-      let span = document.createElement("span")
-      span.classList.add("has-text-success")
-      span.innerText = `+${change.tag} `
-      uiElements.tagChangesReview.appendChild(span)
+  let createSpan = (change) => {
+    let span = document.createElement("span")
+    if (change.change == 0) span.classList.add("has-text-grey-lighter")
+    else if (change.change == 1) span.classList.add("has-text-success")
+    else if (change.change == -1) span.classList.add("has-text-danger")
+    span.innerText = `${change.change == 0 ? "" : (change.change == -1 ? "-" : "+")}${change.tag} `
+
+    let child = findChildInStructure(tagTreeHandler.currentStructure, change.tag)
+
+    if (child && child.thisTag.category == 9) {
+      span.innerText = span.innerText.trim()
+      let exclaim = document.createElement("sup")
+      exclaim.classList.add("has-text-warning")
+      exclaim.innerText = "! "
+      span.appendChild(exclaim)
     }
+
+    return span
+  }
+
+  for (let change of changes) {
+    uiElements.tagChangesReview.appendChild(createSpan(change))
   }
 
   uiElements.tagChangesReview.style.height = `${uiElements.tagContainer.clientHeight / 1.5}px`
