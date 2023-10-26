@@ -1141,13 +1141,13 @@ function createWikiLink(tagName, classes) {
     e.stopImmediatePropagation()
   })
 
-  a.addEventListener("mouseover", async (e) => {
-    if (!a.getAttribute("data-tooltip")) {
-      let shortWiki = await e621WikiFetcher.fetchShortWiki(tagName)
+  // a.addEventListener("mouseover", async (e) => {
+  //   if (!a.getAttribute("data-tooltip")) {
+  //     let shortWiki = await e621WikiFetcher.fetchShortWiki(tagName)
 
-      a.setAttribute("data-tooltip", shortWiki)
-    }
-  })
+  //     a.setAttribute("data-tooltip", shortWiki)
+  //   }
+  // })
 
   // a.addEventListener("mouseover", (e) => {
   //   console.log(e)
