@@ -1329,7 +1329,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 function showGeneralScreen(text) {
   hotkeys.setScope("review")
 
-  uiElements.responseText.innerText = text
+  uiElements.responseTitle.innerText = text
 
   uiElements.responseModal.classList.add("is-active")
   uiElements.closeResponseButton.classList.remove("hidden")
@@ -1338,7 +1338,7 @@ function showGeneralScreen(text) {
 function showLoadingScreen() {
   hotkeys.setScope("review")
 
-  uiElements.responseText.innerText = "Loading"
+  uiElements.responseTitle.innerText = "Loading"
 
   uiElements.responseModal.classList.add("is-active")
   uiElements.closeResponseButton.classList.add("hidden")
@@ -1347,7 +1347,7 @@ function showLoadingScreen() {
 function showSuccessScreen() {
   hotkeys.setScope("review")
 
-  uiElements.responseText.innerText = "Success"
+  uiElements.responseTitle.innerText = "Success"
 
   uiElements.responseModal.classList.add("is-active")
 
