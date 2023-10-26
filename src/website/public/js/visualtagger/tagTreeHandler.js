@@ -966,16 +966,20 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
           let li = child.parentElement
           let parent = li.parentElement
 
+          let open = child.open
+
           li.remove()
 
-          let newLi = createTagTree(struct, 1, true, true)
+          let newLi = createTagTree(struct, 1, true, !open)
 
           newLi.classList.remove("hidden")
 
           parent.appendChild(newLi)
 
-          for (let c of parent.firstChild.firstChild.querySelectorAll(":scope > .show-implications-button")) {
-            c.classList.add("has-active-children")
+          if (!open) {
+            for (let c of parent.firstChild.firstChild.querySelectorAll(":scope > .show-implications-button")) {
+              c.classList.add("has-active-children")
+            }
           }
         }
       }
