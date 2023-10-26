@@ -255,7 +255,9 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
 
     // let li = reparent(parent, showButton)
 
-    if (!tagTreeHandler.preventScroll && relatedList.lastChild && isOutOfViewport(relatedList.lastChild, uiElements.tagContainer).top) relatedList.lastChild.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+    if (!tagTreeHandler.preventScroll && relatedList.parentElement && isOutOfViewport(relatedList.parentElement, uiElements.tagContainer).top) {
+      uiElements.tagContainer.scrollTo({ left: 0, top: relatedList.parentElement.parentElement.offsetTop, behavior: "smooth" })
+    }
 
     if (!parentGroup.thisTag.showedChildren) {
       searchButton.classList.remove("hidden")
