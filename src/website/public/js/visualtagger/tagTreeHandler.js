@@ -991,6 +991,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
         let newLi = createTagTree(struct, 1, true, true)
 
+        for (let c of newLi.querySelectorAll(":scope > details > .show-implications-button")) {
+          c.classList.add("has-active-children")
+        }
+
         newLi.classList.remove("hidden")
 
         ul.appendChild(newLi)
@@ -1004,6 +1008,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
         uiElements.tagContainer.insertBefore(ul, topLevelAfter?.parentElement?.parentElement)
 
         let newLi = createTagTree(struct, 1, true, true)
+
+        for (let c of newLi.querySelectorAll(":scope > details > .show-implications-button")) {
+          c.classList.add("has-active-children")
+        }
 
         newLi.classList.remove("hidden")
 
