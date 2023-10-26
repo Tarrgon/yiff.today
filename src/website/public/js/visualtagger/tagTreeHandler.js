@@ -96,6 +96,8 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
 
   if (!progressMade) {
     console.log(unresolvedImplications, structure)
+    progressMade = true
+    showFailureScreen("Failure", `Unable to resolve tags, please report this issue and post id: ${slideshowController.getCurrentSlide().id}`)
     return
   }
 
@@ -1287,12 +1289,12 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     if (res.ok) {
       showSuccessScreen()
     } else {
-      showFailureScreen(res.status)
+      showFailureScreen("Failure", res.status)
     }
   } catch (e) {
     console.error(e)
 
-    showFailureScreen("unk")
+    showFailureScreen("Failure", "Unknown error, please check console")
   }
 
 
@@ -1327,10 +1329,19 @@ function showSuccessScreen() {
   uiElements.closeResponseButton.classList.remove("hidden")
 }
 
-function showFailureScreen(status) {
+function showFailureScreen(title, status) {
   hotkeys.setScope("review")
 
-  uiElements.responseText.innerText = `Failure (${status})`
+  while (uiElements.responseContent.firstChild) {
+    uiElements.responseContent.removeChild(uiElements.responseContent.firstChild)
+  }
+
+  uiElements.responseTitle.innerText = title
+
+  let span = document.createElement("span")
+  span.innerText = status
+
+  uiElements.responseContent.appendChild(span)
 
   uiElements.responseModal.classList.add("is-active")
 
