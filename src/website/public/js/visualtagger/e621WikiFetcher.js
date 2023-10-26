@@ -17,9 +17,9 @@ let e621WikiFetcher = {
 
       let short = text.replace(/\.\s?([a-zA-Z0-9_])/g, (_, char) => {
         return `. ${char}`
-      }).slice(0, 600)
+      }).slice(0, 400)
 
-      if (text.length > 600) {
+      if (text.length > 400) {
         short += "..."
       }
 
