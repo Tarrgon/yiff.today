@@ -516,7 +516,7 @@ let slideshowController = {
 
     if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
 
-    tagTreeHandler.closeAllModals()
+    closeAllModals()
   },
 
   clearCallbacksForPreloadingSlides() {
