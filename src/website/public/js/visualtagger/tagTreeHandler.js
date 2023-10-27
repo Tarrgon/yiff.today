@@ -1336,6 +1336,14 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
   tagTreeHandler.lock = false
 })
 
+function closeAllModals() {
+  hotkeys.setScope("tagging")
+
+  uiElements.responseModal.classList.remove("is-active")
+  uiElements.reviewChangesModal.classList.remove("is-active")
+  uiElements.reviewAddTagModal.classList.remove("is-active")
+}
+
 function showGeneralScreen(text) {
   hotkeys.setScope("review")
 
