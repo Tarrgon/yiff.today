@@ -1644,7 +1644,7 @@ hotkeys.setScope("tagging")
 
 window.addEventListener("mousedown", (e) => {
 
-  if (!uiElements.tagContainer.contains(e.target)) return
+  if (e.target != uiElements.tagContainer && !uiElements.tagContainer.contains(e.target)) return
 
   let all = document.querySelectorAll(".tag-tree-list-container")
 
