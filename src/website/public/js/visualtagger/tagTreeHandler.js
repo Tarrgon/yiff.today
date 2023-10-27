@@ -1165,74 +1165,79 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
   hotkeys.setScope("addingnewtag")
   currentAutocompleteItem = -1
   if (uiElements.newTagInput.value.length >= 3) {
-    let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
-    if (uiElements.newTagInput.value.length < 3) return // Async hell
-    uiElements.autoCompleteContainer.classList.add("is-active")
+    try {
+      let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
+      if (uiElements.newTagInput.value.length < 3) return // Async hell
+      uiElements.autoCompleteContainer.classList.add("is-active")
 
-    while (uiElements.autoCompleteMenu.firstChild) {
-      uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
-    }
-
-    for (let i = 0; i < autoComplete.length; i++) {
-      let completion = autoComplete[i]
-      let a = document.createElement("button")
-      a.classList.add("dropdown-item")
-      if (i != autoComplete.length - 1) a.classList.add("mb-1")
-      a.style.cursor = "pointer"
-      a.style.border = "1px solid black"
-
-
-      if (!completion.antecedent_name) {
-        let span = document.createElement("span")
-        span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
-        a.appendChild(span)
-        span.innerText = completion.name
-
-        span.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1"]))
-      } else {
-        let span = document.createElement("span")
-        span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
-        a.appendChild(span)
-        span.innerText = `${completion.antecedent_name}`
-
-        span.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1", "mr-1"]))
-
-        let span2 = document.createElement("span")
-        span2.classList.add("has-text-light")
-        a.appendChild(span2)
-        span2.innerHTML = `&rarr;`
-
-        let span3 = document.createElement("span")
-        span3.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
-        a.appendChild(span3)
-        span3.innerText = ` ${completion.name}`
-
-        span3.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1"]))
+      while (uiElements.autoCompleteMenu.firstChild) {
+        uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
       }
 
-      let span = document.createElement("span")
-      span.classList.add("has-text-light")
-      span.innerText = ` (${completion.post_count})`
-      a.appendChild(span)
+      for (let i = 0; i < autoComplete.length; i++) {
+        let completion = autoComplete[i]
+        let a = document.createElement("button")
+        a.classList.add("dropdown-item")
+        if (i != autoComplete.length - 1) a.classList.add("mb-1")
+        a.style.cursor = "pointer"
+        a.style.border = "1px solid black"
 
-      a.addEventListener("mousedown", (e) => {
-        e.preventDefault()
 
-        if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
-      })
+        if (!completion.antecedent_name) {
+          let span = document.createElement("span")
+          span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+          a.appendChild(span)
+          span.innerText = completion.name
 
-      a.addEventListener("click", (e) => {
-        e.preventDefault()
+          span.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1"]))
+        } else {
+          let span = document.createElement("span")
+          span.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+          a.appendChild(span)
+          span.innerText = `${completion.antecedent_name}`
 
-        if (e.button == 0) addNewTag(completion.name)
-      })
+          span.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1", "mr-1"]))
 
-      a.addEventListener("mouseover", (e) => {
-        currentAutocompleteItem = Array.from(uiElements.autoCompleteMenu.children).findIndex(x => x == a)
-        updateAutocompleteDropdown()
-      })
+          let span2 = document.createElement("span")
+          span2.classList.add("has-text-light")
+          a.appendChild(span2)
+          span2.innerHTML = `&rarr;`
 
-      uiElements.autoCompleteMenu.appendChild(a)
+          let span3 = document.createElement("span")
+          span3.classList.add(`${CATEGORIES[completion.category]}-tag-color`)
+          a.appendChild(span3)
+          span3.innerText = ` ${completion.name}`
+
+          span3.appendChild(createWikiLink(completion.name, ["is-underlined", "ml-1"]))
+        }
+
+        let span = document.createElement("span")
+        span.classList.add("has-text-light")
+        span.innerText = ` (${completion.post_count})`
+        a.appendChild(span)
+
+        a.addEventListener("mousedown", (e) => {
+          e.preventDefault()
+
+          if (e.button == 1) window.open(`https://e621.net/posts?tags=${completion.name}`)
+        })
+
+        a.addEventListener("click", (e) => {
+          e.preventDefault()
+
+          if (e.button == 0) addNewTag(completion.name)
+        })
+
+        a.addEventListener("mouseover", (e) => {
+          currentAutocompleteItem = Array.from(uiElements.autoCompleteMenu.children).findIndex(x => x == a)
+          updateAutocompleteDropdown()
+        })
+
+        uiElements.autoCompleteMenu.appendChild(a)
+      }
+    } catch (e) {
+      console.error(e)
+      uiElements.autoCompleteContainer.classList.remove("is-active")
     }
   } else {
     uiElements.autoCompleteContainer.classList.remove("is-active")
