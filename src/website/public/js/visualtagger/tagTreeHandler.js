@@ -1643,6 +1643,9 @@ hotkeys.filter = function (event) {
 hotkeys.setScope("tagging")
 
 window.addEventListener("mousedown", (e) => {
+
+  if (!uiElements.tagContainer.contains(e.target)) return
+
   let all = document.querySelectorAll(".tag-tree-list-container")
 
   for (let list of all) {
