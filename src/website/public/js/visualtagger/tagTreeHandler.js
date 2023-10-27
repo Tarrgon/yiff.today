@@ -922,6 +922,8 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
   let allImplications = {}
   await getImplications(tag.trim(), allImplications, "allparents")
 
+  tag = Object.keys(allImplications)[0]
+
   let t = Object.values(allImplications)[0]
   let structure, addedTags
   if (Object.keys(t).length > 0) {
