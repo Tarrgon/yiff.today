@@ -894,10 +894,11 @@ function getChanges() {
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
 async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
+  tag = tag.trim()
   e621AutoComplete.next = null
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
-  if (tag.trim() == "") return
+  if (tag == "") return
 
   hotkeys.setScope("tagging")
 
@@ -1027,14 +1028,14 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
         ul.appendChild(newLi)
 
-        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag)) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
       }
     }
   }
 
-  let struct = findChildInStructure(tagTreeHandler.currentStructure, tag.trim())
+  let struct = findChildInStructure(tagTreeHandler.currentStructure, tag)
 
-  let existing = document.querySelector(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name=\"${tag.trim()}\"]`)
+  let existing = document.querySelector(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name=\"${tag}\"]`)
 
   let after = null
 
@@ -1053,7 +1054,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   ul.appendChild(newLi)
 
-  if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.trim())) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
+  if (!tagTreeHandler.unchangedTags.split(" ").includes(tag)) ul.firstChild.firstChild.firstChild.classList.add("new-tag")
 
   // ul.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
