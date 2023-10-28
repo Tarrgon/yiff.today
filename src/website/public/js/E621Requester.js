@@ -70,7 +70,7 @@ class E621Requester {
       headers
     }
 
-    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=1&query=id:${id}&_client=${E621Requester.USER_AGENT}`, options)
+    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=1&query=id:${id}%20status%3Aany&_client=${E621Requester.USER_AGENT}`, options)
 
     if (res.ok) {
       let data = await res.json()
