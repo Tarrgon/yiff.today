@@ -1670,3 +1670,7 @@ window.addEventListener("mousedown", (e) => {
     }
   }
 })
+
+window.addEventListener("beforeunload", (e) => {
+  if (getChanges().filter(c => c.change != 0).length > 0) e.preventDefault()
+})
