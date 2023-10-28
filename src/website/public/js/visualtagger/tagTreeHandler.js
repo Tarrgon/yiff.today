@@ -1329,7 +1329,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     if (res.ok) {
       showSuccessScreen()
     } else {
-      showFailureScreen("Failure", res.status)
+      showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
     }
   } catch (e) {
     console.error(e)
