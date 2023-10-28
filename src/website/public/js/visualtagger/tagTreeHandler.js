@@ -660,7 +660,9 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
         tagTreeHandler.tags = tagTreeHandler.tags.trim()
 
-        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) addNewTag(tag.thisTag.name, false, false)
+        if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
+          addNewTag(tag.thisTag.name, false, false, false)
+        }
       }
 
       if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
@@ -893,7 +895,7 @@ function getChanges() {
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
-async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
+async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, checkExisting = false) {
   tag = tag.trim()
   e621AutoComplete.next = null
   uiElements.autoCompleteContainer.classList.remove("is-active")
@@ -902,18 +904,20 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 
   hotkeys.setScope("tagging")
 
-  for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
-    let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
-
-    if (existing && existing.thisTag.active) {
-      if (flash) {
-        for (let i = 0; i < 6; i++) {
-          uiElements.newTagInput.classList.toggle("has-background-grey")
-          await wait(150)
+  if (checkExisting) {
+    for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
+      let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
+  
+      if (existing && existing.thisTag.active) {
+        if (flash) {
+          for (let i = 0; i < 6; i++) {
+            uiElements.newTagInput.classList.toggle("has-background-grey")
+            await wait(150)
+          }
         }
+  
+        return
       }
-
-      return
     }
   }
 
@@ -1092,12 +1096,12 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true) {
 }
 
 uiElements.addTagButton.addEventListener("click", async () => {
-  addNewTag(uiElements.newTagInput.value)
+  addNewTag(uiElements.newTagInput.value, true, true, true)
 })
 
 uiElements.newTagInput.addEventListener("keypress", (e) => {
   if (e.key == "Enter") {
-    addNewTag(uiElements.newTagInput.value)
+    addNewTag(uiElements.newTagInput.value, true, true, true)
   }
 })
 
@@ -1225,7 +1229,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
         a.addEventListener("click", (e) => {
           e.preventDefault()
 
-          if (e.button == 0) addNewTag(completion.name)
+          if (e.button == 0) addNewTag(completion.name, true, true, true)
         })
 
         a.addEventListener("mouseover", (e) => {
@@ -1414,7 +1418,7 @@ uiElements.closeReviewAddTagButton.addEventListener("click", () => {
 uiElements.reviewTagAddButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
   uiElements.reviewAddTagModal.classList.remove("is-active")
-  addNewTag(tagTreeHandler.reviewingTag)
+  addNewTag(tagTreeHandler.reviewingTag, true, true, true)
 })
 
 uiElements.copyTagsButton.addEventListener("click", () => {
