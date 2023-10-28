@@ -1045,3 +1045,9 @@ uiElements.startPage.addEventListener("input", (e) => {
     uiElements.startPage.value = null
   }
 })
+
+uiElements.reloadSlideButton.addEventListener("click", async (e) => {
+  console.log("reload")
+  await slideshowController.getCurrentSlide().reload()
+  slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber)
+})

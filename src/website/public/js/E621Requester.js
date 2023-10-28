@@ -54,4 +54,32 @@ class E621Requester {
       slideshowController.showError(await res.text())
     }
   }
+
+  async getSlide(id) {
+    this.requesting = true
+    let waitTime = WAIT_DECAY - (Date.now() - this.lastRequestTime)
+    WAIT_DECAY = Math.min(1000, WAIT_DECAY + 20)
+    if (waitTime > 0) await wait(waitTime)
+    this.lastRequestTime = Date.now()
+    let headers = {}
+    // if (login && login.e621Username != "" && login.e621ApiKey != "") {
+    //   headers.Authorization = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+    // }
+
+    let options = {
+      headers
+    }
+
+    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=1&query=id:${id}&_client=${E621Requester.USER_AGENT}`, options)
+
+    if (res.ok) {
+      let data = await res.json()
+
+      this.requesting = false
+      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))[0]
+    } else {
+      this.requesting = false
+      slideshowController.showError(await res.text())
+    }
+  }
 }

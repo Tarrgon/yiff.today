@@ -35,6 +35,7 @@ let uiElements = {
   autoCompleteMenu: document.getElementById("autocomplete-menu"),
   submitChangesButton: document.getElementById("submit-changes-button"),
   copyTagsButton: document.getElementById("copy-tags-button"),
+  reloadSlideButton: document.getElementById("reload-slide-button"),
   showCurrentButton: document.getElementById("show-current-button"),
   showChangedButton: document.getElementById("show-changed-button"),
   collapseAllButton: document.getElementById("collapse-all-button"),

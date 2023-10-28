@@ -63,6 +63,16 @@ class Slide {
     }
   }
 
+  async reload() {
+    let slide = await e621Requester.getSlide(this.id)
+
+    let index = slideshowController.slides.findIndex(s => s.id == this.id)
+
+    if (index != -1) {
+      slideshowController.slides[index] = slide
+    }
+  }
+
   preloadImage() {
     this.preloadingImage = new Image()
 
