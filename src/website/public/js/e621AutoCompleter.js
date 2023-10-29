@@ -2,14 +2,18 @@ let e621AutoComplete = {
   next: null,
   current: null,
   processQueue: async () => {
-    let current = e621AutoComplete.current = e621AutoComplete.next
-    e621AutoComplete.next = null
-    let res = await fetch(`https://e621.net/tags/autocomplete.json?search%5Bname_matches%5D=${encodeURIComponent(current.query)}&expiry=7`)
+    try {
+      let current = e621AutoComplete.current = e621AutoComplete.next
+      e621AutoComplete.next = null
+      let res = await fetch(`https://e621.net/tags/autocomplete.json?search%5Bname_matches%5D=${encodeURIComponent(current.query)}&expiry=7`)
 
-    if (res.ok) {
-      current.resolve(await res.json())
-    } else {
-      current.reject(res)
+      if (res.ok) {
+        current.resolve(await res.json())
+      } else {
+        current.reject(res)
+      }
+    } catch (e) {
+      console.error(e)
     }
 
     await wait(10)
