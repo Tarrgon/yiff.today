@@ -759,6 +759,7 @@ let tagTreeHandler = {
   currentStructure: {},
   tags: "",
   unchangedTags: "",
+  lastChanges: [],
   preventClicks: false,
   preventScroll: false,
   lock: false,
@@ -1095,6 +1096,24 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   }
 }
 
+async function redoLastChanges() {
+  let changes = tagTreeHandler.lastChanges
+
+  if (!changes) return
+
+  for (let change of changes) {
+    if (change.change == 1) {
+      await addNewTag(change.tag, true, false, true)
+    } else {
+      if (tagTreeHandler.tags.split(" ").includes(change.tag)) {
+        tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, change.tag).trim()
+        let anyOne = document.querySelector(`[data-tag-name=\"${change.tag}\"]`)
+        if (anyOne) anyOne.firstChild.click()
+      }
+    }
+  }
+}
+
 uiElements.addTagButton.addEventListener("click", async () => {
   addNewTag(uiElements.newTagInput.value, true, true, true)
 })
@@ -1309,6 +1328,8 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
   let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
 
   if (tagDiff.length == 0) return
+
+  tagTreeHandler.lastChanges = changes
 
   let body = new URLSearchParams()
   body.append("post[tag_string_diff]", tagDiff)
@@ -1636,6 +1657,10 @@ hotkeys("enter", "addingnewtag", (e) => {
     e.preventDefault()
     item.click()
   }
+})
+
+hotkeys("r", "tagging", (e) => {
+  redoLastChanges()
 })
 
 hotkeys.filter = function (event) {
