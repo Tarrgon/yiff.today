@@ -409,6 +409,7 @@ let slideshowController = {
   timer: null,
   videoVolume: Number(localStorage.getItem("video-volume") || 0),
   videoMuted: localStorage.getItem("video-muted") == "true",
+  isAutoScrolling: false,
 
   isCurrentSlidePreloaded() {
     return slideshowController.slides.length > 0 && slideshowController.slides[slideshowController.currentSlideNumber].isPreloaded
@@ -1054,6 +1055,24 @@ let slideshowController = {
     if (history.storeHistory) {
       history.addToHistory(searchText)
     }
+  },
+
+  autoScrollUntilEnd() {
+    slideshowController.isAutoScrolling = true
+    let scroll = async () => {
+      if (slideshowController.isAutoScrolling) {
+        window.scrollBy({ top: 2 })
+        if (isOutOfViewport(uiElements.currentImage).bottom) {
+          setTimeout(() => {
+            requestAnimationFrame(scroll)
+          }, 15)
+        } else {
+          slideshowController.isAutoScrolling = false
+        }
+      }
+    }
+
+    requestAnimationFrame(scroll)
   }
 }
 

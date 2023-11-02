@@ -4,18 +4,32 @@ const CATEGORIES_SORTED = ["NEWTAG", "artist", "copyright", "character", "specie
 
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
-  let parentBounding = parent.getBoundingClientRect()
-  let bounding = elem.getBoundingClientRect()
+	if (parent) {
+		let parentBounding = parent.getBoundingClientRect()
+		let bounding = elem.getBoundingClientRect()
 
-  let out = {}
-  out.top = bounding.bottom < parentBounding.top
-  out.left = bounding.right < parentBounding.left
-  out.bottom = bounding.top > (parentBounding.y + parentBounding.height)
-  out.right = bounding.left > (parentBounding.x + parentBounding.width)
-  out.any = out.top || out.left || out.bottom || out.right
-  out.all = out.top && out.left && out.bottom && out.right
+		let out = {}
+		out.top = bounding.bottom < parentBounding.top
+		out.left = bounding.right < parentBounding.left
+		out.bottom = bounding.top > (parentBounding.y + parentBounding.height)
+		out.right = bounding.left > (parentBounding.x + parentBounding.width)
+		out.any = out.top || out.left || out.bottom || out.right
+		out.all = out.top && out.left && out.bottom && out.right
 
-  return out
+		return out
+	} else {
+		let bounding = elem.getBoundingClientRect()
+		
+		let out = {}
+		out.top = bounding.top < 0
+		out.left = bounding.left < 0
+		out.bottom = bounding.bottom > (window.innerHeight || document.documentElement.clientHeight)
+		out.right = bounding.right > (window.innerWidth || document.documentElement.clientWidth)
+		out.any = out.top || out.left || out.bottom || out.right
+		out.all = out.top && out.left && out.bottom && out.right
+
+		return out
+	}
 }
 
 function childSorter(a, b) {
