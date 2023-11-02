@@ -903,8 +903,6 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   uiElements.newTagInput.value = ""
   if (tag == "") return
 
-  hotkeys.setScope("tagging")
-
   if (checkExisting) {
     for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
       let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
