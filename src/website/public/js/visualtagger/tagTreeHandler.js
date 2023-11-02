@@ -4,32 +4,32 @@ const CATEGORIES_SORTED = ["NEWTAG", "artist", "copyright", "character", "specie
 
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
-	if (parent) {
-		let parentBounding = parent.getBoundingClientRect()
-		let bounding = elem.getBoundingClientRect()
+  if (parent) {
+    let parentBounding = parent.getBoundingClientRect()
+    let bounding = elem.getBoundingClientRect()
 
-		let out = {}
-		out.top = bounding.bottom < parentBounding.top
-		out.left = bounding.right < parentBounding.left
-		out.bottom = bounding.top > (parentBounding.y + parentBounding.height)
-		out.right = bounding.left > (parentBounding.x + parentBounding.width)
-		out.any = out.top || out.left || out.bottom || out.right
-		out.all = out.top && out.left && out.bottom && out.right
+    let out = {}
+    out.top = bounding.bottom < parentBounding.top
+    out.left = bounding.right < parentBounding.left
+    out.bottom = bounding.top > (parentBounding.y + parentBounding.height)
+    out.right = bounding.left > (parentBounding.x + parentBounding.width)
+    out.any = out.top || out.left || out.bottom || out.right
+    out.all = out.top && out.left && out.bottom && out.right
 
-		return out
-	} else {
-		let bounding = elem.getBoundingClientRect()
-		
-		let out = {}
-		out.top = bounding.top < 0
-		out.left = bounding.left < 0
-		out.bottom = bounding.bottom > (window.innerHeight || document.documentElement.clientHeight)
-		out.right = bounding.right > (window.innerWidth || document.documentElement.clientWidth)
-		out.any = out.top || out.left || out.bottom || out.right
-		out.all = out.top && out.left && out.bottom && out.right
+    return out
+  } else {
+    let bounding = elem.getBoundingClientRect()
 
-		return out
-	}
+    let out = {}
+    out.top = bounding.top < 0
+    out.left = bounding.left < 0
+    out.bottom = bounding.bottom > (window.innerHeight || document.documentElement.clientHeight)
+    out.right = bounding.right > (window.innerWidth || document.documentElement.clientWidth)
+    out.any = out.top || out.left || out.bottom || out.right
+    out.all = out.top && out.left && out.bottom && out.right
+
+    return out
+  }
 }
 
 function childSorter(a, b) {
@@ -732,6 +732,14 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
   let p = document.createElement("p")
   p.innerText = toTitle(tag.thisTag.name)
+
+  if (tag.thisTag.postCount < 50) {
+    let exclaim = document.createElement("span")
+    exclaim.classList.add("has-text-danger")
+    exclaim.innerText = "!!"
+    p.appendChild(exclaim)
+  }
+
   summary.appendChild(p)
 
   if (!isReview && tag.thisTag.category != 9) createImplicationRequester(details, tag.thisTag.name, depth + 1, tag)
@@ -920,7 +928,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   if (checkExisting) {
     for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
       let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
-  
+
       if (existing && existing.thisTag.active) {
         if (flash) {
           for (let i = 0; i < 6; i++) {
@@ -928,7 +936,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
             await wait(150)
           }
         }
-  
+
         return
       }
     }
@@ -1300,11 +1308,11 @@ uiElements.submitChangesButton.addEventListener("click", () => {
 
     let child = findChildInStructure(tagTreeHandler.currentStructure, change.tag)
 
-    if (child && child.thisTag.category == 9) {
+    if (child && (child.thisTag.category == 9 || child.thisTag.postCount < 50)) {
       span.innerText = span.innerText.trim()
       let exclaim = document.createElement("sup")
       exclaim.classList.add("has-text-warning")
-      exclaim.innerText = "! "
+      exclaim.innerText = "!! "
       span.appendChild(exclaim)
     }
 
