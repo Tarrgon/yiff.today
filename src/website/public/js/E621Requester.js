@@ -23,24 +23,29 @@ class E621Requester {
     WAIT_DECAY = Math.min(1000, WAIT_DECAY + 20)
     if (waitTime > 0) await wait(waitTime)
     this.lastRequestTime = Date.now()
-    let headers = {}
     // if (login && login.e621Username != "" && login.e621ApiKey != "") {
     //   headers.Authorization = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
     // }
 
     let options = {
-      headers
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST"
     }
 
     if (pageNumber == null && this._searchAfter != null) {
       options.body = JSON.stringify({
+        query: searchText,
         searchAfter: this._searchAfter
       })
-      options.headers["Content-Type"] = "application/json"
-      options.method = "POST"
+    } else {
+      options.body = JSON.stringify({
+        query: searchText
+      })
     }
 
-    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100&query=${encodeURIComponent(searchText)}${pageNumber != null ? `&page=${pageNumber}` : ""}&_client=${E621Requester.USER_AGENT}`, options)
+    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100&${pageNumber != null ? `&page=${pageNumber}` : ""}&_client=${E621Requester.USER_AGENT}`, options)
 
     if (res.ok) {
       let data = await res.json()
