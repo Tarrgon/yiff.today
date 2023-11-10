@@ -1680,7 +1680,7 @@ hotkeys("enter", "addingnewtag", (e) => {
 })
 
 hotkeys("r", "tagging", (e) => {
-  redoLastChanges()
+  if (confirm("Redo last changes")) redoLastChanges()
 })
 
 hotkeys.filter = function (event) {
