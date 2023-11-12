@@ -1116,9 +1116,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   }
 }
 
-async function redoLastChanges() {
-  let changes = tagTreeHandler.lastChanges
-
+async function redoLastChanges(changes) {
   if (!changes) return
 
   for (let change of changes) {
@@ -1132,6 +1130,8 @@ async function redoLastChanges() {
       }
     }
   }
+
+  uiElements.closeRedoButton.click()
 }
 
 uiElements.addTagButton.addEventListener("click", async () => {
@@ -1349,7 +1349,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
   if (tagDiff.length == 0) return
 
-  tagTreeHandler.lastChanges = changes
+  tagTreeHandler.lastChanges.unshift({ img: slideshowController.getCurrentSlide().fileUrl, changes })
 
   let body = new URLSearchParams()
   body.append("post[tag_string_diff]", tagDiff)
@@ -1454,6 +1454,11 @@ uiElements.closeResponseButton.addEventListener("click", () => {
 uiElements.closeReviewAddTagButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
   uiElements.reviewAddTagModal.classList.remove("is-active")
+})
+
+uiElements.closeRedoButton.addEventListener("click", () => {
+  hotkeys.setScope("tagging")
+  uiElements.redoModal.classList.remove("is-active")
 })
 
 uiElements.reviewTagAddButton.addEventListener("click", () => {
@@ -1654,6 +1659,13 @@ hotkeys("escape", "review", (e) => {
   }
 })
 
+hotkeys("escape", "redoing", (e) => {
+  e.preventDefault()
+  if (uiElements.redoModal.classList.contains("is-active")) {
+    uiElements.closeRedoButton.click()
+  }
+})
+
 hotkeys("up", "addingnewtag", (e) => {
   e.preventDefault()
 
@@ -1680,7 +1692,29 @@ hotkeys("enter", "addingnewtag", (e) => {
 })
 
 hotkeys("r", "tagging", (e) => {
-  if (confirm("Redo last changes")) redoLastChanges()
+  hotkeys.setScope("redoing")
+
+  while (uiElements.redoContent.firstChild) {
+    uiElements.redoContent.removeChild(uiElements.redoContent.firstChild)
+  }
+
+  for (let { img, changes } of tagTreeHandler.lastChanges) {
+    let i = document.createElement("img")
+    i.src = img
+    i.classList.add("column", "is-4")
+    i.style.cursor = "pointer"
+
+    i.addEventListener("click", (e) => {
+      e.preventDefault()
+
+      redoLastChanges(changes)
+    })
+
+    uiElements.redoContent.appendChild(i)
+  }
+
+  uiElements.redoModal.classList.add("is-active")
+  // redoLastChanges()
 })
 
 hotkeys.filter = function (event) {
