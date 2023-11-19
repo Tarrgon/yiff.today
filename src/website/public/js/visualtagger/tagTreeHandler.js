@@ -1415,6 +1415,10 @@ function showLoadingScreen() {
 function showSuccessScreen() {
   hotkeys.setScope("review")
 
+  while (uiElements.responseContent.firstChild) {
+    uiElements.responseContent.removeChild(uiElements.responseContent.firstChild)
+  }
+
   uiElements.responseTitle.innerText = "Success"
 
   uiElements.responseModal.classList.add("is-active")
