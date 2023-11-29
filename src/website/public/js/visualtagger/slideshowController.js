@@ -889,7 +889,8 @@ let slideshowController = {
     let slide = slideshowController.getCurrentSlide()
 
     if (slide) {
-      let map = slide.rawTags[1].map(a => a.split(" ").join("_")).filter(a => a != "unknown_artist" && a != "third-party_edit" && a != "anonymous_artist" && a != "conditional_dnp" && a != "sound_warning" && a != "epilepsy_warning" && !uiElements.searchText.value.includes(a)).join(" ~")
+      const notArtists = ["unknown_artist", "third-party_edit", "anonymous_artist", "conditional_dnp", "sound_warning", "epilepsy_warning", "avoid_posting"]
+      let map = slide.rawTags[1].map(a => a.split(" ").join("_")).filter(a =>  !notArtists.includes(a) && !uiElements.searchText.value.includes(a)).join(" ~")
       if (map.length > 0) uiElements.searchText.value += " ~" + map
     }
   },
