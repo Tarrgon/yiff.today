@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Yiff Today - Mass Unfavoriter</title>
+
+  <%- include("./partials/head"); %>
+  <link rel="stylesheet" href="/css/massunfavorite.css">
+</head>
+
+<body>
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
+      <input id="filter-text" type="text" placeholder="Filter tags" style="height:2.5em;" /><br>
+      <button id="unfavorite-button">Unfavorite</button>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 has-text-centered options">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light">E621 Login</h4>
+      <ul>
+        <li>
+          <label>E621 Username (Case-Sensitive) <input id="e621-username" type="text" /></label>
+        </li>
+        <li>
+          <label>E621 API Key <input id="e621-api-key" type="password" /></label>
+        </li>
+        <li><a href="https://e621.net/users/home" target="_blank">(get API key here)</a></li>
+        <li class="note">
+          This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="/js/massunfavorite/uiElements.js"></script>
+  <script src="/js/e621LoginHandler.js"></script>
+  <script src="/js/dataHandler.js"></script>
+  <script src="/js/massunfavorite/handler.js"></script>
+</body>
+
+</html>

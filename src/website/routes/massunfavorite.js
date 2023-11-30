@@ -1,13 +1,10 @@
 const express = require("express")
 const router = express.Router()
 
-let utils
-
 router.get("/", async (req, res) => {
-  res.render("visualtagger")
+  res.render("massunfavorite")
 })
 
-module.exports = (u) => {
-  utils = u
+module.exports = () => {
   return router
 }

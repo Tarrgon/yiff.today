@@ -21,7 +21,7 @@ html {
   background: #181a1f;
 }
 
-#search-button {
+#search-button, #unfavorite-button {
   background: #3498db;
   background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
   background-image: -moz-linear-gradient(top, #3498db, #2980b9);
@@ -40,7 +40,7 @@ html {
   margin-top: 10px;
 }
 
-#search-text, #start-page-number {
+#search-text, #start-page-number, #filter-text {
   padding: 5px 5px 5px 5px;
   margin: 10px;
   border-radius: 5px;
