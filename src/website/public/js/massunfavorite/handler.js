@@ -1,13 +1,11 @@
 const USER_AGENT = "yiff.today Mass Unfavorite/1.0"
 
-let AUTH = ""
-
 async function getFavorites() {
   try {
     let res = await fetch("https://e621.net/favorites.json", {
       headers: {
         "User-Agent": USER_AGENT,
-        Authorization: AUTH
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
       }
     })
 
@@ -37,7 +35,7 @@ async function unfavorite(postId) {
       method: "POST",
       headers: {
         "User-Agent": USER_AGENT,
-        Authorization: AUTH
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
       },
       body
     })
@@ -58,9 +56,15 @@ function wait(ms) {
   return new Promise(r => setTimeout(r, ms))
 }
 
-async function run() {
-  const dry = false
-  let groups = getGroups(uiElements.filterText.value.trim())
+async function getPostsToUnfavorite(filter) {
+  let favorites = await getFavorites()
+
+  if (!favorites) {
+    alert("Error fetching favorites")
+    return
+  }
+
+  let groups = getGroups(filter)
 
   if (!groups) {
     console.error("Error parsing filter.")
@@ -74,11 +78,8 @@ async function run() {
     return
   }
 
-  AUTH = `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-
-  let favorites = await getFavorites()
-
   let changes = { unfavorited: [], noChange: [] }
+  let toUnfavorite = []
 
   for (let favorite of favorites) {
     if (builtQuery && !passesGroup(favorite.tags, builtQuery)) {
@@ -86,15 +87,27 @@ async function run() {
       continue
     }
 
-    if (!dry) {
-      await unfavorite(favorite.id)
-      await wait(800)
-    }
+    toUnfavorite.push(favorite)
 
     changes.unfavorited.push({ id: favorite.id, tags: favorite.tags, operation: "UNFAVORITE" })
   }
 
-  if (dry) console.log("DRY RUN, NO OPERATIONS DONE.")
+  return { changes, toUnfavorite }
+}
+
+async function run() {
+  if (!confirm("Are you sure?")) return
+
+  let { changes, toUnfavorite } = await getPostsToUnfavorite(uiElements.filterText.value.trim())
+
+  alert(`This will take ${toUnfavorite.length * 0.8} seconds. Do not close this window until complete.`)
+
+  for (let favorite of toUnfavorite) {
+    await unfavorite(favorite.id)
+    await wait(800)
+  }
+
+  alert(`Complete. Information available in console. Total unfavorited: ${changes.unfavorited.length}.`)
 
   console.log(`Total unfavorited: ${changes.unfavorited.length}`)
   console.log(`Total unchanged: ${changes.noChange.length}`)
@@ -286,3 +299,11 @@ class Tokenizer {
 }
 
 uiElements.unfavoriteButton.addEventListener("click", run)
+
+uiElements.showButton.addEventListener("click", async (e) => {
+  let { toUnfavorite } = await getPostsToUnfavorite(uiElements.filterText.value.trim())
+
+  slideshowController.slides = toUnfavorite.map(fav => new Slide(fav.id, fav.rating, fav.file.url, fav.preview.url, `https://e621.net/posts/${fav.id}`, fav.file.width, fav.file.height, new Date(fav.created_at), fav.score.total, getMediaTypeFromFileType(fav.file.ext), fav.file.md5, Object.values(fav.tags).flat(), fav.tags))
+
+  slideshowController.setCurrentSlideNumber(0)
+})

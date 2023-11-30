@@ -10,9 +10,40 @@
 </head>
 
 <body>
+  <p id="warning-message"></p>
+  <p id="info-message"></p>
+  <div id="slide-wrapper">
+    <img id="current-image" />
+    <video id="current-video" autoplay="true" loop="true" volume="0" controls>
+      <source type="video/webm">
+      </source>
+    </video>
+    <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
+    <div id="tags" style="display:none;"></div>
+  </div>
+
+  <div id="navigation" class="columns">
+    <div class="column is-8 is-offset-2 mb-6 has-text-centered">
+      <button class="hidden" id="favorite-button">♥</button><br>
+      <span id="current-slide-number"></span> of <span id="total-slide-number"></span><br>
+      <button class="nav-button" id="first-button">&lt;&lt;</button>
+      <button class="nav-button" id="previous-button">&lt;</button>
+      <button class="nav-button" id="play-button">&#9658;</button>
+      <button class="nav-button" id="pause-button">&#9646;&#9646;</button>
+      <button class="nav-button" id="next-button">&gt;</button>
+      <button class="nav-button" id="last-button">&gt;&gt;</button>
+    </div>
+  </div>
+
+  <div id="thumbnail-list-wrapper">
+    <div id="thumbnail-list">
+    </div>
+  </div>
+
   <div class="columns">
     <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
-      <input id="filter-text" type="text" placeholder="Filter tags" style="height:2.5em;" /><br>
+      <input id="filter-text" type="text" placeholder="Filter tags" style="height:2.5em;" /><br />
+      <button id="show-button">Show to be Unfavorited</button><br />
       <button id="unfavorite-button">Unfavorite</button>
     </div>
   </div>
@@ -35,9 +66,12 @@
     </div>
   </div>
 
+  <script src="/js/globals.js"></script>
+  <script src="/js/Slide.js"></script>
   <script src="/js/massunfavorite/uiElements.js"></script>
-  <script src="/js/e621LoginHandler.js"></script>
   <script src="/js/dataHandler.js"></script>
+  <script src="/js/e621LoginHandler.js"></script>
+  <script src="/js/massunfavorite/slideshowController.js"></script>
   <script src="/js/massunfavorite/handler.js"></script>
 </body>
 
