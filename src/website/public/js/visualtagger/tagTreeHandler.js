@@ -1215,7 +1215,7 @@ uiElements.newTagInput.addEventListener("input", async (e) => {
   if (uiElements.newTagInput.value.length >= 3) {
     try {
       let autoComplete = await e621AutoComplete.autoComplete(tag)
-      if (tag.length < 3) return // Async hell
+      if (uiElements.newTagInput.value.length < 3) return // Async hell
       uiElements.autoCompleteContainer.classList.add("is-active")
 
       while (uiElements.autoCompleteMenu.firstChild) {
