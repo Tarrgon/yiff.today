@@ -919,7 +919,7 @@ function getChanges() {
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
 async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, checkExisting = false) {
-  tag = tag.trim()
+  tag = tag.trim().replaceAll(" ", "_")
   e621AutoComplete.next = null
   uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
@@ -1207,10 +1207,11 @@ function createWikiLink(tagName, classes) {
 uiElements.newTagInput.addEventListener("input", async (e) => {
   hotkeys.setScope("addingnewtag")
   currentAutocompleteItem = -1
+  let tag = uiElements.newTagInput.value.trim().replaceAll(" ", "_")
   if (uiElements.newTagInput.value.length >= 3) {
     try {
-      let autoComplete = await e621AutoComplete.autoComplete(uiElements.newTagInput.value)
-      if (uiElements.newTagInput.value.length < 3) return // Async hell
+      let autoComplete = await e621AutoComplete.autoComplete(tag)
+      if (tag.length < 3) return // Async hell
       uiElements.autoCompleteContainer.classList.add("is-active")
 
       while (uiElements.autoCompleteMenu.firstChild) {
