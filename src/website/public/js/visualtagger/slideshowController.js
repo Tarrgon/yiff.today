@@ -505,6 +505,7 @@ let slideshowController = {
 
   setCurrentSlideNumber(index) {
     if (index >= slideshowController.slides.length || index < 0) return
+    if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return 
     slideshowController.clearCallbacksForPreloadingSlides()
     slideshowController.currentSlideNumber = index
     slideshowController.preloadCurrentSlideIfNeeded()
