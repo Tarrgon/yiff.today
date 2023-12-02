@@ -1387,6 +1387,8 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     showFailureScreen("Failure", "Unknown error, please check console")
   }
 
+  tagTreeHandler.unchangedTags = tagTreeHandler.tags
+
 
   tagTreeHandler.lock = false
 })
