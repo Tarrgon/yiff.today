@@ -1106,6 +1106,10 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
     }
   }
 
+  while (uiElements.autoCompleteMenu.firstChild) {
+    uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
+  }
+
   tagTreeHandler.preventClicks = false
 
   if (flash) {
