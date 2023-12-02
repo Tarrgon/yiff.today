@@ -921,7 +921,6 @@ function getChanges() {
 async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, checkExisting = false) {
   tag = tag.trim().replaceAll(" ", "_")
   e621AutoComplete.next = null
-  uiElements.autoCompleteContainer.classList.remove("is-active")
   uiElements.newTagInput.value = ""
   if (tag == "") return
 
@@ -1106,6 +1105,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
     }
   }
 
+  uiElements.autoCompleteContainer.classList.remove("is-active")
   while (uiElements.autoCompleteMenu.firstChild) {
     uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
   }
