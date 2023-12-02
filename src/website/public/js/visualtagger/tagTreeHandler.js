@@ -105,14 +105,27 @@ function findChildInStructure(structure, name) {
 
 let progressMade = true
 
-function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
+async function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
   if (Object.entries(unresolvedImplications).length == 0) return structure
 
   if (!progressMade) {
-    console.log(unresolvedImplications, structure)
     progressMade = true
-    showFailureScreen("Failure", `Unable to resolve tags, please report this issue and post id: ${slideshowController.getCurrentSlide().id}`)
-    return
+    for (let [tagName, data] of Object.entries(unresolvedImplications)) {
+      for (let parent of data.parents) {
+        tagTreeHandler.tags = addToText(tagTreeHandler.tags, parent.name)
+        tags = tagTreeHandler.tags
+        let allImplications = {}
+        await getImplications(parent.name, allImplications)
+
+        let struct = await resolveTagStructure(allImplications, tags)
+
+        for (let [k, v] of Object.entries(struct)) {
+          structure[k] = v
+        }
+      }
+    }
+    // showFailureScreen("Failure", `Unable to resolve tags, please report this issue and post id: ${slideshowController.getCurrentSlide().id}`)
+    // return
   }
 
   progressMade = false
@@ -173,7 +186,7 @@ function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
     }
   }
 
-  return resolveTagStructure(unresolvedImplications, tags, structure)
+  return await resolveTagStructure(unresolvedImplications, tags, structure)
 }
 
 async function getImplications(tags, allImplications, include = "children,parents") {
@@ -364,7 +377,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     let allImplications = {}
     await getImplications(tagName, allImplications, "children")
 
-    let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
+    let structure = await resolveTagStructure(allImplications, tagTreeHandler.tags)
 
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
 
@@ -534,7 +547,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
   //   let allImplications = {}
   //   await getImplications(tagName, allImplications, "children")
 
-  //   let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
+  //   let structure = await resolveTagStructure(allImplications, tagTreeHandler.tags)
 
   //   let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
 
@@ -804,7 +817,7 @@ let tagTreeHandler = {
     await getImplications(tagTreeHandler.tags, allImplications)
 
     if (slideshowController.currentSlideNumber == index) {
-      let structure = resolveTagStructure(allImplications, tagTreeHandler.tags)
+      let structure = await resolveTagStructure(allImplications, tagTreeHandler.tags)
 
       tagTreeHandler.currentStructure = structure
 
