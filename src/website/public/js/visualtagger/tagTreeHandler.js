@@ -937,6 +937,8 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   uiElements.newTagInput.value = ""
   if (tag == "") return
 
+  uiElements.autoCompleteContainer.classList.remove("is-active")
+
   if (checkExisting) {
     for (let [tagName, structure] of Object.entries(tagTreeHandler.currentStructure)) {
       let existing = findChildInStructure({ [tagName]: structure }, tag.trim())
@@ -1116,11 +1118,6 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
         // }
       }
     }
-  }
-
-  uiElements.autoCompleteContainer.classList.remove("is-active")
-  while (uiElements.autoCompleteMenu.firstChild) {
-    uiElements.autoCompleteMenu.removeChild(uiElements.autoCompleteMenu.firstChild)
   }
 
   tagTreeHandler.preventClicks = false
