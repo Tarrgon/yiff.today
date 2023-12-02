@@ -3,230 +3,34 @@
 <html>
 
 <head>
-  <title>Yiff Today - Slideshow Viewer</title>
+  <title>Yiff Today - Index</title>
 
   <%- include("./partials/head"); %>
 </head>
 
 <body>
-  <p id="warning-message"></p>
-  <p id="info-message"></p>
-  <div id="slide-wrapper">
-    <img id="current-image" />
-    <video id="current-video" autoplay="true" loop="true" volume="0" controls>
-      <source type="video/webm">
-      </source>
-    </video>
-    <img id="loading-animation" src="img/loading.gif" alt="Loading Slide" />
-    <div id="tags" style="display:none;"></div>
-  </div>
-
-  <div id="navigation" class="columns">
-    <div class="column is-8 is-offset-2 mb-6 has-text-centered">
-      <button class="hidden" id="favorite-button">♥</button><br>
-      <span id="current-slide-number"></span> of <span id="total-slide-number"></span><br>
-      <button class="nav-button" id="first-button">&lt;&lt;</button>
-      <button class="nav-button" id="previous-button">&lt;</button>
-      <button class="nav-button" id="play-button">&#9658;</button>
-      <button class="nav-button" id="pause-button">&#9646;&#9646;</button>
-      <button class="nav-button" id="next-button">&gt;</button>
-      <button class="nav-button" id="last-button">&gt;&gt;</button>
-    </div>
-  </div>
-
-  <div id="thumbnail-list-wrapper">
-    <div id="thumbnail-list">
-    </div>
-  </div>
-
   <div class="columns">
-    <div class="is-container box column is-10 is-offset-1 my-6 pb-5 has-text-centered">
-      <input id="search-text" type="text" placeholder="Search tags" list="search-history" /><br>
-      <input id="start-page-number" type="number" placeholder="Start page" min="1" /><br>
-      <button id="search-button">Search</button>
-      <datalist id="search-history"></datalist>
-    </div>
-  </div>
-
-  <div class="columns">
-    <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">Filtering</h4>
+    <div class="options is-container box column is-2 is-offset-5 my-6 has-text-centered">
+      <h1 class="is-size-3 has-text-weight-bold has-text-light">Site Index</h1>
       <ul>
         <li>
-          <label><input id="include-images" type="checkbox" checked />Include Images</label>
+          <h3 class="has-text-weight-normal is-size-5"><a href="/">Slideshow Viewer</a></h3>
         </li>
         <li>
-          <label><input id="include-gifs" type="checkbox" checked />Include GIFs</label>
+          <h3 class="has-text-weight-normal is-size-5"><a href="/visualtagger">Visual Tagger</a></h3>
         </li>
         <li>
-          <label><input id="include-webms" type="checkbox" />Include WEBMs</label>
+          <h3 class="has-text-weight-normal is-size-5"><a href="/counter">Query Post Counter</a></h3>
         </li>
         <li>
-          <label><input id="include-explicit" type="checkbox" />Include Explicit</label>
+          <h3 class="has-text-weight-normal is-size-5"><a href="/massunfavorite">Mass Unfavoriter</a></h3>
         </li>
         <li>
-          <label><input id="include-questionable" type="checkbox" />Include Questionable</label>
-        </li>
-        <li>
-          <label><input id="include-safe" type="checkbox" checked />Include Safe</label>
-        </li>
-        <li class="hidden">
-          <label><input id="include-favorites" type="checkbox" checked />Include Favorites</label>
-        </li>
-        <li>
-          <label><input id="include-seen" type="checkbox" />Include Seen</label>
-        </li>
-        <li class="note">
-          Searching for only GIFs or WEBMs may take forever since it is still going through all image results.
-          Consider adding "animated" to the search query.
-        </li>
-      </ul>
-
-      <h4>Local Tags</h4>
-      <ul id="local-tags-container">
-        <li>
-          <textarea id="local-tags" placeholder="example example2 ( tag1 tag2 ) ( -x -y )"></textarea>
-        </li>
-        <li class="note">
-          These tags are checked locally, supporting tag grouping and proper "or" tag resolving in those groups. These do not support groups within groups.
-        </li>
-      </ul>
-
-      <h4>Blacklist</h4>
-      <ul id="blacklist-container">
-        <li>
-          <textarea id="blacklist" placeholder="example example2"></textarea>
-        </li>
-        <li class="note">
-          These tags are checked locally. Supports tag groups.
-        </li>
-      </ul>
-    </div>
-
-    <div class="options is-container box column is-4 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">Presentation</h4>
-      <ul>
-        <li>
-          Seconds per Slide
-          <br>
-          <input id="seconds-per-slide" type="number" min="1" value="5" />
-        </li>
-        <li>
-          Max. Width
-          <br>
-          <input id="max-width" type="number" min="1" /><br>
-        </li>
-        <li>
-          Max. Height
-          <br>
-          <input id="max-height" type="number" min="1" />
-        </li>
-        <li>
-          <label><input id="auto-fit-slide" type="checkbox" checked />Auto-Fit</label>
-        </li>
-        <li class="hidden">
-          <label><input id="favorite-remotely" type="checkbox" />Favorite Remotely <span class="note">Requires API Key</span></label>
-        </li>
-
-        <li>
-          <label><input id="slideshow-plays-full-video" type="checkbox" />Slideshow Plays Full Video</label>
-        </li>
-
-        <li>
-          Slideshow Gif Loop Count
-          <br>
-          <input id="slideshow-gif-loop-count" type="number" min="1" value="4" />
-        </li>
-
-        <li>
-          Slideshow Low Duration mp4 Seconds
-          <br>
-          <input id="slideshow-low-duration-mp4-seconds" type="number" min="1" value="10" />
-        </li>
-        <li class="note">
-          Slideshow does not respect pausing videos, or buffering.
-        </li>
-      </ul>
-    </div>
-
-    <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">History</h4>
-      <ul>
-        <li><label><input id="store-history" type="checkbox" checked />Store Search History</label></li>
-        <li class="note">
-          Up to 100 queries are saved. Uses localStorage.
-        </li>
-        <li><button id="clear-history">Clear Search History</button></li>
-        <li><label><input id="store-seen" type="checkbox" checked />Store Seen</label></li>
-        <li class="note">
-          Up to 800,000 are saved (about 6MB).
-        </li>
-        <li><button id="clear-seen">Clear Seen History</button></li>
-        <li class="hidden"><button id="view-favorites">View All Favorites</button></li>
-        <li class="hidden note">
-          Favorites are stored on the server as there"s no way to store the size it requires client side. Due to this, there are limits to the amount of favorites you can have. <span class="has-text-info">Current limit is 10,000</span>. Tags are saved at the first time a user favorites. This allows a lot of space to be saved server side.
-          <br />
-          <span class="class=hidden has-text-danger">Due to rate limits on E621, favorites are added in batches of up to 40/s</span> for everyone. (40 tags max, at a 1 req/s rate limit) This means your favorites might be quite delayed if many people are using the app at the same time. However, this is unlikely.
+          <h3 class="has-text-weight-normal is-size-5"><a href="/colors">Color Dataset</a></h3>
         </li>
       </ul>
     </div>
   </div>
-
-  <div class="columns">
-    <!-- <div class="options is-container box column is-2 is-offset-1 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">E621 Login</h4>
-      <ul>
-        <li>
-          <label>E621 Username <input id="e621-username" type="text" /></label>
-        </li>
-        <li>
-          <label>E621 API Key <input id="e621-api-key" type="password" /></label>
-        </li>
-        <li><a href="https://e621.net/users/home" target="_blank">(get API key here)</a></li>
-        <li class="note">
-          This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
-          <br>
-          Allows you to access posts that can't be accessed without an account.
-        </li>
-      </ul>
-    </div> -->
-
-    <div class="is-container box column is-4 is-offset-4 my-6 has-text-centered">
-      <h4 class="is-size-5 has-text-weight-bold has-text-light">Hotkeys</h4>
-      <ul class="has-text-light">
-        <li>Full-screen (F11)</li>
-        <li>Next slide (&rarr; or D)</li>
-        <li>Previous slide (&larr; or A)</li>
-        <li>Forward 10 slides (&uarr; or W)</li>
-        <li>Back 10 slides (&darr; or S)</li>
-        <li>Play/pause slideshow (Enter or space)</li>
-        <li>Auto-Fit (F)</li>
-        <li>Open current image in new tab (E)</li>
-        <li>Download Current Image (L or Numpad period)</li>
-        <li class="hidden">Favorite/Unfavorite Image (G or Numpad zero - <a id="login" class="is-underlined">Must be logged in</a>)</li>
-        <hr />
-        <li class="is-size-4 has-text-weight-semibold has-text-light">Video Controls</li>
-        <li>Backward 5 seconds (1)</li>
-        <li>Forward 5 seconds (2)</li>
-        <li>Play/pause video (3)</li>
-        <li class="note">
-          Both regular and numpad work
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/gif-frames@1.0.1/dist/gif-frames.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fuzzysort@2.0.4/fuzzysort.min.js"></script>
-  <script src="/js/globals.js"></script>
-  <script src="/js/slideshowElements.js"></script>
-  <script src="/js/Slide.js"></script>
-  <script src="/js/E621Requester.js"></script>
-  <script src="/js/dataHandler.js"></script>
-  <script src="/js/filterHandler.js"></script>
-  <script src="/js/historyHandler.js"></script>
-  <script src="/js/presentationHandler.js"></script>
-  <script src="/js/slideshowController.js"></script>
 </body>
 
 </html>
