@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Yiff Today - Query Counter</title>
+
+  <%- include("./partials/head"); %>
+</head>
+
+<body>
+
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
+      <h1 class="is-size-1 has-text-light">
+        Count: <span id="count">0</span>
+      </h1>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
+      <input id="search-text" type="text" placeholder="Search tags" style="height:2.5em;" /><br />
+      <button id="count-button">Count</button><br />
+    </div>
+  </div>
+
+  <script src="/js/counter/handler.js"></script>
+</body>
+
+</html>

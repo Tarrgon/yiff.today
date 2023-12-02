@@ -31,6 +31,7 @@ module.exports = async () => {
     app.use("/colors", require("./routes/colors.js")(utils))
     app.use("/visualtagger", require("./routes/visualtagger.js")(utils))
     app.use("/massunfavorite", require("./routes/massunfavorite.js")(utils))
+    app.use("/counter", require("./routes/counter.js")(utils))
 
     return app
   } catch (e) {
