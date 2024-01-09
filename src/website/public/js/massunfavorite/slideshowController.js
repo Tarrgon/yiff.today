@@ -815,17 +815,6 @@ let slideshowController = {
     })
   },
 
-  tryToPlayOrPause() {
-    if (slideshowController.hasSlidesToDisplay()) {
-      if (slideshowController.isPlaying)
-        slideshowController.pauseSlideshow()
-      else
-        slideshowController.startSlideshow()
-    }
-
-    slideshowController.updateNavigation()
-  },
-
   async downloadCurrentSlide() {
     let slide = slideshowController.getCurrentSlide()
 
@@ -908,14 +897,6 @@ uiElements.currentImage.onload = () => {
 uiElements.currentVideo.addEventListener("loadeddata", () => {
   slideshowController.hideLoadingAnimation()
 }, false)
-
-uiElements.playButton.addEventListener("click", () => {
-  slideshowController.startSlideshow()
-})
-
-uiElements.pauseButton.addEventListener("click", () => {
-  slideshowController.pauseSlideshow()
-})
 
 uiElements.nextButton.addEventListener("click", () => {
   slideshowController.nextSlide()

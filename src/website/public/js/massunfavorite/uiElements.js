@@ -11,8 +11,6 @@ let uiElements = {
   totalSlideNumber: document.getElementById("total-slide-number"),
   firstButton: document.getElementById("first-button"),
   previousButton: document.getElementById("previous-button"),
-  playButton: document.getElementById("play-button"),
-  pauseButton: document.getElementById("pause-button"),
   nextButton: document.getElementById("next-button"),
   lastButton: document.getElementById("last-button"),
   thumbnailList: document.getElementById("thumbnail-list"),

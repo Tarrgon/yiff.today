@@ -1,8 +1,11 @@
 const USER_AGENT = "yiff.today Mass Unfavorite/1.0"
 
-async function getFavorites() {
+let favorites = []
+
+async function getFavorites(page = 1) {
   try {
-    let res = await fetch("https://e621.net/favorites.json", {
+    console.log(`Fetching favorites page ${page}`)
+    let res = await fetch(`https://e621.net/favorites.json?page=${page}&limit=300&user_id=45665`, {
       headers: {
         "User-Agent": USER_AGENT,
         Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
@@ -10,10 +13,14 @@ async function getFavorites() {
     })
 
     if (res.ok) {
-      return (await res.json()).posts.map(p => {
+      let parsed = await res.json()
+
+      if (parsed.posts.length == 0) return []
+
+      return parsed.posts.map(p => {
         p.tags = Object.values(p.tags).flat()
         return p
-      })
+      }).concat(await getFavorites(page + 1))
     } else {
       console.error(`Fetching favorites failed (${res.status})`)
       console.error(await res.text())
@@ -57,7 +64,11 @@ function wait(ms) {
 }
 
 async function getPostsToUnfavorite(filter) {
-  let favorites = await getFavorites()
+  if (favorites.length == 0) {
+    if (!confirm("Click OK to begin fetching favorites. This could take a long time. You will be alerted when ready")) return { changes: null, toUnfavorite: null }
+    favorites = await getFavorites()
+    alert("Fetching favorites complete")
+  }
 
   if (!favorites) {
     alert("Error fetching favorites")
@@ -99,6 +110,8 @@ async function run() {
   if (!confirm("Are you sure?")) return
 
   let { changes, toUnfavorite } = await getPostsToUnfavorite(uiElements.filterText.value.trim())
+
+  if (changes == null) return
 
   alert(`This will take ${toUnfavorite.length * 0.8} seconds. Do not close this window until complete.`)
 
