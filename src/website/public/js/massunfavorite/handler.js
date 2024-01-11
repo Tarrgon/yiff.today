@@ -2,6 +2,8 @@ const USER_AGENT = "yiff.today Mass Unfavorite/1.0"
 
 let favorites = []
 
+let sets = {}
+
 async function getFavorites(page = 1) {
   try {
     console.log(`Fetching favorites page ${page}`)
@@ -29,6 +31,75 @@ async function getFavorites(page = 1) {
     }
   } catch (e) {
     console.error(`Fetching favorites failed`)
+    console.error(e)
+    return null
+  }
+}
+
+async function getPosts(ids) {
+  let posts = []
+
+  for (let i = 0; i < ids.length / 200; i++) {
+    let theseIds = ids.slice(i * 200, i * 200 + 200)
+
+    console.log(theseIds)
+
+    let res = await fetch(`https://search.yiff.today/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({"query": `id:${theseIds.join(" ~ id:")}`})
+    })
+
+    if (!res.ok) {
+      console.error(`Fetching posts failed (${res.status})`)
+      console.error(await res.text())
+
+      return null
+    }
+
+    let body = await res.json()
+
+    posts = posts.concat(body.posts.map(p => {
+      p.tags = p.tags.flat()
+      return p
+    }))
+  }
+
+  return posts
+}
+
+async function getSet(id) {
+  try {
+    if (sets[id]) return sets[id]
+    let res = await fetch(`https://e621.net/post_sets/${id}.json`, {
+      headers: {
+        "User-Agent": USER_AGENT,
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      }
+    })
+
+    if (res.ok) {
+      let parsed = await res.json()
+
+      if (parsed.post_ids.length == 0) return []
+
+      // let posts = await getPosts(parsed.post_ids)
+
+      // sets[id] = posts
+
+      sets[id] = parsed.post_ids
+
+      return sets[id]
+    } else {
+      console.error(`Fetching set failed (${res.status})`)
+      console.error(await res.text())
+
+      return null
+    }
+  } catch (e) {
+    console.error(`Fetching set failed`)
     console.error(e)
     return null
   }
@@ -75,6 +146,14 @@ async function getPostsToUnfavorite(filter) {
     return
   }
 
+  let setRegex = /set:(\d+)/g
+
+  let res = null
+
+  while ((res = setRegex.exec(filter)) != null) {
+    await getSet(parseInt(res[1]))
+  }
+
   let groups = getGroups(filter)
 
   if (!groups) {
@@ -93,7 +172,7 @@ async function getPostsToUnfavorite(filter) {
   let toUnfavorite = []
 
   for (let favorite of favorites) {
-    if (builtQuery && !passesGroup(favorite.tags, builtQuery)) {
+    if (builtQuery && !passesGroup(favorite, builtQuery)) {
       changes.noChange.push({ id: favorite.id, tags: favorite.tags, operation: "NO CHANGE" })
       continue
     }
@@ -134,14 +213,17 @@ const MODIFIERS = {
   OR: 1
 }
 
-function passesGroup(tags, curGroup) {
+function passesGroup(post, curGroup) {
   let { must, mustNot, should } = curGroup
 
   for (let token of must) {
     if (typeof (token) == "string") {
-      if (!tags.includes(token)) return false
+      let res
+      if ((res = /set:(\d+)/.exec(token)) != null) {
+        if (!sets[parseInt(res[1])].includes(post.id)) return false
+      } else if (!post.tags.includes(token)) return false
     } else {
-      if (!passesGroup(tags, token)) return false
+      if (!passesGroup(post, token)) return false
     }
   }
 
@@ -149,12 +231,18 @@ function passesGroup(tags, curGroup) {
 
   for (let token of should) {
     if (typeof (token) == "string") {
-      if (tags.includes(token)) {
+      let res
+      if ((res = /set:(\d+)/.exec(token)) != null) {
+        if (sets[parseInt(res[1])].includes(post.id)) {
+          shouldPassed = true
+          break
+        }
+      }else if (post.tags.includes(token)) {
         shouldPassed = true
         break
       }
     } else {
-      if (passesGroup(tags, token)) {
+      if (passesGroup(post, token)) {
         shouldPassed = true
         break
       }
@@ -165,9 +253,14 @@ function passesGroup(tags, curGroup) {
 
   for (let token of mustNot) {
     if (typeof (token) == "string") {
-      if (tags.includes(token)) return false
+      let res
+      if ((res = /set:(\d+)/.exec(token)) != null) {
+        if (sets[parseInt(res[1])].includes(post.id)) {
+          return false
+        }
+      } else if (post.tags.includes(token)) return false
     } else {
-      if (passesGroup(tags, token)) return false
+      if (passesGroup(post, token)) return false
     }
   }
 
