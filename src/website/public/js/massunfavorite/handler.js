@@ -5,7 +5,7 @@ let favorites = []
 async function getFavorites(page = 1) {
   try {
     console.log(`Fetching favorites page ${page}`)
-    let res = await fetch(`https://e621.net/favorites.json?page=${page}&limit=300&user_id=45665`, {
+    let res = await fetch(`https://e621.net/favorites.json?page=${page}&limit=300`, {
       headers: {
         "User-Agent": USER_AGENT,
         Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
