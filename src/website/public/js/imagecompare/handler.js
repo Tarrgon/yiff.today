@@ -121,7 +121,7 @@ async function updateMetadata() {
     })
   }
 
-  if (tags2["FileType"].value != "gif") {
+  if (tags2["FileType"].value == "jpeg") {
     setMetadata({
       "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
       "img-2-type": `File type: ${tags2["FileType"].description}`,
