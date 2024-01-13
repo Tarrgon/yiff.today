@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Yiff Today - Image Comparer</title>
+
+  <%- include("./partials/head"); %>
+  <link rel="stylesheet" href="/css/imagecompare.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+  <script src="/js/imagecompare/exif.js"></script>
+</head>
+
+<body>
+
+  <div id="comparison-container" class="columns is-centered hidden">
+    <div class="column is-12 has-text-centered">
+      <img-comparison-slider>
+        <img id="img-1" slot="first"/>
+        <img id="img-2" slot="second"/>
+      </img-comparison-slider>
+    </div>
+  </div>
+
+  <div id="metadata-container" class="columns hidden">
+    <div class="options is-container box column is-2 is-offset-3 has-text-centered">
+      <h1 class="is-size-3 has-text-weight-bold has-text-light">Image 1 Data</h1>
+      <ul>
+        <li>
+          <h3 id="img-1-size" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-1-type" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-1-bps" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-1-color-components" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-1-subsampling" class="has-text-weight-normal is-size-5"></h3>
+        </li>
+      </ul>
+    </div>
+    <div class="options is-container box column is-2 is-offset-2 has-text-centered">
+      <h1 class="is-size-3 has-text-weight-bold has-text-light">Image 2 Data</h1>
+      <ul>
+        <li>
+          <h3 id="img-2-size" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-2-type" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-2-bps" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-2-color-components" class="has-text-weight-normal is-size-5"></h3>
+          <h3 id="img-2-subsampling" class="has-text-weight-normal is-size-5"></h3>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="input-container" class="columns">
+    <div class="options is-container box column is-6 is-offset-3 mt-6 has-text-centered no-scroll">
+      <div class="columns">
+        <div class="column is-3">
+          <h1 class="title has-text-light">
+            Input file 1
+          </h1>
+        </div>
+        <div class="column is-3">
+          <div class="file">
+            <label class="file-label">
+              <input class="file-input" type="file" id="file-input-1" accept="image/png, image/jpeg, image/gif">
+              <span class="file-cta">
+                <span class="file-icon">
+                  <i class="fas fa-upload"></i>
+                </span>
+                <span class="file-label">
+                  Choose a file…
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="column is-4">
+          <input class="input is-success" type="text" placeholder="Or use a file URL" id="url-input-1">
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column is-3">
+          <h1 class="title has-text-light">
+            Input file 2
+          </h1>
+        </div>
+        <div class="column is-3">
+          <div class="file">
+            <label class="file-label">
+              <input class="file-input" type="file" id="file-input-2" accept="image/png, image/jpeg, image/gif">
+              <span class="file-cta">
+                <span class="file-icon">
+                  <i class="fas fa-upload"></i>
+                </span>
+                <span class="file-label">
+                  Choose a file…
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="column is-4">
+          <input class="input is-success" type="text" placeholder="Or use a file URL" id="url-input-2">
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column is-12">
+          <button class="button is-primary" onclick="compare()">Compare!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include("./partials/index"); %>
+
+  <script src="/js/imagecompare/handler.js"></script>
+</body>
+
+</html>

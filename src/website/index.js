@@ -32,6 +32,7 @@ module.exports = async () => {
     app.use("/visualtagger", require("./routes/visualtagger.js")(utils))
     app.use("/massunfavorite", require("./routes/massunfavorite.js")(utils))
     app.use("/counter", require("./routes/counter.js")(utils))
+    app.use("/imagecompare", require("./routes/imagecompare.js")(utils))
     app.use("/index", require("./routes/index.js")(utils))
 
     return app
