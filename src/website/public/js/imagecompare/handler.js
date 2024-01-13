@@ -131,19 +131,19 @@ async function updateMetadata() {
     })
   } else if (tags2["FileType"].value == "png") {
     setMetadata({
-      "img-1-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
-      "img-1-type": `File type: ${tags2["FileType"].description}`,
-      "img-1-bps": `Bit depth: ${tags2["Bit Depth"].value}`,
-      "img-1-color-components": `Color Type: ${tags2["Color Type"].description}`,
-      "img-1-subsampling": ""
+      "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
+      "img-2-type": `File type: ${tags2["FileType"].description}`,
+      "img-2-bps": `Bit depth: ${tags2["Bit Depth"].value}`,
+      "img-2-color-components": `Color Type: ${tags2["Color Type"].description}`,
+      "img-2-subsampling": ""
     })
   } else if (tags2["FileType"].value == "gif") {
     setMetadata({
-      "img-1-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
-      "img-1-type": `File type: ${tags2["FileType"].description}`,
-      "img-1-bps": `Color resolution depth: ${tags2["Color Resolution Depth"].description}`,
-      "img-1-color-components": "",
-      "img-1-subsampling": ""
+      "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
+      "img-2-type": `File type: ${tags2["FileType"].description}`,
+      "img-2-bps": `Color resolution depth: ${tags2["Color Resolution Depth"].description}`,
+      "img-2-color-components": "",
+      "img-2-subsampling": ""
     })
   }
 
