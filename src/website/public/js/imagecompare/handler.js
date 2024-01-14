@@ -191,7 +191,3 @@ function compare() {
   updateSize()
   updateMetadata()
 }
-
-window.addEventListener("resize", () => {
-  updateSize()
-})
