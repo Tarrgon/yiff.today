@@ -1094,10 +1094,13 @@ uiElements.currentVideo.addEventListener("loadeddata", () => {
 
 uiElements.playButton.addEventListener("click", () => {
   slideshowController.startSlideshow()
+
+  slideshowController.updateNavigation()
 })
 
 uiElements.pauseButton.addEventListener("click", () => {
   slideshowController.pauseSlideshow()
+  slideshowController.updateNavigation()
 })
 
 uiElements.nextButton.addEventListener("click", () => {

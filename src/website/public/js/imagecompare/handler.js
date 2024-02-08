@@ -92,59 +92,81 @@ async function updateMetadata() {
   let blob1 = await urlToBlob(img1.src)
   let blob2 = await urlToBlob(img2.src)
 
-  let tags1 = await ExifReader.load(await urlToBuffer(img1.src))
-  let tags2 = await ExifReader.load(await urlToBuffer(img2.src))
+  try {
+    let tags1 = await ExifReader.load(await urlToBuffer(img1.src))
+    let tags2 = await ExifReader.load(await urlToBuffer(img2.src))
+  
+    if (tags1["FileType"].value == "jpeg") {
+      setMetadata({
+        "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
+        "img-1-type": `File type: ${tags1["FileType"].description}`,
+        "img-1-bps": `Bits per sample: ${tags1["Bits Per Sample"].value}`,
+        "img-1-color-components": `Color components: ${tags1["Color Components"].value}`,
+        "img-1-subsampling": `Subsampling: ${tags1["Subsampling"].description}`
+      })
+    } else if (tags1["FileType"].value == "png") {
+      setMetadata({
+        "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
+        "img-1-type": `File type: ${tags1["FileType"].description}`,
+        "img-1-bps": `Bit depth: ${tags1["Bit Depth"].value}`,
+        "img-1-color-components": `Color Type: ${tags1["Color Type"].description}`,
+        "img-1-subsampling": ""
+      })
+    } else if (tags1["FileType"].value == "gif") {
+      setMetadata({
+        "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
+        "img-1-type": `File type: ${tags1["FileType"].description}`,
+        "img-1-bps": `Color resolution depth: ${tags1["Color Resolution Depth"].description}`,
+        "img-1-color-components": "",
+        "img-1-subsampling": ""
+      })
+    }
+  
+    if (tags2["FileType"].value == "jpeg") {
+      setMetadata({
+        "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
+        "img-2-type": `File type: ${tags2["FileType"].description}`,
+        "img-2-bps": `Bits per sample: ${tags2["Bits Per Sample"].value}`,
+        "img-2-color-components": `Color components: ${tags2["Color Components"].value}`,
+        "img-2-subsampling": `Subsampling: ${tags2["Subsampling"].description}`
+      })
+    } else if (tags2["FileType"].value == "png") {
+      setMetadata({
+        "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
+        "img-2-type": `File type: ${tags2["FileType"].description}`,
+        "img-2-bps": `Bit depth: ${tags2["Bit Depth"].value}`,
+        "img-2-color-components": `Color Type: ${tags2["Color Type"].description}`,
+        "img-2-subsampling": ""
+      })
+    } else if (tags2["FileType"].value == "gif") {
+      setMetadata({
+        "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
+        "img-2-type": `File type: ${tags2["FileType"].description}`,
+        "img-2-bps": `Color resolution depth: ${tags2["Color Resolution Depth"].description}`,
+        "img-2-color-components": "",
+        "img-2-subsampling": ""
+      })
+    }
+  } catch(e) {
+    console.error(e)
 
-  if (tags1["FileType"].value == "jpeg") {
     setMetadata({
-      "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
-      "img-1-type": `File type: ${tags1["FileType"].description}`,
-      "img-1-bps": `Bits per sample: ${tags1["Bits Per Sample"].value}`,
-      "img-1-color-components": `Color components: ${tags1["Color Components"].value}`,
-      "img-1-subsampling": `Subsampling: ${tags1["Subsampling"].description}`
+      "img-1-size": `Error`,
+      "img-1-type": `Error`,
+      "img-1-bps": `Error`,
+      "img-1-color-components": "Error",
+      "img-1-subsampling": "Error"
     })
-  } else if (tags1["FileType"].value == "png") {
-    setMetadata({
-      "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
-      "img-1-type": `File type: ${tags1["FileType"].description}`,
-      "img-1-bps": `Bit depth: ${tags1["Bit Depth"].value}`,
-      "img-1-color-components": `Color Type: ${tags1["Color Type"].description}`,
-      "img-1-subsampling": ""
-    })
-  } else if (tags1["FileType"].value == "gif") {
-    setMetadata({
-      "img-1-size": `Size: ${tags1["Image Width"].value}x${tags1["Image Height"].value} (${humanFileSize(blob1.size, true)})`,
-      "img-1-type": `File type: ${tags1["FileType"].description}`,
-      "img-1-bps": `Color resolution depth: ${tags1["Color Resolution Depth"].description}`,
-      "img-1-color-components": "",
-      "img-1-subsampling": ""
-    })
-  }
 
-  if (tags2["FileType"].value == "jpeg") {
     setMetadata({
-      "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
-      "img-2-type": `File type: ${tags2["FileType"].description}`,
-      "img-2-bps": `Bits per sample: ${tags2["Bits Per Sample"].value}`,
-      "img-2-color-components": `Color components: ${tags2["Color Components"].value}`,
-      "img-2-subsampling": `Subsampling: ${tags2["Subsampling"].description}`
+      "img-2-size": `Error`,
+      "img-2-type": `Error`,
+      "img-2-bps": `Error`,
+      "img-2-color-components": "Error",
+      "img-2-subsampling": "Error"
     })
-  } else if (tags2["FileType"].value == "png") {
-    setMetadata({
-      "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
-      "img-2-type": `File type: ${tags2["FileType"].description}`,
-      "img-2-bps": `Bit depth: ${tags2["Bit Depth"].value}`,
-      "img-2-color-components": `Color Type: ${tags2["Color Type"].description}`,
-      "img-2-subsampling": ""
-    })
-  } else if (tags2["FileType"].value == "gif") {
-    setMetadata({
-      "img-2-size": `Size: ${tags2["Image Width"].value}x${tags2["Image Height"].value} (${humanFileSize(blob2.size, true)})`,
-      "img-2-type": `File type: ${tags2["FileType"].description}`,
-      "img-2-bps": `Color resolution depth: ${tags2["Color Resolution Depth"].description}`,
-      "img-2-color-components": "",
-      "img-2-subsampling": ""
-    })
+
+    alert("Error loading image metadata")
   }
 
   document.getElementById("metadata-container").classList.remove("hidden")
