@@ -113,6 +113,7 @@ async function resolveTagStructure(unresolvedImplications, tags, structure = {})
     for (let [tagName, data] of Object.entries(unresolvedImplications)) {
       for (let parent of data.parents) {
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, parent.name)
+        updateTagCount()
         tags = tagTreeHandler.tags
         let allImplications = {}
         await getImplications(parent.name, allImplications)
@@ -648,6 +649,7 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
 
       if (!tagTreeHandler.preventClicks) {
         tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, tag.thisTag.name).trim()
+        updateTagCount()
 
         for (let duplicateDetails of document.querySelectorAll(`.tree.mb-3.duplicate-added-tag > li > details[data-tag-name=\"${tag.thisTag.name}\"]`)) {
           duplicateDetails.parentElement.parentElement.remove()
@@ -684,8 +686,8 @@ function createTagTree(tag, depth = 1, forceShowButton = false, hidden = false, 
     } else {
       summary.classList.remove("removed-tag")
       if (!tagTreeHandler.preventClicks) {
-        tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name)
-        tagTreeHandler.tags = tagTreeHandler.tags.trim()
+        tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag.thisTag.name).trim()
+        updateTagCount()
 
         if (!tagTreeHandler.unchangedTags.split(" ").includes(tag.thisTag.name)) {
           addNewTag(tag.thisTag.name, false, false, false)
@@ -812,6 +814,7 @@ let tagTreeHandler = {
     let allImplications = {}
 
     tagTreeHandler.tags = slide.tags
+    updateTagCount()
     tagTreeHandler.unchangedTags = slide.tags
 
     await getImplications(tagTreeHandler.tags, allImplications)
@@ -980,8 +983,8 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   }
 
   for (let tag of addedTags) {
-    tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag)
-    tagTreeHandler.tags = tagTreeHandler.tags.trim()
+    tagTreeHandler.tags = addToText(tagTreeHandler.tags, tag).trim()
+    updateTagCount()
   }
 
   let newTopLevel = []
@@ -1139,6 +1142,7 @@ async function redoLastChanges(changes) {
     } else {
       if (tagTreeHandler.tags.split(" ").includes(change.tag)) {
         tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, change.tag).trim()
+        updateTagCount()
         let anyOne = document.querySelector(`[data-tag-name=\"${change.tag}\"]`)
         if (anyOne) anyOne.firstChild.click()
       }
@@ -1460,6 +1464,29 @@ function showFailureScreen(title, status) {
   uiElements.responseModal.classList.add("is-active")
 
   uiElements.closeResponseButton.classList.remove("hidden")
+}
+
+function updateTagCount() {
+  let face = document.getElementById("face")
+  let tagCountText = document.getElementById("tag-count-text")
+
+  let tagCount = tagTreeHandler.tags.split(" ").length
+
+  if (tagCount < 15) {
+    face.className = "fa-regular fa-face-frown"
+    face.classList.add("fa-face-frown")
+  } else if (tagCount < 25) {
+    face.className = "fa-regular fa-face-meh"
+    face.classList.add("fa-face-meh")
+  } else if (tagCount < 40) {
+    face.className = "fa-regular fa-face-smile"
+  } else if (tagCount < 60) {
+    face.className = "fa-regular fa-face-surprise"
+  } else {
+    face.className = "fa-regular fa-face-surprise fa-bounce"
+  }
+
+  tagCountText.innerText = `${tagCount} tags`
 }
 
 uiElements.closeReviewButton.addEventListener("click", () => {

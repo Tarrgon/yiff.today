@@ -240,3 +240,15 @@ button.dropdown-item.active {
 .is-review-existing-tag {
   border: 4.5px solid yellow !important;
 }
+
+.fa-face-frown {
+  color: red;
+}
+
+.fa-face-meh {
+  color: #bdb76b;
+}
+
+.fa-face-smile, .fa-face-surprise {
+  color: green;
+}
