@@ -172,6 +172,11 @@ async function updateMetadata() {
   document.getElementById("metadata-container").classList.remove("hidden")
 }
 
+function isImageLink(url) {
+  if (typeof url !== 'string') return false;
+  return url.match(/^http[^\?]*.(jpg|jpeg|gif|png)(\?(.*))?$/gmi) != null
+}
+
 function compare() {
   let fileInput1 = document.getElementById("file-input-1")
 
@@ -184,7 +189,7 @@ function compare() {
   } else {
     fileUrl1 = document.getElementById("url-input-1").value
 
-    if (!["gif", "jpg", "jpeg", "png"].some(end => fileUrl1.endsWith(end))) return alert("File 1 type not identifiable")
+    if (!isImageLink(fileUrl1)) return alert("File 1 type not identifiable")
   }
 
   if (!fileUrl1) return alert("File 1 not selected.")
@@ -200,7 +205,7 @@ function compare() {
   } else {
     fileUrl2 = document.getElementById("url-input-2").value
 
-    if (!["gif", "jpg", "jpeg", "png"].some(end => fileUrl2.endsWith(end))) return alert("File 2 type not identifiable.")
+    if (!isImageLink(fileUrl2)) return alert("File 2 type not identifiable.")
   }
 
   if (!fileUrl2) return alert("File 2 not selected.")
