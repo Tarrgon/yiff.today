@@ -1422,6 +1422,15 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       checked.push(artist)
     }
 
+    for (let tag of splitTags) {
+      if (tag.startsWith("art:") || tag.startsWith("artist")) {
+        let t = tag.slice(tag.indexOf(":") + 1)
+        let status = await avoidPosting.getDNPStatus(t)
+        if (status) dnpStatuses.push(status)
+        checked.push(t)
+      }
+    }
+
     if (!slide.bypassDNP && (hasConditionalDNP || hasAvoidPosting || dnpStatuses.length > 0)) {
       showGeneralScreen("Warning", `The artist you are uploading from is ${hasConditionalDNP ? "conditional DNP" : ""}${hasConditionalDNP && hasAvoidPosting ? " and " : ""}${hasAvoidPosting ? "on the avoid posting list" : ""}. Submit again without any changes to force.\n\n${dnpStatuses.map(s => `${s.name}${(s.message.length > 0 ? ` - ${s.message}` : "")}`).join("\n")}`)
       slide.bypassDNP = true
