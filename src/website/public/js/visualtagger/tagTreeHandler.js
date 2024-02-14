@@ -1439,6 +1439,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     showLoadingScreen()
 
+    try {
       let res = await fetch(`https://e621.net/uploads.json`, {
         method: "POST",
         headers: {
@@ -1453,6 +1454,10 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       } else {
         showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
       }
+    } catch (e) {
+      showFailureScreen(`Failure`, `Check console`)
+      console.error(e)
+    }
   }
 
   tagTreeHandler.unchangedTags = tagTreeHandler.tags
@@ -1568,9 +1573,28 @@ uiElements.reviewTagAddButton.addEventListener("click", () => {
   addNewTag(tagTreeHandler.reviewingTag, true, true, true)
 })
 
-uiElements.copyTagsButton.addEventListener("click", () => {
+uiElements.copyTagsButton.addEventListener("click", (e) => {
   hotkeys.setScope("tagging")
   navigator.clipboard.writeText(tagTreeHandler.tags)
+})
+
+uiElements.copyTagsButton.addEventListener("contextmenu", async (e) => {
+  hotkeys.setScope("tagging")
+  e.preventDefault()
+
+  let tags = (await navigator.clipboard.readText()).split(" ")
+
+  showLoadingScreen()
+
+  let p = []
+
+  for (let tag of tags) {
+    p.push(addNewTag(tag, true, false, true))
+  }
+
+  await Promise.all(p)
+
+  showSuccessScreen()
 })
 
 uiElements.showCurrentButton.addEventListener("click", () => {
@@ -1865,7 +1889,7 @@ uiElements.addSourceButton.addEventListener("click", (e) => {
 
   buttons[0].parentElement.remove()
   buttons[1].parentElement.remove()
-  
+
   let cloned = uiElements.sourceContainer.firstElementChild.firstElementChild.cloneNode(true)
 
   cloned.firstElementChild.firstElementChild.value = ""
@@ -1882,7 +1906,7 @@ uiElements.removeSourceButton.addEventListener("click", (e) => {
 
   buttons[0].parentElement.remove()
   buttons[1].parentElement.remove()
-  
+
   uiElements.sourceContainer.firstElementChild.lastElementChild.remove()
 
   uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
