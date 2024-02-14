@@ -1409,26 +1409,30 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     let splitTags = tagTreeHandler.tags.split(" ")
 
     if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex"].some(t => splitTags.includes(t))) {
-      showGeneralScreen("Your post lacks any obvious gender tags. Submit again without any changes to force.")
+      showGeneralScreen("Warning", "Your post lacks any obvious gender tags. Submit again without any changes to force.")
       slide.bypassGender = true
+      tagTreeHandler.lock = false
       return
     }
 
     if (!slide.bypassCount && !["solo", "duo", "trio", "group", "zero_pictured"].some(t => splitTags.includes(t))) {
-      showGeneralScreen("Your post lacks any obvious character count tags. Submit again without any changes to force.")
+      showGeneralScreen("Warning", "Your post lacks any obvious character count tags. Submit again without any changes to force.")
       slide.bypassCount = true
+      tagTreeHandler.lock = false
       return
     }
 
     if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex"].some(t => splitTags.includes(t))) {
-      showGeneralScreen("Your post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
+      showGeneralScreen("Warning", "Your post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
       slide.bypassCharacterInteractions = true
+      tagTreeHandler.lock = false
       return
     }
 
     if (!slide.bypassForms && !["anthro", "feral", "humanoid", "human", "taur", "semi-anthro"].some(t => splitTags.includes(t))) {
-      showGeneralScreen("Your post lacks any obvious character form tags. Submit again without any changes to force.")
+      showGeneralScreen("Warning", "Your post lacks any obvious character form tags. Submit again without any changes to force.")
       slide.bypassForms = true
+      tagTreeHandler.lock = false
       return
     }
 
@@ -1497,10 +1501,11 @@ function closeAllModals() {
   uiElements.reviewAddTagModal.classList.remove("is-active")
 }
 
-function showGeneralScreen(text) {
+function showGeneralScreen(title, text = "") {
   hotkeys.setScope("review")
 
-  uiElements.responseTitle.innerText = text
+  uiElements.responseTitle.innerText = title
+  uiElements.responseContent.innerText = text
 
   uiElements.responseModal.classList.add("is-active")
   uiElements.closeResponseButton.classList.remove("hidden")
