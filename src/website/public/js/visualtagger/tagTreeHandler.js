@@ -1408,6 +1408,27 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     let splitTags = tagTreeHandler.tags.split(" ")
 
+    let hasConditionalDNP = splitTags.includes("conditional_dnp")
+    let hasAvoidPosting = splitTags.includes("avoid_posting")
+
+    let dnpStatuses = []
+    let checked = []
+
+    for (let tag of document.querySelectorAll(".artist-tag-category")) {
+      let artist = tag.parentElement.getAttribute("data-tag-name")
+      if (!tag.parentElement.open || checked.includes(artist)) continue
+      let status = await avoidPosting.getDNPStatus(artist)
+      if (status) dnpStatuses.push(status)
+      checked.push(artist)
+    }
+
+    if (!slide.bypassDNP && (hasConditionalDNP || hasAvoidPosting || dnpStatuses.length > 0)) {
+      showGeneralScreen("Warning", `The artist you are uploading from is ${hasConditionalDNP ? "conditional DNP" : ""}${hasConditionalDNP && hasAvoidPosting ? " and " : ""}${hasAvoidPosting ? "on the avoid posting list" : ""}. Submit again without any changes to force.\n\n${dnpStatuses.map(s => `${s.name}${(s.message.length > 0 ? ` - ${s.message}` : "")}`).join("\n")}`)
+      slide.bypassDNP = true
+      tagTreeHandler.lock = false
+      return
+    }
+
     if (!slide.bypassArtist && !document.querySelector(".artist-tag-category") && !splitTags.some(t => t.startsWith("art:") || t.startsWith("artist:"))) {
       showGeneralScreen("Warning", "Your post lacks an artist tag. Submit again without any changes to force.")
       slide.bypassArtist = true
@@ -1478,20 +1499,20 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     showLoadingScreen()
 
     try {
-      let res = await fetch(`https://e621.net/uploads.json`, {
-        method: "POST",
-        headers: {
-          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
-          Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-        },
-        body: formData
-      })
+      // let res = await fetch(`https://e621.net/uploads.json`, {
+      //   method: "POST",
+      //   headers: {
+      //     "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+      //     Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      //   },
+      //   body: formData
+      // })
 
-      if (res.ok) {
-        showSuccessScreen()
-      } else {
-        showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
-      }
+      // if (res.ok) {
+      //   showSuccessScreen()
+      // } else {
+      //   showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
+      // }
     } catch (e) {
       showFailureScreen(`Failure`, `Check console`)
       console.error(e)
@@ -1572,6 +1593,7 @@ function updateTagCount() {
     slide.bypassForms = false
     slide.bypassGender = false
     slide.bypassArtist = false
+    slide.bypassDNP = false
   }
 
   let face = document.getElementById("face")
