@@ -1408,6 +1408,30 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     let splitTags = tagTreeHandler.tags.split(" ")
 
+    if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex"].some(t => splitTags.includes(t))) {
+      showGeneralScreen("Your post lacks any obvious gender tags. Submit again without any changes to force.")
+      slide.bypassGender = true
+      return
+    }
+
+    if (!slide.bypassCount && !["solo", "duo", "trio", "group", "zero_pictured"].some(t => splitTags.includes(t))) {
+      showGeneralScreen("Your post lacks any obvious character count tags. Submit again without any changes to force.")
+      slide.bypassCount = true
+      return
+    }
+
+    if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex"].some(t => splitTags.includes(t))) {
+      showGeneralScreen("Your post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
+      slide.bypassCharacterInteractions = true
+      return
+    }
+
+    if (!slide.bypassForms && !["anthro", "feral", "humanoid", "human", "taur", "semi-anthro"].some(t => splitTags.includes(t))) {
+      showGeneralScreen("Your post lacks any obvious character form tags. Submit again without any changes to force.")
+      slide.bypassForms = true
+      return
+    }
+
     let ratingIndex = splitTags.findIndex(t => t.startsWith("rating:"))
 
     if (ratingIndex == -1) {
@@ -1525,6 +1549,15 @@ function showFailureScreen(title, status) {
 }
 
 function updateTagCount() {
+  let slide = slideshowController.getCurrentSlide()
+
+  if (slide.wasUploaded) {
+    slide.bypassCharacterInteractions = false
+    slide.bypassCount = false
+    slide.bypassForms = false
+    slide.bypassGender = false
+  }
+
   let face = document.getElementById("face")
   let tagCountText = document.getElementById("tag-count-text")
 
