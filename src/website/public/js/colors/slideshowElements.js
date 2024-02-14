@@ -24,5 +24,5 @@ let uiElements = {
   localTags: document.getElementById("local-tags"),
   blacklist: document.getElementById("blacklist"),
   storeHistory: document.getElementById("store-history"),
-  clearHistory: document.getElementById("clear-history")
+  clearHistory: document.getElementById("clear-history"),
 }

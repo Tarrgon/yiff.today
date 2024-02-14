@@ -148,6 +148,26 @@
           <button id="show-all-button" class="button is-info">Show all</button>
         </div>
       </div>
+
+      <div id="source-container" class="columns hidden">
+        <div class="column is-full">
+          <div class="field has-addons">
+            <div class="control">
+              <input class="input" type="text" placeholder="Add a source">
+            </div>
+            <div class="control">
+              <button id="add-source-button" class="button is-success">
+                +
+              </button>
+            </div>
+            <div class="control">
+              <button id="remove-source-button" class="button is-danger">
+                -
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -157,13 +177,31 @@
   </div>
 
   <div class="columns">
-    <div class="is-container box column is-10 is-offset-1 my-6 pb-5 has-text-centered">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered">
       <p id="warning-message"></p>
       <p id="info-message"></p>
       <sub>New here? Make sure to read the <a href="https://e621.net/forum_topics/40904" target="_blank">forum post</a>!</sub><br>
-      <input id="search-text" type="text" placeholder="Search tags" list="search-history" /><br>
-      <input id="start-page-number" type="number" placeholder="Start page" min="1" /><br>
-      <button id="search-button">Search</button>
+      <input class="input-text" id="search-text" type="text" placeholder="Search tags" list="search-history" /><br>
+      <input class="input-text" id="start-page-number" type="number" placeholder="Start page" min="1" /><br>
+      <button class="blue-button" id="search-button">Search</button><br>
+      <div class="file has-name is-centered mt-2">
+        <label class="file-label">
+          <input id="file-input" class="file-input" type="file" accept=".png, .jpeg, .jpg, .gif, .webm">
+          <span class="file-cta">
+            <span class="file-icon">
+              <i class="fas fa-upload"></i>
+            </span>
+            <span class="file-label">
+              Choose a file…
+            </span>
+          </span>
+          <span id="file-name" class="file-name has-text-light">
+            None selected
+          </span>
+        </label>
+      </div>
+      <input class="input-text" id="file-input-text" type="text" placeholder="URL Upload (overrides file)"/><br>
+      <button class="blue-button" id="begin-upload-button">Upload file</button>
       <datalist id="search-history"></datalist>
     </div>
   </div>

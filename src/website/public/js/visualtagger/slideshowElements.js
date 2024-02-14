@@ -62,5 +62,12 @@ let uiElements = {
   storeSeen: document.getElementById("store-seen"),
   clearSeen: document.getElementById("clear-seen"),
   e621Username: document.getElementById("e621-username"),
-  e621ApiKey: document.getElementById("e621-api-key")
+  e621ApiKey: document.getElementById("e621-api-key"),
+  fileInput: document.getElementById("file-input"),
+  fileName: document.getElementById("file-name"),
+  fileInputText: document.getElementById("file-input-text"),
+  uploadFileButton: document.getElementById("begin-upload-button"),
+  sourceContainer: document.getElementById("source-container"),
+  addSourceButton: document.getElementById("add-source-button"),
+  removeSourceButton: document.getElementById("remove-source-button")
 }

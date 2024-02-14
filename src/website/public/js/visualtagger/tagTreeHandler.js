@@ -1368,41 +1368,94 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
   if (tagDiff.length == 0) return
 
-  tagTreeHandler.lastChanges.unshift({ img: slideshowController.getCurrentSlide().fileUrl, changes })
+  let slide = slideshowController.getCurrentSlide()
 
-  let body = new URLSearchParams()
-  body.append("post[tag_string_diff]", tagDiff)
-  body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
-  body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
-  body.append("_method", "PATCH")
+  tagTreeHandler.lastChanges.unshift({ img: slide.fileUrl, changes })
 
-  uiElements.closeReviewButton.click()
+  if (!slide.wasUploaded) {
+    let body = new URLSearchParams()
+    body.append("post[tag_string_diff]", tagDiff)
+    body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
+    body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
+    body.append("_method", "PATCH")
 
-  try {
+    uiElements.closeReviewButton.click()
+
+    try {
+      showLoadingScreen()
+
+      let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
+        method: "POST",
+        headers: {
+          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+          Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+        },
+        body
+      })
+
+      if (res.ok) {
+        showSuccessScreen()
+      } else {
+        showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
+      }
+    } catch (e) {
+      console.error(e)
+
+      showFailureScreen("Failure", "Unknown error, please check console")
+    }
+  } else {
+    let formData = new FormData()
+
+    let splitTags = tagTreeHandler.tags.split(" ")
+
+    let ratingIndex = splitTags.findIndex(t => t.startsWith("rating:"))
+
+    if (ratingIndex == -1) {
+      showFailureScreen(`No rating`, "You have to provide a rating in the form of rating:e, rating:q, or rating:s as a tag.")
+      return
+    }
+
+    let rating = splitTags.splice(ratingIndex, 1)[0].slice(7)
+
+    tagTreeHandler.tags = splitTags.join(" ")
+
+    if (!["s", "q", "e"].includes(rating)) {
+      showFailureScreen(`No rating`, "You have to provide a rating in the form of rating:e, rating:q, or rating:s as a tag.")
+      return
+    }
+
+    let sources = Array.from(uiElements.sourceContainer.querySelectorAll("input")).map(e => e.value).filter(s => s)
+
+    if (sources.length == 0) {
+      showFailureScreen(`No source`, "You must provide at least one source")
+      return
+    }
+
+    formData.append("upload[tag_string]", tagTreeHandler.tags)
+    if (!slide.isURLUpload) formData.append("upload[file]", slide.fileForForm)
+    else formData.append("upload[direct_url]", slide.urlForForm)
+    formData.append("upload[source]", sources.join("%0A"))
+    formData.append("upload[rating]", rating)
+
     showLoadingScreen()
 
-    let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
-      method: "POST",
-      headers: {
-        "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
-        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-      },
-      body
-    })
+      let res = await fetch(`https://e621.net/uploads.json`, {
+        method: "POST",
+        headers: {
+          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+          Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+        },
+        body: formData
+      })
 
-    if (res.ok) {
-      showSuccessScreen()
-    } else {
-      showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
-    }
-  } catch (e) {
-    console.error(e)
-
-    showFailureScreen("Failure", "Unknown error, please check console")
+      if (res.ok) {
+        showSuccessScreen()
+      } else {
+        showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
+      }
   }
 
   tagTreeHandler.unchangedTags = tagTreeHandler.tags
-
 
   tagTreeHandler.lock = false
 })
@@ -1470,7 +1523,7 @@ function updateTagCount() {
   let face = document.getElementById("face")
   let tagCountText = document.getElementById("tag-count-text")
 
-  let tagCount = tagTreeHandler.tags.split(" ").length
+  let tagCount = tagTreeHandler.tags.split(" ").filter(a => a).length
 
   if (tagCount < 15) {
     face.className = "fa-regular fa-face-frown"
@@ -1804,4 +1857,34 @@ window.addEventListener("mousedown", (e) => {
 
 window.addEventListener("beforeunload", (e) => {
   if (getChanges().filter(c => c.change != 0).length > 0) e.preventDefault()
+})
+
+uiElements.addSourceButton.addEventListener("click", (e) => {
+  if (uiElements.sourceContainer.firstElementChild.childElementCount >= 10) return
+  let buttons = uiElements.sourceContainer.querySelectorAll("button")
+
+  buttons[0].parentElement.remove()
+  buttons[1].parentElement.remove()
+  
+  let cloned = uiElements.sourceContainer.firstElementChild.firstElementChild.cloneNode(true)
+
+  cloned.firstElementChild.firstElementChild.value = ""
+
+  uiElements.sourceContainer.firstElementChild.appendChild(cloned)
+
+  cloned.appendChild(buttons[0].parentElement)
+  cloned.appendChild(buttons[1].parentElement)
+})
+
+uiElements.removeSourceButton.addEventListener("click", (e) => {
+  if (uiElements.sourceContainer.firstElementChild.childElementCount == 1) return
+  let buttons = uiElements.sourceContainer.querySelectorAll("button")
+
+  buttons[0].parentElement.remove()
+  buttons[1].parentElement.remove()
+  
+  uiElements.sourceContainer.firstElementChild.lastElementChild.remove()
+
+  uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
+  uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
 })

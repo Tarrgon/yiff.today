@@ -505,7 +505,7 @@ let slideshowController = {
 
   setCurrentSlideNumber(index) {
     if (index >= slideshowController.slides.length || index < 0) return
-    if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return 
+    if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return
     slideshowController.clearCallbacksForPreloadingSlides()
     slideshowController.currentSlideNumber = index
     slideshowController.preloadCurrentSlideIfNeeded()
@@ -518,6 +518,28 @@ let slideshowController = {
     if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
 
     closeAllModals()
+
+    if (slideshowController.getCurrentSlide().wasUploaded) {
+      uiElements.submitChangesButton.innerText = "Upload file"
+
+      uiElements.sourceContainer.classList.remove("hidden")
+
+      let buttons = uiElements.sourceContainer.querySelectorAll("button")
+
+      buttons[0].parentElement.remove()
+      buttons[1].parentElement.remove()
+
+      while (uiElements.sourceContainer.firstElementChild.childElementCount > 1) {
+        uiElements.sourceContainer.firstElementChild.lastElementChild.remove()
+      }
+
+      uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
+      uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
+    } else {
+      uiElements.submitChangesButton.innerText = "Submit changes"
+
+      uiElements.sourceContainer.classList.add("hidden")
+    }
   },
 
   clearCallbacksForPreloadingSlides() {
@@ -750,7 +772,7 @@ let slideshowController = {
     current.style.maxWidth = null
     current.style.maxHeight = null
 
-    let viewWidth = (current.parentElement.parentElement.clientWidth / (12/8)) - 50
+    let viewWidth = (current.parentElement.parentElement.clientWidth / (12 / 8)) - 50
     let viewHeight = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight) - 120
 
     let newWidth = currentSlide.width
@@ -891,7 +913,7 @@ let slideshowController = {
 
     if (slide) {
       const notArtists = ["unknown_artist", "third-party_edit", "anonymous_artist", "conditional_dnp", "sound_warning", "epilepsy_warning", "avoid_posting"]
-      let map = slide.rawTags[1].map(a => a.split(" ").join("_")).filter(a =>  !notArtists.includes(a) && !uiElements.searchText.value.includes(a)).join(" ~")
+      let map = slide.rawTags[1].map(a => a.split(" ").join("_")).filter(a => !notArtists.includes(a) && !uiElements.searchText.value.includes(a)).join(" ~")
       if (map.length > 0) uiElements.searchText.value += " ~" + map
     }
   },
@@ -1050,5 +1072,84 @@ uiElements.startPage.addEventListener("input", (e) => {
 
 uiElements.reloadSlideButton.addEventListener("click", async (e) => {
   await slideshowController.getCurrentSlide().reload()
+  slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber)
+})
+
+uiElements.fileInput.addEventListener("change", (e) => {
+  let file = uiElements.fileInput.files[0]
+  uiElements.fileName.innerText = file ? file.name : "None selected"
+})
+
+function isImageLink(url) {
+  if (typeof url !== 'string') return false;
+  return url.match(/^http[^\?]*.(jpg|jpeg|gif|png)(\?(.*))?$/gmi) != null
+}
+
+function isVideoLink(url) {
+  if (typeof url !== 'string') return false;
+  return url.match(/^http[^\?]*.(webm)(\?(.*))?$/gmi) != null
+}
+
+async function getFileDimesnions(file, fileType) {
+  if (fileType == "image") {
+    return new Promise((resolve) => {
+      let image = new Image()
+
+      image.onload = () => {
+        resolve([image.width, image.height])
+
+        image.remove()
+      }
+
+      image.src = file
+    })
+  } else {
+    return new Promise((resolve) => {
+      let video = document.createElement("video")
+
+      video.addEventListener("loadedmetadata", () => {
+        resolve([video.videoWidth, video.videoHeight])
+
+        video.remove()
+      })
+
+      video.src = file
+    })
+  }
+}
+
+uiElements.uploadFileButton.addEventListener("click", async (e) => {
+  let file = uiElements.fileInputText.value.length > 0 ? uiElements.fileInputText.value : uiElements.fileInput.files[0]
+  let isUrl = uiElements.fileInputText.value.length > 0
+
+  if (!file) {
+    alert("No file provided")
+    return
+  }
+
+  let fileType
+
+  if (typeof (file) == "string") {
+    if (isImageLink(file)) fileType = "image"
+    else if (isVideoLink(file)) fileType = "video"
+    else {
+      alert("Couldn't determine file input type.")
+      return
+    }
+  } else {
+    fileType = file.name.endsWith("webm") ? "video" : "image"
+  }
+
+  let dimensions = await getFileDimesnions(isUrl ? file : URL.createObjectURL(file), fileType)
+
+  let slide = new Slide(-1, "", isUrl ? file : URL.createObjectURL(file), "", "", dimensions[0], dimensions[1], -1, -1, fileType.toUpperCase(), "", "", [])
+
+  slide.wasUploaded = true
+  slide.isURLUpload = isUrl
+  slide.fileForForm = !isUrl ? file : null
+  slide.urlForForm = isUrl ? file : null
+
+  slideshowController.slides.splice(slideshowController.currentSlideNumber, 0, slide)
+
   slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber)
 })
