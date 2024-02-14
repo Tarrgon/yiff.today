@@ -1440,6 +1440,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     if (ratingIndex == -1) {
       showFailureScreen(`No rating`, "You have to provide a rating in the form of rating:e, rating:q, or rating:s as a tag.")
+      tagTreeHandler.lock = false
       return
     }
 
@@ -1449,6 +1450,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     if (!["s", "q", "e"].includes(rating)) {
       showFailureScreen(`No rating`, "You have to provide a rating in the form of rating:e, rating:q, or rating:s as a tag.")
+      tagTreeHandler.lock = false
       return
     }
 
@@ -1456,6 +1458,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     if (sources.length == 0) {
       showFailureScreen(`No source`, "You must provide at least one source")
+      tagTreeHandler.lock = false
       return
     }
 
