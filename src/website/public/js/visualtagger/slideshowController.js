@@ -535,6 +535,8 @@ let slideshowController = {
 
       uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
       uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
+
+      uiElements.sourceContainer.firstElementChild.firstElementChild.value = ""
     } else {
       uiElements.submitChangesButton.innerText = "Submit changes"
 

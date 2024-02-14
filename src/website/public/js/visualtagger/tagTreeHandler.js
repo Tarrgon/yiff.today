@@ -1408,6 +1408,13 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
 
     let splitTags = tagTreeHandler.tags.split(" ")
 
+    if (!slide.bypassArtist && !document.querySelector(".artist-tag-category") && !splitTags.some(t => t.startsWith("art:") || t.startsWith("artist:"))) {
+      showGeneralScreen("Warning", "Your post lacks an artist tag. Submit again without any changes to force.")
+      slide.bypassArtist = true
+      tagTreeHandler.lock = false
+      return
+    }
+
     if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex"].some(t => splitTags.includes(t))) {
       showGeneralScreen("Warning", "Your post lacks any obvious gender tags. Submit again without any changes to force.")
       slide.bypassGender = true
@@ -1564,6 +1571,7 @@ function updateTagCount() {
     slide.bypassCount = false
     slide.bypassForms = false
     slide.bypassGender = false
+    slide.bypassArtist = false
   }
 
   let face = document.getElementById("face")
