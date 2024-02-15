@@ -1508,20 +1508,20 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     showLoadingScreen()
 
     try {
-      // let res = await fetch(`https://e621.net/uploads.json`, {
-      //   method: "POST",
-      //   headers: {
-      //     "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
-      //     Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
-      //   },
-      //   body: formData
-      // })
+      let res = await fetch(`https://e621.net/uploads.json`, {
+        method: "POST",
+        headers: {
+          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+          Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+        },
+        body: formData
+      })
 
-      // if (res.ok) {
-      //   showSuccessScreen()
-      // } else {
-      //   showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
-      // }
+      if (res.ok) {
+        showSuccessScreen()
+      } else {
+        showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)
+      }
     } catch (e) {
       showFailureScreen(`Failure`, `Check console`)
       console.error(e)
