@@ -1557,6 +1557,7 @@ function showLoadingScreen() {
   hotkeys.setScope("review")
 
   uiElements.responseTitle.innerText = "Loading"
+  uiElements.responseContent.innerText = ""
 
   uiElements.responseModal.classList.add("is-active")
   uiElements.closeResponseButton.classList.add("hidden")
@@ -1571,6 +1572,7 @@ function showSuccessScreen() {
   }
 
   uiElements.responseTitle.innerText = "Success"
+  uiElements.responseContent.innerText = ""
 
   uiElements.responseModal.classList.add("is-active")
 
@@ -1586,6 +1588,7 @@ function showFailureScreen(title, status) {
   }
 
   uiElements.responseTitle.innerText = title
+  uiElements.responseContent.innerText = ""
 
   let span = document.createElement("span")
   span.innerText = status
