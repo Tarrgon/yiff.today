@@ -45,7 +45,7 @@ class E621Requester {
       })
     }
 
-    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100&${pageNumber != null ? `&page=${pageNumber}` : ""}&_client=${E621Requester.USER_AGENT}`, options)
+    let res = await fetch(E621Requester.REQUEST_BASE_URL + `/?limit=100${pageNumber != null ? `&page=${pageNumber}` : ""}&_client=${E621Requester.USER_AGENT}`, options)
 
     if (res.ok) {
       let data = await res.json()

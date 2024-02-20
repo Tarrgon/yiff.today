@@ -1542,6 +1542,7 @@ function closeAllModals() {
 }
 
 function showGeneralScreen(title, text = "") {
+  closeAllModals()
   hotkeys.setScope("review")
 
   uiElements.responseTitle.innerText = title
@@ -1552,6 +1553,7 @@ function showGeneralScreen(title, text = "") {
 }
 
 function showLoadingScreen() {
+  closeAllModals()
   hotkeys.setScope("review")
 
   uiElements.responseTitle.innerText = "Loading"
@@ -1561,6 +1563,7 @@ function showLoadingScreen() {
 }
 
 function showSuccessScreen() {
+  closeAllModals()
   hotkeys.setScope("review")
 
   while (uiElements.responseContent.firstChild) {
@@ -1575,6 +1578,7 @@ function showSuccessScreen() {
 }
 
 function showFailureScreen(title, status) {
+  closeAllModals()
   hotkeys.setScope("review")
 
   while (uiElements.responseContent.firstChild) {
