@@ -200,7 +200,7 @@
           </span>
         </label>
       </div>
-      <input class="input-text" id="file-input-text" type="text" placeholder="URL Upload (overrides file)"/><br>
+      <input class="input-text" id="file-input-text" type="text" placeholder="URL Upload (overrides file)" /><br>
       <button class="blue-button" id="begin-upload-button">Upload file</button>
       <datalist id="search-history"></datalist>
     </div>
@@ -345,6 +345,15 @@
   <script src="/js/visualtagger/tagImplicationHandler.js"></script>
   <script src="/js/visualtagger/slideshowController.js"></script>
   <script src="/js/visualtagger/tagTreeHandler.js"></script>
+  <script>
+    let params = new URL(document.location).searchParams
+    let query = params.get("q")
+
+    if (query.length > 0) {
+      uiElements.searchText.value = decodeURI(query)
+      uiElements.searchButton.click()
+    }
+  </script>
 </body>
 
 </html>
