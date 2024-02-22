@@ -29,6 +29,16 @@
   <%- include("./partials/index"); %>
 
   <script src="/js/counter/handler.js"></script>
+
+  <script>
+    let params = new URL(document.location).searchParams
+    let query = params.get("q")
+
+    if (query.length > 0) {
+      document.getElementById("search-text").value = decodeURI(query)
+      document.getElementById("count-button").click()
+    }
+  </script>
 </body>
 
 </html>
