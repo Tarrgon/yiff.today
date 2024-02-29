@@ -1,8 +1,10 @@
 const express = require("express")
 const router = express.Router()
+const cors = require("cors")
 
 const fileUpload = require("express-fileupload")
 
+router.use(cors())
 router.use(fileUpload({
   limits: { fileSize: 100 * 1024 * 1024 },
 }));
