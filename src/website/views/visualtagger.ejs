@@ -349,7 +349,7 @@
     let params = new URL(document.location).searchParams
     let query = params.get("q")
 
-    if (query.length > 0) {
+    if (query && query.length > 0) {
       uiElements.searchText.value = decodeURI(query)
       uiElements.searchButton.click()
     }

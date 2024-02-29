@@ -112,6 +112,7 @@ async function resolveTagStructure(unresolvedImplications, tags, structure = {})
     progressMade = true
     for (let [tagName, data] of Object.entries(unresolvedImplications)) {
       for (let parent of data.parents) {
+        console.log(tagName, data, parent)
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, parent.name)
         updateTagCount()
         tags = tagTreeHandler.tags

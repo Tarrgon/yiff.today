@@ -34,6 +34,7 @@ module.exports = async () => {
     app.use("/counter", require("./routes/counter.js")(utils))
     app.use("/imagecompare", require("./routes/imagecompare.js")(utils))
     app.use("/index", require("./routes/index.js")(utils))
+    app.use("/upload_middleman", require("./routes/middleman.js")(utils))
 
     return app
   } catch (e) {
