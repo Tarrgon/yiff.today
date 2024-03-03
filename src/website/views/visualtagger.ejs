@@ -309,6 +309,29 @@
 
   <div class="columns">
     <div class="options is-container box column is-4 is-offset-4 my-6 has-text-centered">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Custom Aliases</h4>
+      <div class="custom-alias-container field has-addons" style="justify-content: center;">
+        <div class="mr-4 control">
+          <input onblur="updateCustomAlias(event, 0)" onfocus="saveFocus(event)" class="antecendent-tag input" type="text" placeholder="Antecedent tag" style="margin-top:0px !important;">
+        </div>
+        <div class="control">
+          <input onblur="updateCustomAlias(event, 1)" onfocus="saveFocus(event)" class="consequent-tag input" type="text" placeholder="Consequent tag" style="margin-top:0px !important;">
+        </div>
+        <div class="control">
+          <button onclick="removeCustomAlias(event)" id="remove-alias-button" class="button is-danger" style="margin-top:0px !important; background-color: #f14668 !important; background-image:none !important;">
+            -
+          </button>
+        </div>
+      </div>
+
+      <button id="add-alias-button" class="button is-success" style="margin-top:1em !important; background-color: #48c78e !important; background-image:none !important;">
+        Add alias
+      </button>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="options is-container box column is-4 is-offset-4 my-6 has-text-centered">
       <h4 class="is-size-5 has-text-weight-bold has-text-light">E621 Login</h4>
       <ul>
         <li>

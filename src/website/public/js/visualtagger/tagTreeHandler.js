@@ -2,6 +2,8 @@ const BACKGROUND_COLORS = ["#b4c7d9", "#f2ac08", "god is surely dead since this 
 const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "species", "invalid", "meta", "lore", "NEWTAG"]
 const CATEGORIES_SORTED = ["NEWTAG", "artist", "copyright", "character", "species", "general", "meta", "lore"] // This is how e6 shows categories
 
+let customAliasesCache = {}
+
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
   if (parent) {
@@ -940,6 +942,16 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   e621AutoComplete.next = null
   uiElements.newTagInput.value = ""
   if (tag == "") return
+
+  if (customAliasesCache[tag]) {
+    let f = true
+    for (let t of customAliasesCache[tag]) {
+      await addNewTag(t, replaceExistingTopLevel, f, checkExisting)
+      f = false
+    }
+
+    return
+  }
 
   uiElements.autoCompleteContainer.classList.remove("is-active")
 
@@ -2000,3 +2012,110 @@ uiElements.removeSourceButton.addEventListener("click", (e) => {
   uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
   uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
 })
+
+document.getElementById("add-alias-button").addEventListener("click", e => {
+  let containers = document.querySelectorAll(".custom-alias-container")
+  let container = containers[containers.length - 1]
+  let cloned = container.cloneNode(true)
+  for (let input of cloned.querySelectorAll("input")) input.value = ""
+
+  container.after(cloned)
+})
+
+let savedFocus
+
+function updateCustomAlias(event, type) {
+  let antecedent = event.target.parentElement.parentElement.querySelector(".antecendent-tag").value
+  let consequent = event.target.parentElement.parentElement.querySelector(".consequent-tag").value
+
+  console.log(`"${savedFocus}"`, `"${antecedent}"`, `"${consequent}"`, type)
+
+  let customAliases = localStorage.getItem("customAliases")
+
+  if (!customAliases) customAliases = {}
+  else customAliases = JSON.parse(customAliases)
+
+  if (type == 0) {
+    if (customAliases[savedFocus] && customAliases[savedFocus].length == 1) delete customAliases[savedFocus]
+    else if (customAliases[savedFocus]) {
+      let index = customAliases[savedFocus].indexOf(consequent)
+      if (index != -1) customAliases[savedFocus].splice(index, 1)
+    }
+  }
+
+  if (!customAliases[antecedent]) customAliases[antecedent] = []
+
+  if (type == 1) {
+    if (customAliases[antecedent]) {
+      let index = customAliases[antecedent].indexOf(savedFocus)
+      if (index != -1) customAliases[antecedent].splice(index, 1)
+    }
+  }
+
+  if (customAliases[antecedent].includes(consequent)) return
+
+  customAliases[antecedent].push(consequent)
+  localStorage.setItem("customAliases", JSON.stringify(customAliases))
+
+  customAliasesCache = customAliases
+}
+
+function removeCustomAlias(event) {
+  let containers = document.querySelectorAll(".custom-alias-container")
+  let antecedent = event.target.parentElement.parentElement.querySelector(".antecendent-tag").value
+  let consequent = event.target.parentElement.parentElement.querySelector(".consequent-tag").value
+
+  if (containers.length == 1) {
+    for (let input of event.target.parentElement.parentElement.querySelectorAll("input")) input.value = ""
+  } else {
+    event.target.parentElement.parentElement.remove()
+  }
+
+  let customAliases = localStorage.getItem("customAliases")
+  if (!customAliases) return
+  else customAliases = JSON.parse(customAliases)
+
+  if (!customAliases[antecedent]) return
+
+  customAliases[antecedent].splice(customAliases[antecedent].indexOf(consequent), 1)
+
+  if (customAliases[antecedent].length == 0) delete customAliases[antecedent]
+  localStorage.setItem("customAliases", JSON.stringify(customAliases))
+
+  customAliasesCache = customAliases
+}
+
+function saveFocus(event) {
+  savedFocus = event.target.value
+
+  hotkeys.setScope("aliasing")
+}
+
+function loadCustomAliases() {
+  let customAliases = localStorage.getItem("customAliases")
+
+  if (!customAliases) return
+
+  customAliasesCache = JSON.parse(customAliases)
+
+  for (let [antecedent, consequents] of Object.entries(customAliasesCache)) {
+    for (let consequent of consequents) {
+      let containers = document.querySelectorAll(".custom-alias-container")
+      let container = containers[containers.length - 1]
+      let cloned = container.cloneNode(true)
+
+      cloned.querySelector(".antecendent-tag").value = antecedent
+      cloned.querySelector(".consequent-tag").value = consequent
+
+      container.after(cloned)
+    }
+  }
+
+  let containers = document.querySelectorAll(".custom-alias-container")
+
+  if (containers.length == 1) return
+
+  containers[0].remove()
+}
+
+loadCustomAliases()
