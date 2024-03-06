@@ -2028,8 +2028,6 @@ function updateCustomAlias(event, type) {
   let antecedent = event.target.parentElement.parentElement.querySelector(".antecendent-tag").value
   let consequent = event.target.parentElement.parentElement.querySelector(".consequent-tag").value
 
-  console.log(`"${savedFocus}"`, `"${antecedent}"`, `"${consequent}"`, type)
-
   let customAliases = localStorage.getItem("customAliases")
 
   if (!customAliases) customAliases = {}
