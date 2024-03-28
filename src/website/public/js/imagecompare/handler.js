@@ -25,7 +25,7 @@ function updateSize() {
     newWidth = viewHeight * newRatio
     newHeight = viewHeight
   }
-
+  
   image1.style.width = newWidth + "px"
   image1.style.height = (newHeight - 100) + "px"
 
@@ -177,7 +177,10 @@ function isImageLink(url) {
   return url.match(/^http[^\?]*.(jpg|jpeg|gif|png)(\?(.*))?$/gmi) != null
 }
 
-function compare() {
+let waitingPromise1Resolve
+let waitingPromise2Resolve
+
+async function compare() {
   let fileInput1 = document.getElementById("file-input-1")
 
   let file1 = fileInput1.files[0]
@@ -210,11 +213,29 @@ function compare() {
 
   if (!fileUrl2) return alert("File 2 not selected.")
 
+  let p1 = new Promise((r) => {
+    waitingPromise1Resolve = r
+  })
+
+  let p2 = new Promise((r) => {
+    waitingPromise2Resolve = r
+  })
+
   document.getElementById("img-1").src = fileUrl1
   document.getElementById("img-2").src = fileUrl2
+
+  await Promise.all([p1, p2])
 
   document.getElementById("comparison-container").classList.remove("hidden")
 
   updateSize()
   updateMetadata()
 }
+
+document.getElementById("img-1").addEventListener("load", () => {
+  waitingPromise1Resolve()
+})
+
+document.getElementById("img-2").addEventListener("load", () => {
+  waitingPromise2Resolve()
+})

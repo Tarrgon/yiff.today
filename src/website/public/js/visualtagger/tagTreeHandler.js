@@ -1356,6 +1356,12 @@ uiElements.submitChangesButton.addEventListener("click", () => {
   }
 
   uiElements.tagChangesReview.style.height = `${uiElements.tagContainer.clientHeight / 1.5}px`
+
+  if (slideshowController.getCurrentSlide().wasUploaded) {
+    uiElements.descriptionContainer.classList.remove("hidden")
+  } else {
+    uiElements.descriptionContainer.classList.add("hidden")
+  }
 })
 
 uiElements.confirmSubmitButton.addEventListener("click", async () => {
@@ -1472,7 +1478,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       return
     }
 
-    if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex"].some(t => splitTags.includes(t))) {
+    if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex", "female/ambiguous", "male/ambiguous", "intersex/ambiguous"].some(t => splitTags.includes(t))) {
       showGeneralScreen("Warning", "Your post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
       slide.bypassCharacterInteractions = true
       tagTreeHandler.lock = false
@@ -1512,11 +1518,19 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       return
     }
 
+    if (slide.isMp4) {
+      showFailureScreen("Post is MP4", "This is an MP4 file. This filetype is not supported on e621. Please copy your tags, download the file, convert it and upload it manually. Sorry for the inconvenience.")
+      return
+    }
+
     formData.append("upload[tag_string]", tagTreeHandler.tags)
     if (!slide.isURLUpload) formData.append("upload[file]", slide.fileForForm)
     else formData.append("upload[direct_url]", slide.urlForForm)
     formData.append("upload[source]", sources.join("%0A"))
     formData.append("upload[rating]", rating)
+    if (uiElements.descriptionText.value.trim().length > 0) formData.append("upload[description]", uiElements.descriptionText.value)
+
+    uiElements.descriptionText.value = ""
 
     showLoadingScreen()
 
@@ -1531,6 +1545,11 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       })
 
       if (res.ok) {
+        if (slide.isMiddleman) {
+          if (!await middlemanRequester.markAsUploaded(slide.md5)) {
+            showFailureScreen(`Upload success, middleman upload mark failed`, "The file was successfully uploaded to e621, however marking as uploaded to middleman failed.")
+          }
+        }
         showSuccessScreen()
       } else {
         showFailureScreen(`Failure (${res.status})`, `${(await res.json()).reason.toUpperCase()}`)

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>Yiff Today - Tag Search</title>
+
+  <%- include("./partials/head"); %>
+</head>
+
+<body>
+  <!-- <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
+      <h1 class="is-size-1 has-text-light">
+        Count: <span id="count">0</span>
+      </h1>
+    </div>
+  </div> -->
+
+  <div class="columns">
+    <div class="is-container box column is-10 is-offset-1 my-6 has-text-centered options">
+      <sub style="color:#4a4a4a;">Make sure to read the query language below for proper use!</sub><br>
+      <input class="input-text" type="text" placeholder="Search query" style="height:2.5em;" /><br />
+      <button class="blue-button">Search</button><br />
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="options is-container box column is-8 is-offset-2 my-6 has-text-centered">
+      <h4 class="is-size-3 has-text-weight-bold has-text-light">Query Language Definition</h4>
+      <hr>
+
+      <h4 class="is-size-4 has-text-weight-bold has-text-light">Keywords</h4>
+      <ul>
+        <li>
+          <h3 class="has-text-weight-normal is-size-5">NAME string</h3>
+          <h3 class="has-text-weight-normal is-size-5">IMPCOUNT range</h3>
+          <h3 class="has-text-weight-normal is-size-5">IMPLIES string</h3>
+          <h3 class="has-text-weight-normal is-size-5">IMPLIEDBY string</h3>
+          <h3 class="has-text-weight-normal is-size-5">ALIASEDTO string</h3>
+          <h3 class="has-text-weight-normal is-size-5">ALIASEDFROM string</h3>
+          <h3 class="has-text-weight-normal is-size-5">COUNT range</h3>
+          <h3 class="has-text-weight-normal is-size-5">CATEGORY string</h3>
+        </li>
+      </ul>
+      <hr>
+
+      <h4 class="is-size-4 has-text-weight-bold has-text-light">Operators</h4>
+      <ul>
+        <li>
+          <h3 class="has-text-weight-normal is-size-5">AND (assumed)</h3>
+          <h3 class="has-text-weight-normal is-size-5">OR</h3>
+          <h3 class="has-text-weight-normal is-size-5">NOT</h3>
+        </li>
+      </ul>
+      <h4 class="is-size-5 has-text-weight-normal has-text-light">You can use parentheses () to change the order of operations. Defaults to LEFT TO RIGHT.</h4>
+      <hr>
+    </div>
+  </div>
+
+  <%- include("./partials/index"); %>
+</body>
+
+</html>

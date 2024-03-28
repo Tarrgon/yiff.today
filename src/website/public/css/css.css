@@ -94,12 +94,12 @@ textarea {
   width: 100%;
 }
 
-textarea, #e621-api-key, #e621-username {
+textarea, #e621-api-key, #e621-username, #middleman-api-key {
   background: #181a1f;
   color: #999;
 }
 
-textarea:focus, #e621-api-key:focus, #e621-username:focus {
+textarea:focus, #e621-api-key:focus, #e621-username:focus, #middleman-api-key:focus {
   background: #292c3e;
   color: #fff;
 }

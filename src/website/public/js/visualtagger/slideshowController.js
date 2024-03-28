@@ -1,4 +1,7 @@
 let e621Requester = new E621Requester()
+let middlemanRequester = new MiddlemanRequester()
+
+let currentRequester
 
 async function getBufferFromUrl(url) {
   const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(url))
@@ -303,7 +306,7 @@ function areSomeTagsAreBlacklisted(tags) {
 }
 
 function slideFilter(slide) {
-  if (!slide.tags || slide.tags == "" || typeof slide.tags != "string") return false
+  if (!slide.tags || slide.tags == "" || typeof slide.tags != "string") return true
 
   if (!isMediaTypeSupported(slide.mediaType)) return false
 
@@ -486,9 +489,11 @@ let slideshowController = {
   },
 
   async loadNewSlidesIfNeeded() {
-    if (!slideshowController.loadingNewSlides && slideshowController.currentSlideNumber >= slideshowController.slides.length - 11 && e621Requester.hasMore && !e621Requester.requesting) {
+    currentRequester = slideshowController.searchText == "middleman" ? middlemanRequester : e621Requester
+
+    if (!slideshowController.loadingNewSlides && slideshowController.currentSlideNumber >= slideshowController.slides.length - 11 && currentRequester.hasMore && !currentRequester.requesting) {
       loadingNewSlides = true
-      let slides = await e621Requester.getSlides(slideshowController.searchText, null)
+      let slides = await currentRequester.getSlides(slideshowController.searchText, currentRequester == middlemanRequester ? currentRequester.currentPage + 1 : null)
 
       slideshowController.slides = slideshowController.slides.concat(slides.filter(slideFilter))
       loadingNewSlides = false
@@ -506,6 +511,7 @@ let slideshowController = {
   setCurrentSlideNumber(index) {
     if (index >= slideshowController.slides.length || index < 0) return
     if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return
+    uiElements.descriptionText.value = ""
     slideshowController.clearCallbacksForPreloadingSlides()
     slideshowController.currentSlideNumber = index
     slideshowController.preloadCurrentSlideIfNeeded()
@@ -518,6 +524,15 @@ let slideshowController = {
     if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
 
     closeAllModals()
+
+    if (slideshowController.getCurrentSlide().isMiddleman) {
+      uiElements.sourceFoundAtContainer.classList.remove("hidden")
+      uiElements.sourceFoundAtText.innerText = `Source located at: ${slideshowController.getCurrentSlide().source}`
+
+      if (slideshowController.getCurrentSlide().isMp4) {
+        alert("This is an MP4 slide. Manual convert and upload would be required.")
+      }
+    }
 
     if (slideshowController.getCurrentSlide().wasUploaded) {
       uiElements.submitChangesButton.innerText = "Upload file"
@@ -536,11 +551,12 @@ let slideshowController = {
       uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[0].parentElement)
       uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
 
-      uiElements.sourceContainer.firstElementChild.firstElementChild.value = ""
+      uiElements.sourceContainer.firstElementChild.firstElementChild.firstElementChild.firstElementChild.value = ""
     } else {
       uiElements.submitChangesButton.innerText = "Submit changes"
 
       uiElements.sourceContainer.classList.add("hidden")
+      uiElements.sourceFoundAtContainer.classList.add("hidden")
     }
   },
 
@@ -606,7 +622,9 @@ let slideshowController = {
   updateTotalNumberDisplay() {
     let totalNumberText = slideshowController.slides.length
 
-    if (e621Requester.hasMore) {
+    currentRequester = slideshowController.searchText == "middleman" ? middlemanRequester : e621Requester
+
+    if (currentRequester.hasMore) {
       totalNumberText += "+";
     }
 
@@ -923,7 +941,10 @@ let slideshowController = {
   async executeSearch() {
     let searchText = uiElements.searchText.value
     slideshowController.searchText = searchText
-    let slides = await e621Requester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
+
+    currentRequester = slideshowController.searchText == "middleman" ? middlemanRequester : e621Requester
+
+    let slides = await currentRequester.getSlides(slideshowController.searchText, uiElements.startPage.value || 1)
 
     if (slides.length == 0) {
       slideshowController.displayInfoMessage("No posts found")
@@ -1154,4 +1175,12 @@ uiElements.uploadFileButton.addEventListener("click", async (e) => {
   slideshowController.slides.splice(slideshowController.currentSlideNumber, 0, slide)
 
   slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber)
+})
+
+uiElements.middlemanMarkAsUploaded.addEventListener("click", () => {
+  middlemanRequester.markAsUploaded(slideshowController.getCurrentSlide().md5)
+})
+
+uiElements.middlemanDelete.addEventListener("click", () => {
+  middlemanRequester.delete(slideshowController.getCurrentSlide().md5)
 })

@@ -252,3 +252,13 @@ button.dropdown-item.active {
 .fa-face-smile, .fa-face-surprise {
   color: green;
 }
+
+#description-text::placeholder {
+  color: red;
+  opacity: 1;
+}
+
+#description-text::ms-input-placeholder {
+  color: red;
+  opacity: 1;
+}

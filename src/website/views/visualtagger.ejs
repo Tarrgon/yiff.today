@@ -73,6 +73,11 @@
               <div id="tag-changes-review" class="textarea is-info has-background-dark" style="overflow-y: scroll;"></div>
             </div>
           </div>
+          <div id="description-container" class="columns">
+            <div class="column">
+              <textarea id="description-text" class="textarea is-info has-background-dark has-text-light" style="overflow-y: scroll;", placeholder="Description content"></textarea>
+            </div>
+          </div>
           <div class="columns">
             <div class="column is-4 is-offset-4 has-text-centered">
               <button id="confirm-submit" class="button is-success">Submit</button>
@@ -146,6 +151,16 @@
           <button id="show-changed-button" class="button is-info">Show additions</button>
           <button id="collapse-all-button" class="button is-info">Collapse all</button>
           <button id="show-all-button" class="button is-info">Show all</button>
+        </div>
+      </div>
+
+      <div id="posted-at-container" class="columns hidden">
+        <div class="column is-full">
+          <h1 id="posted-at-text" class="is-4 has-text-white"></h1>
+        </div>
+        <div class="column">
+          <button id="middleman-mark-uploaded" class="button is-info">Mark as uploaded</button>
+          <button id="middleman-delete" class="button is-danger">Delete</button>
         </div>
       </div>
 
@@ -341,6 +356,10 @@
           <label>E621 API Key <input id="e621-api-key" type="password" /></label>
         </li>
         <li><a href="https://e621.net/users/home" target="_blank">(get API key here)</a></li>
+        <li>
+          <label>Middleman API Key <input id="middleman-api-key" type="password" /></label>
+        <li>(If you don't know what this is, leave it blank. Unrelated to e621.)</li>
+        </li>
         <li class="note">
           This is saved locally, however it is saved in plaintext. <span class="has-text-warning">Use with caution</span>.
           <br>
@@ -359,10 +378,12 @@
   <script src="/js/visualtagger/slideshowElements.js"></script>
   <script src="/js/Slide.js"></script>
   <script src="/js/E621Requester.js"></script>
+  <script src="/js/MiddlemanRequester.js"></script>
   <script src="/js/e621AutoCompleter.js"></script>
   <script src="/js/visualtagger/e621WikiFetcher.js"></script>
   <script src="/js/dataHandler.js"></script>
   <script src="/js/e621LoginHandler.js"></script>
+  <script src="/js/middlemanAPIKey.js"></script>
   <script src="/js/filterHandler.js"></script>
   <script src="/js/historyHandler.js"></script>
   <script src="/js/visualtagger/tagImplicationHandler.js"></script>

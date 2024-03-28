@@ -2,6 +2,8 @@ const { Db, ObjectId } = require("mongodb")
 
 const SCALE_FACTOR = 10000000000
 
+const path = require("path")
+
 const ACCEPTABLE_NAMES = ["black", "blue", "brown", "green", "grey", "orange", "pink", "purple", "red", "tan", "teal", "white", "yellow"]
 
 /** @type {Db} */
@@ -139,6 +141,44 @@ module.exports = (db) => {
       z = (z > 0.008856) ? Math.pow(z, 1 / 3) : (7.787 * z) + 16 / 116
 
       return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)]
+    },
+
+    async checkMiddlemanAuth(key) {
+      if (!key) return false
+
+      return (await database.collection("middlemanAuth").findOne({ key })) != null
+    },
+
+    async checkMiddlemanUploaderAuth(key) {
+      return (await database.collection("middlemanUploaderAuth").findOne({ key })) != null
+    },
+
+    async uploadFiles(files, key, source) {
+      let acc = await database.collection("middlemanAuth").findOne({ key })
+
+      for (let file of files) {
+        await database.collection("middlemanImages").updateOne({ md5: file.md5 }, { $set: { source: acc[source] ?? `${source}/${acc.name}`, createdAt: new Date(), path: path.resolve(file.path), uploaded: false } }, { upsert: true })
+      }
+    },
+
+    async getMiddlemanFiles(page = 0, limit = 100) {
+      let files = await database.collection("middlemanImages").find({ uploaded: false }).sort({ createdAt: 1 }).skip(page * limit).limit(limit).toArray()
+
+      let f = []
+
+      for (let file of files) {
+        f.push({ createdAt: file.createdAt, source: file.source, md5: file.md5, name: path.basename(file.path) })
+      }
+
+      return f
+    },
+
+    async getFile(md5) {
+      return await database.collection("middlemanImages").findOne({ md5 })
+    },
+
+    async incrementMiddlemanUses(key, uses) {
+      await database.collection("middlemanAuth").updateOne({ key }, { $inc: { uses } }, { upsert: true })
     }
   }
   return mod
