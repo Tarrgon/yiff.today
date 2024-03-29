@@ -25,18 +25,25 @@ router.post("/", async (req, res) => {
 
   let uploadedFiles = 0
 
+  let passedFiles = []
+
   for (let [fileName, file] of Object.entries(req.files)) {
     if (!acceptableMimeTypes.includes(file.mimetype) || file.size > MAX_SIZE || (file.mimetype == "image/gif" && file.size > MAX_SIZE_GIF)) continue
-    uploadedFiles++
-    let name = `${file.md5}.${mime.extension(file.mimetype)}`
     
+    if (await utils.getFile(file.md5)) continue
+
+    let name = `${file.md5}.${mime.extension(file.mimetype)}`
+
     if (name.endsWith("apng")) name = `${file.md5}.png`
+
+    uploadedFiles++
 
     file.mv(`${__dirname}/../middleman_files/${name}`)
     file.path = `${__dirname}/../middleman_files/${name}`
+    passedFiles.push(file)
   }
 
-  utils.uploadFiles(Object.values(req.files), req.query.key, req.body.source)
+  utils.uploadFiles(passedFiles, req.query.key, req.body.source)
   utils.incrementMiddlemanUses(req.query.key, uploadedFiles)
 })
 
