@@ -527,7 +527,7 @@ let slideshowController = {
 
     if (slideshowController.getCurrentSlide().isMiddleman) {
       uiElements.sourceFoundAtContainer.classList.remove("hidden")
-      uiElements.sourceFoundAtText.innerText = `Source located at: ${slideshowController.getCurrentSlide().source}`
+      uiElements.sourceFoundAtText.innerText = `Source located at: ${slideshowController.getCurrentSlide().source}\nPotential alternate sources:${slideshowController.getCurrentSlide().potentialAlternateSources.join("\n")}`
 
       if (slideshowController.getCurrentSlide().isMp4) {
         alert("This is an MP4 slide. Manual convert and upload would be required.")

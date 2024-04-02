@@ -7,11 +7,15 @@ class MiddlemanRequester {
     this.currentPage = 1
   }
 
-  async getSlides(_, pageNumber) {
+  async getSlides(text, pageNumber) {
     this.currentPage = pageNumber
     this.requesting = true
 
-    let res = await fetch(MiddlemanRequester.REQUEST_BASE_URL + `/?limit=100${pageNumber != null ? `&page=${pageNumber}` : ""}`, {
+    if (!middlemanAPIKey) await new Promise(r => setTimeout(r, 1000))
+
+    let artist = text.replace("middleman", "").trim()
+
+    let res = await fetch(MiddlemanRequester.REQUEST_BASE_URL + `/?limit=100${pageNumber != null ? `&page=${pageNumber}` : ""}${artist.length > 0 ? `&artist=${artist}` : ""}`, {
       headers: {
         Authorization: middlemanAPIKey
       }
@@ -42,6 +46,7 @@ class MiddlemanRequester {
         slide.fileForForm = file
         slide.isMiddleman = true
         slide.source = p.source
+        slide.potentialAlternateSources = p.potentialAlternateSources
         slide.isMp4 = p.name.endsWith("mp4")
 
         return slide
@@ -51,12 +56,14 @@ class MiddlemanRequester {
       return await Promise.all(mapped)
     } else {
       this.requesting = false
-      slideshowController.showError(await res.text())
+      slideshowController.displayWarningMessage("Error occured, check console.")
+      console.error(await res.text())
     }
   }
 
   async markAsUploaded(md5) {
     let res = await fetch(`https://yiff.today/upload_middleman/mark_uploaded/${md5}`, {
+      method: "POST",
       headers: {
         Authorization: middlemanAPIKey
       }
@@ -72,7 +79,8 @@ class MiddlemanRequester {
   }
 
   async delete(md5) {
-    let res = await fetch(`https://yiff.today/upload_middleman/delete/${md5}`, {
+    let res = await fetch(`https://yiff.today/upload_middleman/file/${md5}`, {
+      method: "DELETE",
       headers: {
         Authorization: middlemanAPIKey
       }

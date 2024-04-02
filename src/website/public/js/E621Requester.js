@@ -56,7 +56,8 @@ class E621Requester {
       return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))
     } else {
       this.requesting = false
-      slideshowController.showError(await res.text())
+      slideshowController.displayWarningMessage("Error occured, check console")
+      console.error(await res.text())
     }
   }
 
@@ -84,7 +85,8 @@ class E621Requester {
       return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))[0]
     } else {
       this.requesting = false
-      slideshowController.showError(await res.text())
+      slideshowController.displayWarningMessage("Error occured, check console")
+      console.error(await res.text())
     }
   }
 }

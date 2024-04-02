@@ -1,5 +1,7 @@
 const { Db, ObjectId } = require("mongodb")
 
+const fs = require("fs")
+
 const SCALE_FACTOR = 10000000000
 
 const path = require("path")
@@ -156,18 +158,28 @@ module.exports = (db) => {
     async uploadFiles(files, key, source) {
       let acc = await database.collection("middlemanAuth").findOne({ key })
 
+      let potentialAlternateSources = []
+
+      for (let [site, url] of Object.entries(acc.sources)) {
+        if (site == source) continue
+        potentialAlternateSources.push(url)
+      }
+
       for (let file of files) {
-        await database.collection("middlemanImages").updateOne({ md5: file.md5 }, { $set: { source: acc[source] ?? `${source}/${acc.name}`, createdAt: new Date(), path: path.resolve(file.path), uploaded: false } }, { upsert: true })
+        await database.collection("middlemanImages").updateOne({ md5: file.md5 }, { $set: { source: acc.sources ? acc.sources[source] ?? `${source}/${acc.name}` : `${source}/${acc.name}`, artist: acc.name, potentialAlternateSources, createdAt: new Date(), path: path.resolve(file.path), uploaded: false, deleted: false } }, { upsert: true })
       }
     },
 
-    async getMiddlemanFiles(page = 0, limit = 100) {
-      let files = await database.collection("middlemanImages").find({ uploaded: false }).sort({ createdAt: 1 }).skip(page * limit).limit(limit).toArray()
+    async getMiddlemanFiles(artist = null, page = 0, limit = 100) {
+      let files
+
+      if (artist) files = await database.collection("middlemanImages").find({ uploaded: false, deleted: false, artist }).sort({ createdAt: 1 }).skip(page * limit).limit(limit).toArray()
+      else files = await database.collection("middlemanImages").find({ uploaded: false, deleted: false }).sort({ createdAt: 1 }).skip(page * limit).limit(limit).toArray()
 
       let f = []
 
       for (let file of files) {
-        f.push({ createdAt: file.createdAt, source: file.source, md5: file.md5, name: path.basename(file.path) })
+        f.push({ createdAt: file.createdAt, source: file.source, potentialAlternateSources: file.potentialAlternateSources, md5: file.md5, name: path.basename(file.path) })
       }
 
       return f
@@ -179,6 +191,26 @@ module.exports = (db) => {
 
     async incrementMiddlemanUses(key, uses) {
       await database.collection("middlemanAuth").updateOne({ key }, { $inc: { uses } }, { upsert: true })
+    },
+
+    async markFileUploaded(md5, key) {
+      let file = await database.collection("middlemanImages").findOne({ md5 })
+      if (!file) return false
+      await database.collection("middlemanImages").updateOne({ md5 }, { $set: { uploaded: true, uploadedBy: key } })
+      
+      fs.unlinkSync(file.path)
+
+      return true
+    },
+
+    async deleteFile(md5, key) {
+      let file = await database.collection("middlemanImages").findOne({ md5 })
+      if (!file) return false
+      await database.collection("middlemanImages").updateOne({ md5 }, { $set: { deleted: true, deletedBy: key } })
+      
+      fs.unlinkSync(file.path)
+
+      return true
     }
   }
   return mod
