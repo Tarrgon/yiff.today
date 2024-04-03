@@ -972,6 +972,8 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
   uiElements.newTagInput.value = ""
   if (tag == "") return
 
+  let dontContinue = false
+
   if (customAliasesCache[tag]) {
     let f = true
     for (let t of customAliasesCache[tag]) {
@@ -979,7 +981,7 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
       f = false
     }
 
-    return
+    dontContinue = true
   }
 
   for (let [regex, replacements] of regexAliases) {
@@ -990,9 +992,12 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
         await addNewTag(replaceWithGroups(t, match), replaceExistingTopLevel, f, checkExisting)
         f = false
       }
-      return
+
+      dontContinue = true
     }
   }
+
+  if (dontContinue) return
 
   uiElements.autoCompleteContainer.classList.remove("is-active")
 
