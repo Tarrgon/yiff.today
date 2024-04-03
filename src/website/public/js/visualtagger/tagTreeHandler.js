@@ -3,6 +3,7 @@ const CATEGORIES = ["general", "artist", "dead god", "copyright", "character", "
 const CATEGORIES_SORTED = ["NEWTAG", "artist", "copyright", "character", "species", "general", "meta", "lore"] // This is how e6 shows categories
 
 let customAliasesCache = {}
+let regexAliases = []
 
 // (c) 2018 Chris Ferdinandi, MIT License, https://gomakethings.com
 function isOutOfViewport(elem, parent) {
@@ -937,6 +938,34 @@ function getChanges() {
 // TODO: If the tag exists multiple times, it might desync with other instances of the same tag
 //       Turning a tag on that implies multiple tags will not properly resolve tags other than the parent it was added from
 
+function replaceWithGroups(tag, match) {
+  let newString = ""
+
+  let lastDollarSign = false
+  let index = ""
+
+  for (let char of tag.split("")) {
+    if (lastDollarSign && !isNaN(char)) {
+      index += char
+    } else if (char == "$") lastDollarSign = true
+    else {
+      if (lastDollarSign) {
+        newString += match[parseInt(index)]
+        lastDollarSign = false
+        index = ""
+      }
+
+      newString += char
+    }
+  }
+
+  if (index != "") {
+    newString += match[parseInt(index)]
+  }
+
+  return newString
+}
+
 async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, checkExisting = false) {
   tag = tag.trim().replaceAll(" ", "_")
   e621AutoComplete.next = null
@@ -951,6 +980,18 @@ async function addNewTag(tag, replaceExistingTopLevel = true, flash = true, chec
     }
 
     return
+  }
+
+  for (let [regex, replacements] of regexAliases) {
+    let match = []
+    if ((match = new RegExp(regex.slice(1, -1)).exec(tag)) != null) {
+      let f = true
+      for (let t of replacements) {
+        await addNewTag(replaceWithGroups(t, match), replaceExistingTopLevel, f, checkExisting)
+        f = false
+      }
+      return
+    }
   }
 
   uiElements.autoCompleteContainer.classList.remove("is-active")
@@ -1464,6 +1505,13 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       return
     }
 
+    if (!slide.bypassSpecies && !document.querySelector(".species-tag-category") && !splitTags.some(t => t.startsWith("species:") || t.startsWith("spec:"))) {
+      showGeneralScreen("Warning", "Your post lacks any species tags. Submit again without any changes to force.")
+      slide.bypassSpecies = true
+      tagTreeHandler.lock = false
+      return
+    }
+
     if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex"].some(t => splitTags.includes(t))) {
       showGeneralScreen("Warning", "Your post lacks any obvious gender tags. Submit again without any changes to force.")
       slide.bypassGender = true
@@ -1641,6 +1689,7 @@ function updateTagCount() {
     slide.bypassForms = false
     slide.bypassGender = false
     slide.bypassArtist = false
+    slide.bypassSpecies = false
     slide.bypassDNP = false
   }
 
@@ -2075,6 +2124,7 @@ function updateCustomAlias(event, type) {
   localStorage.setItem("customAliases", JSON.stringify(customAliases))
 
   customAliasesCache = customAliases
+  regexAliases = Object.entries(customAliasesCache).filter(([alias, _]) => alias.startsWith("/") && alias.endsWith("/"))
 }
 
 function removeCustomAlias(event) {
@@ -2100,6 +2150,7 @@ function removeCustomAlias(event) {
   localStorage.setItem("customAliases", JSON.stringify(customAliases))
 
   customAliasesCache = customAliases
+  regexAliases = Object.entries(customAliasesCache).filter(([alias, _]) => alias.startsWith("/") && alias.endsWith("/"))
 }
 
 function saveFocus(event) {
@@ -2114,6 +2165,7 @@ function loadCustomAliases() {
   if (!customAliases) return
 
   customAliasesCache = JSON.parse(customAliases)
+  regexAliases = Object.entries(customAliasesCache).filter(([alias, _]) => alias.startsWith("/") && alias.endsWith("/"))
 
   for (let [antecedent, consequents] of Object.entries(customAliasesCache)) {
     for (let consequent of consequents) {
