@@ -262,3 +262,19 @@ button.dropdown-item.active {
   color: red;
   opacity: 1;
 }
+
+#tag-container::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #F5F5F5;
+}
+
+#tag-container::-webkit-scrollbar {
+  width: 12px;
+}
+
+#tag-container::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+  background: linear-gradient(#d66029, #d62929);
+}

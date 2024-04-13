@@ -197,7 +197,7 @@ async function compare() {
 
   if (!fileUrl1) return alert("File 1 not selected.")
 
-  let fileInput2 = document.getElementById("file-input-1")
+  let fileInput2 = document.getElementById("file-input-2")
 
   let file2 = fileInput2.files[0]
 

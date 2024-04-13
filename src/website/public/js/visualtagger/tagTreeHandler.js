@@ -839,6 +839,42 @@ let tagTreeHandler = {
 
         ul.appendChild(createTagTree(group, 1, true))
       }
+
+      let sources = slide.sources
+
+      if (sources && sources.length > 0) {
+        for (let i = 0; i < sources.length - 1; i++) {
+          uiElements.addSourceButton.click()
+        }
+
+        Array.from(uiElements.sourceContainer.querySelectorAll("input")).forEach((v, i) => v.value = sources[i])
+      }
+
+      if (slide.savedDescription && slide.savedDescription.length > 0) uiElements.descriptionText.value = slide.savedDescription
+
+      if (slide.savedChanges && slide.savedChanges.length > 0) {
+        showLoadingScreen()
+
+        let p = []
+
+        for (let change of slide.savedChanges.filter(c => c.change == 1)) {
+          p.push(addNewTag(change.tag, true, false, true))
+        }
+
+        for (let change of slide.savedChanges.filter(c => c.change == -1)) {
+          if (tagTreeHandler.tags.split(" ").includes(change.tag)) {
+            tagTreeHandler.tags = removeFromText(tagTreeHandler.tags, change.tag).trim()
+            let anyOne = document.querySelector(`[data-tag-name=\"${change.tag}\"]`)
+            if (anyOne) anyOne.firstChild.click()
+          }
+        }
+
+        await Promise.all(p)
+
+        closeAllModals()
+      }
+
+      updateTagCount()
     }
   }
 }
@@ -1459,6 +1495,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       })
 
       if (res.ok) {
+        slide.submitted = true
         showSuccessScreen()
       } else {
         showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
@@ -1598,6 +1635,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       })
 
       if (res.ok) {
+        slide.submitted = true
         if (slide.isMiddleman) {
           if (!await middlemanRequester.markAsUploaded(slide.md5)) {
             showFailureScreen(`Upload success, middleman upload mark failed`, "The file was successfully uploaded to e621, however marking as uploaded to middleman failed.")
@@ -2053,7 +2091,7 @@ window.addEventListener("mousedown", (e) => {
 })
 
 window.addEventListener("beforeunload", (e) => {
-  if (getChanges().filter(c => c.change != 0).length > 0) e.preventDefault()
+  if (slideshowController.slides.filter(s => (s.savedChanges?.length > 0 || s.savedDescription?.length > 0 || s.sources?.length > 0) && !s.submitted).length > 0) e.preventDefault()
 })
 
 uiElements.addSourceButton.addEventListener("click", (e) => {
@@ -2086,13 +2124,17 @@ uiElements.removeSourceButton.addEventListener("click", (e) => {
   uiElements.sourceContainer.firstElementChild.lastElementChild.appendChild(buttons[1].parentElement)
 })
 
-document.getElementById("add-alias-button").addEventListener("click", e => {
+document.getElementById("add-alias-button").addEventListener("click", () => {
   let containers = document.querySelectorAll(".custom-alias-container")
   let container = containers[containers.length - 1]
   let cloned = container.cloneNode(true)
   for (let input of cloned.querySelectorAll("input")) input.value = ""
 
   container.after(cloned)
+})
+
+document.getElementById("autofill-section").addEventListener("click", () => {
+  uiElements.descriptionText.value += "[section=From the artist]\n\n[/section]"
 })
 
 let savedFocus

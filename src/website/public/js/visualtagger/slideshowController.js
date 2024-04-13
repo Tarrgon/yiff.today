@@ -510,7 +510,16 @@ let slideshowController = {
 
   setCurrentSlideNumber(index) {
     if (index >= slideshowController.slides.length || index < 0) return
-    if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return
+    // if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return
+
+    let cur = slideshowController.getCurrentSlide()
+    if (cur.wasUploaded) {
+      cur.sources = Array.from(uiElements.sourceContainer.querySelectorAll("input")).map(e => e.value).filter(s => s)
+      cur.savedDescription = uiElements.descriptionText.value
+    }
+
+    cur.savedChanges = getChanges().filter(c => c.change != 0)//tagTreeHandler.tags.split(" ").filter(s => s)
+
     uiElements.descriptionText.value = ""
     slideshowController.clearCallbacksForPreloadingSlides()
     slideshowController.currentSlideNumber = index
@@ -1172,9 +1181,13 @@ uiElements.uploadFileButton.addEventListener("click", async (e) => {
   slide.fileForForm = !isUrl ? file : null
   slide.urlForForm = isUrl ? file : null
 
-  slideshowController.slides.splice(slideshowController.currentSlideNumber, 0, slide)
-
-  slideshowController.setCurrentSlideNumber(slideshowController.currentSlideNumber)
+  if (slideshowController.slides.length == 0) {
+    slideshowController.slides.splice(0, 0, slide)
+    slideshowController.setCurrentSlideNumber(0)
+  } else {
+    slideshowController.slides.splice(slideshowController.currentSlideNumber + 1, 0, slide)
+    slideshowController.nextSlide()
+  }
 })
 
 uiElements.middlemanMarkAsUploaded.addEventListener("click", () => {
