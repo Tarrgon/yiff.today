@@ -36,6 +36,7 @@ module.exports = async () => {
     app.use("/index", require("./routes/index.js")(utils))
     app.use("/upload_middleman", require("./routes/middleman.js")(utils))
     app.use("/tagsearch", require("./routes/tagsearch.js")(utils))
+    app.use("/mod", require("./routes/mod.js")(utils))
 
     return app
   } catch (e) {

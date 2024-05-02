@@ -2,7 +2,7 @@ class Slide {
 
   static preloading = 0
 
-  constructor(id, rating, fileUrl, previewFileUrl, viewableWebsitePostUrl, width, height, date, score, mediaType, md5, tags, rawTags) {
+  constructor(id, rating, fileUrl, previewFileUrl, viewableWebsitePostUrl, width, height, date, score, mediaType, md5, tags, rawTags, isPending) {
     // console.log("New Slide")
     this.id = id
     this.rating = rating
@@ -22,6 +22,7 @@ class Slide {
     this.callbackToRunAfterPreloadingFinishes = null
     this.tags = tags
     this.rawTags = rawTags
+    this.isPending = isPending
   }
 
   clone() {
@@ -39,8 +40,30 @@ class Slide {
       this.mediaType,
       this.md5,
       this.tags,
-      this.rawTags
+      this.rawTags,
+      this.isPending
     )
+  }
+
+  async hasPendingReplacements() {
+    if (this._hasPendingReplacements !== undefined) return this._hasPendingReplacements
+    let res = await fetch(`https://e621.net/post_replacements.json?search%5Bpost_id%5D=${this.id}`)
+
+    if (!res.ok) {
+      this._hasPendingReplacements = false
+      return
+    }
+
+    let data = await res.json()
+
+    if (data.post_replacements) {
+      this._hasPendingReplacements = false
+      return
+    }
+
+    this._hasPendingReplacements = data.length > 0
+
+    return this._hasPendingReplacements
   }
 
   preload() {

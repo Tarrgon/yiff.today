@@ -1,6 +1,30 @@
 let login = null
 
-document.addEventListener("DOMContentLoaded", () => {
+async function checkCanApprovePosts() {
+  if (!login.e621Username || !login.e621Username) return false
+
+  let res = await fetch(`https://e621.net/users.json?search[name_matches]=${login.e621Username}&limit=1`)
+
+  if (!res.ok) return false
+
+  let data = await res.json()
+
+  return data[0]?.can_approve_posts
+}
+
+async function getE621Id() {
+  if (!login.e621Username || !login.e621Username) return null
+
+  let res = await fetch(`https://e621.net/users.json?search[name_matches]=${login.e621Username}&limit=1`)
+
+  if (!res.ok) return false
+
+  let data = await res.json()
+
+  return data[0]?.id
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
   login = {
     e621Username: getValue("e621-username", ""),
     e621ApiKey: getValue("e621-api-key", "")
@@ -22,4 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
       })
     }
   }
+
+  login.canApprovePosts = await checkCanApprovePosts()
+  login.e621Id = await getE621Id()
+
+  if (login.canApprovePosts && uiElements.modStatsContainer) modStats.updateStats()
 })

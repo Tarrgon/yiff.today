@@ -100,6 +100,10 @@ router.get("/addon/updates", (req, res) => {
           {
             "version": "2.2",
             "update_link": "https://yiff.today/upload_middleman/addon/uncompressedE621Mirror-2.2.xpi"
+          },
+          {
+            "version": "2.3",
+            "update_link": "https://yiff.today/upload_middleman/addon/uncompressedE621Mirror-2.3.xpi"
           }
         ]
       }

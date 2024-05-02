@@ -3,7 +3,7 @@ let WAIT_DECAY = 500
 class E621Requester {
   static E621_BASE_URL = "https://e621.net"
   static REQUEST_BASE_URL = "https://search.yiff.today"
-  static USER_AGENT = encodeURIComponent("Yiff Today/1.0 (by DefinitelyNotAFurry4)")
+  static USER_AGENT = encodeURIComponent("Yiff Today/1.0 (by Tarrgon)")
 
   constructor() {
     this.lastRequestTime = 0
@@ -53,7 +53,7 @@ class E621Requester {
       this.hasMore = data.searchAfter != null || data.posts.length == 100
       this._searchAfter = data.searchAfter
       this.requesting = false
-      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))
+      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags, p.isPending))
     } else {
       this.requesting = false
       slideshowController.displayWarningMessage("Error occured, check console")
@@ -82,7 +82,7 @@ class E621Requester {
       let data = await res.json()
 
       this.requesting = false
-      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags))[0]
+      return data.posts.map(p => new Slide(p.id, p.rating, p.fileUrl, p.previewUrl, `${E621Requester.E621_BASE_URL}/posts/${p.id}`, p.width, p.height, new Date(p.createdAt), p.score, getMediaTypeFromFileType(p.fileType), p.md5, p.tags.flat().join(" "), p.tags, p.isPending))[0]
     } else {
       this.requesting = false
       slideshowController.displayWarningMessage("Error occured, check console")

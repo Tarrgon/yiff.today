@@ -513,12 +513,13 @@ let slideshowController = {
     // if (getChanges().filter(c => c.change != 0).length > 0 && !confirm("You have unsaved changes. Continue?")) return
 
     let cur = slideshowController.getCurrentSlide()
-    if (cur.wasUploaded) {
-      cur.sources = Array.from(uiElements.sourceContainer.querySelectorAll("input")).map(e => e.value).filter(s => s)
-      cur.savedDescription = uiElements.descriptionText.value
+    if (cur) {
+      cur.savedChanges = getChanges().filter(c => c.change != 0)//tagTreeHandler.tags.split(" ").filter(s => s)
+      if (cur.wasUploaded) {
+        cur.sources = Array.from(uiElements.sourceContainer.querySelectorAll("input")).map(e => e.value).filter(s => s)
+        cur.savedDescription = uiElements.descriptionText.value
+      }
     }
-
-    cur.savedChanges = getChanges().filter(c => c.change != 0)//tagTreeHandler.tags.split(" ").filter(s => s)
 
     uiElements.descriptionText.value = ""
     slideshowController.clearCallbacksForPreloadingSlides()
@@ -530,20 +531,22 @@ let slideshowController = {
       slideshowController.loadNewSlidesIfNeeded()
     })
 
+    let slide = slideshowController.getCurrentSlide()
+
     if (history.storeSeen) history.addToSeen(slideshowController.slides[index].id)
 
     closeAllModals()
 
-    if (slideshowController.getCurrentSlide().isMiddleman) {
+    if (slide.isMiddleman) {
       uiElements.sourceFoundAtContainer.classList.remove("hidden")
-      uiElements.sourceFoundAtText.innerText = `Source located at: ${slideshowController.getCurrentSlide().source}\nPotential alternate sources:${slideshowController.getCurrentSlide().potentialAlternateSources.join("\n")}`
+      uiElements.sourceFoundAtText.innerText = `Source located at: ${slide.source}\nPotential alternate sources:${slide.potentialAlternateSources.join("\n")}`
 
-      if (slideshowController.getCurrentSlide().isMp4) {
+      if (slide.isMp4) {
         alert("This is an MP4 slide. Manual convert and upload would be required.")
       }
     }
 
-    if (slideshowController.getCurrentSlide().wasUploaded) {
+    if (slide.wasUploaded) {
       uiElements.submitChangesButton.innerText = "Upload file"
 
       uiElements.sourceContainer.classList.remove("hidden")
@@ -567,6 +570,40 @@ let slideshowController = {
       uiElements.sourceContainer.classList.add("hidden")
       uiElements.sourceFoundAtContainer.classList.add("hidden")
     }
+
+    if (login.canApprovePosts && slide.isPending) {
+      uiElements.modContainer.classList.remove("hidden")
+    } else {
+      uiElements.modContainer.classList.add("hidden")
+    }
+
+    uiElements.ratingContainer.classList.remove("has-background-danger", "has-background-warning", "has-background-success", "has-text-light", "has-text-dark")
+
+    if (slide.rating == "e") {
+      uiElements.ratingContainer.classList.add("has-background-danger")
+      uiElements.ratingContainer.classList.add("has-text-light")
+    } else if (slide.rating == "q") {
+      uiElements.ratingContainer.classList.add("has-background-warning")
+      uiElements.ratingContainer.classList.add("has-text-dark")
+    } else if (slide.rating == "s") {
+      uiElements.ratingContainer.classList.add("has-background-success")
+      uiElements.ratingContainer.classList.add("has-text-light")
+    }
+
+    uiElements.ratingText.innerText = slide.rating == "e" ? "Explicit" : slide.rating == "q" ? "Questionable" : "Safe"
+
+    slide.hasPendingReplacements().then(hasReplacements => {
+      if (slide.id != slideshowController.getCurrentSlide().id) return
+
+      if (login.canApprovePosts && slide.isPending && hasReplacements) {
+        uiElements.pendingReplacementsContainer.classList.remove("hidden")
+        uiElements.pendingReplacementsContainer.onclick = () => {
+          window.open(`https://e621.net/post_replacements?search%5Bpost_id%5D=${this.id}`, "_blank")
+        }
+      } else {
+        uiElements.pendingReplacementsContainer.classList.add("hidden")
+      }
+    })
   },
 
   clearCallbacksForPreloadingSlides() {
@@ -821,7 +858,11 @@ let slideshowController = {
     current.style.width = newWidth + "px"
     current.style.height = (newHeight - 10) + "px"
 
-    uiElements.tagContainer.style["max-height"] = (viewHeight - 100) + "px"
+    if (login.canApprovePosts && slideshowController.getCurrentSlide().isPending) {
+      uiElements.tagContainer.style["max-height"] = (viewHeight - 200) + "px"
+    } else {
+      uiElements.tagContainer.style["max-height"] = (viewHeight - 100) + "px"
+    }
 
     uiElements.tagChangerContainer.style.transform = `translate(-${(current.parentElement.clientWidth - current.clientWidth) / 2 - 20}px, 0px)`
 
@@ -1174,7 +1215,7 @@ uiElements.uploadFileButton.addEventListener("click", async (e) => {
 
   let dimensions = await getFileDimesnions(isUrl ? file : URL.createObjectURL(file), fileType)
 
-  let slide = new Slide(-1, "", isUrl ? file : URL.createObjectURL(file), "", "", dimensions[0], dimensions[1], -1, -1, fileType.toUpperCase(), "", "", [])
+  let slide = new Slide(-1, "", isUrl ? file : URL.createObjectURL(file), "", "", dimensions[0], dimensions[1], -1, -1, fileType.toUpperCase(), "", "", [], false)
 
   slide.wasUploaded = true
   slide.isURLUpload = isUrl

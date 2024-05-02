@@ -409,7 +409,7 @@ uiElements.unfavoriteButton.addEventListener("click", run)
 uiElements.showButton.addEventListener("click", async (e) => {
   let { toUnfavorite } = await getPostsToUnfavorite(uiElements.filterText.value.trim())
 
-  slideshowController.slides = toUnfavorite.map(fav => new Slide(fav.id, fav.rating, fav.file.url, fav.preview.url, `https://e621.net/posts/${fav.id}`, fav.file.width, fav.file.height, new Date(fav.created_at), fav.score.total, getMediaTypeFromFileType(fav.file.ext), fav.file.md5, Object.values(fav.tags).flat(), fav.tags))
+  slideshowController.slides = toUnfavorite.map(fav => new Slide(fav.id, fav.rating, fav.file.url, fav.preview.url, `https://e621.net/posts/${fav.id}`, fav.file.width, fav.file.height, new Date(fav.created_at), fav.score.total, getMediaTypeFromFileType(fav.file.ext), fav.file.md5, Object.values(fav.tags).flat(), fav.tags, false))
 
   slideshowController.setCurrentSlideNumber(0)
 })

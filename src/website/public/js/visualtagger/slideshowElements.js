@@ -76,5 +76,12 @@ let uiElements = {
   middlemanDelete: document.getElementById("middleman-delete"),
   sourceContainer: document.getElementById("source-container"),
   addSourceButton: document.getElementById("add-source-button"),
-  removeSourceButton: document.getElementById("remove-source-button")
+  removeSourceButton: document.getElementById("remove-source-button"),
+  modContainer: document.getElementById("mod-actions-container"),
+  deleteModal: document.getElementById("mod-delete-modal"),
+  disapprovalModal: document.getElementById("mod-disapproval-modal"),
+  ratingContainer: document.getElementById("rating-container"),
+  ratingText: document.getElementById("rating-text"),
+  pendingReplacementsContainer: document.getElementById("pending-replacements-container"),
+  modStatsContainer: document.getElementById("mod-stats")
 }

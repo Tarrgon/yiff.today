@@ -109,13 +109,15 @@ function findChildInStructure(structure, name) {
 let progressMade = true
 
 async function resolveTagStructure(unresolvedImplications, tags, structure = {}) {
-  if (Object.entries(unresolvedImplications).length == 0) return structure
+  if (Object.entries(unresolvedImplications).length == 0 || resolveKillswitch) {
+    resolveKillswitch = true
+    return structure
+  }
 
   if (!progressMade) {
     progressMade = true
     for (let [tagName, data] of Object.entries(unresolvedImplications)) {
       for (let parent of data.parents) {
-        console.log(tagName, data, parent)
         tagTreeHandler.tags = addToText(tagTreeHandler.tags, parent.name)
         updateTagCount()
         tags = tagTreeHandler.tags
@@ -123,7 +125,6 @@ async function resolveTagStructure(unresolvedImplications, tags, structure = {})
         await getImplications(parent.name, allImplications)
 
         let struct = await resolveTagStructure(allImplications, tags)
-
         for (let [k, v] of Object.entries(struct)) {
           structure[k] = v
         }
@@ -382,6 +383,7 @@ function createImplicationRequester(parentDetails, tagName, depth, parentGroup) 
     let allImplications = {}
     await getImplications(tagName, allImplications, "children")
 
+    resolveKillswitch = false
     let structure = await resolveTagStructure(allImplications, tagTreeHandler.tags)
 
     let realStructure = findChildInStructure(tagTreeHandler.currentStructure, tagName)
@@ -804,6 +806,7 @@ let tagTreeHandler = {
   preventClicks: false,
   preventScroll: false,
   lock: false,
+  approveAfterSubmit: false,
   async slideUpdated() {
     tagTreeHandler.buttons = {}
 
@@ -824,6 +827,7 @@ let tagTreeHandler = {
     await getImplications(tagTreeHandler.tags, allImplications)
 
     if (slideshowController.currentSlideNumber == index) {
+      resolveKillswitch = false
       let structure = await resolveTagStructure(allImplications, tagTreeHandler.tags)
 
       tagTreeHandler.currentStructure = structure
@@ -1480,6 +1484,8 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
     body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
     body.append("_method", "PATCH")
 
+    let approveAfter = tagTreeHandler.approveAfterSubmit
+
     uiElements.closeReviewButton.click()
 
     try {
@@ -1488,7 +1494,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       let res = await fetch(`https://e621.net/posts/${slideshowController.getCurrentSlide().id}.json`, {
         method: "POST",
         headers: {
-          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+          "User-Agent": "Yiff.Today VisualTagger (by Tarrgon)",
           Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
         },
         body
@@ -1499,6 +1505,10 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
         showSuccessScreen()
       } else {
         showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
+      }
+
+      if (approveAfter) {
+        approvePost()
       }
     } catch (e) {
       console.error(e)
@@ -1554,7 +1564,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       return
     }
 
-    if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex"].some(t => splitTags.includes(t))) {
+    if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex", "ambiguous_gender"].some(t => splitTags.includes(t))) {
       showGeneralScreen("Warning", "Your post lacks any obvious gender tags. Submit again without any changes to force.")
       slide.bypassGender = true
       tagTreeHandler.lock = false
@@ -1568,7 +1578,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       return
     }
 
-    if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex", "female/ambiguous", "male/ambiguous", "intersex/ambiguous"].some(t => splitTags.includes(t))) {
+    if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex", "female/ambiguous", "male/ambiguous", "intersex/ambiguous", "ambiguous/ambiguous"].some(t => splitTags.includes(t))) {
       showGeneralScreen("Warning", "Your post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
       slide.bypassCharacterInteractions = true
       tagTreeHandler.lock = false
@@ -1628,7 +1638,7 @@ uiElements.confirmSubmitButton.addEventListener("click", async () => {
       let res = await fetch(`https://e621.net/uploads.json`, {
         method: "POST",
         headers: {
-          "User-Agent": "Yiff.Today VisualTagger (by DefinitelyNotAFurry4)",
+          "User-Agent": "Yiff.Today VisualTagger (by Tarrgon)",
           Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
         },
         body: formData
@@ -1662,6 +1672,8 @@ function closeAllModals() {
   uiElements.responseModal.classList.remove("is-active")
   uiElements.reviewChangesModal.classList.remove("is-active")
   uiElements.reviewAddTagModal.classList.remove("is-active")
+  uiElements.deleteModal.classList.remove("is-active")
+  uiElements.disapprovalModal.classList.remove("is-active")
 }
 
 function showGeneralScreen(title, text = "") {
@@ -1726,15 +1738,15 @@ function showFailureScreen(title, status) {
 function updateTagCount() {
   let slide = slideshowController.getCurrentSlide()
 
-  if (slide.wasUploaded) {
-    slide.bypassCharacterInteractions = false
-    slide.bypassCount = false
-    slide.bypassForms = false
-    slide.bypassGender = false
-    slide.bypassArtist = false
-    slide.bypassSpecies = false
-    slide.bypassDNP = false
-  }
+  if (!slide) return
+
+  slide.bypassCharacterInteractions = false
+  slide.bypassCount = false
+  slide.bypassForms = false
+  slide.bypassGender = false
+  slide.bypassArtist = false
+  slide.bypassSpecies = false
+  slide.bypassDNP = false
 
   let face = document.getElementById("face")
   let tagCountText = document.getElementById("tag-count-text")
@@ -1760,6 +1772,7 @@ function updateTagCount() {
 
 uiElements.closeReviewButton.addEventListener("click", () => {
   hotkeys.setScope("tagging")
+  tagTreeHandler.approveAfterSubmit = false
   uiElements.reviewChangesModal.classList.remove("is-active")
 })
 
@@ -2204,6 +2217,257 @@ function saveFocus(event) {
   savedFocus = event.target.value
 
   hotkeys.setScope("aliasing")
+}
+
+async function approvePost() {
+  let slide = slideshowController.getCurrentSlide()
+  let postId = slide.id
+
+  showLoadingScreen()
+
+  let splitTags = tagTreeHandler.tags.split(" ")
+
+  let hasConditionalDNP = splitTags.includes("conditional_dnp")
+  let hasAvoidPosting = splitTags.includes("avoid_posting")
+
+  let dnpStatuses = []
+  let checked = []
+
+  for (let tag of document.querySelectorAll(".artist-tag-category")) {
+    let artist = tag.parentElement.getAttribute("data-tag-name")
+    if (!tag.parentElement.open || checked.includes(artist)) continue
+    let status = await avoidPosting.getDNPStatus(artist)
+    if (status) dnpStatuses.push(status)
+    checked.push(artist)
+  }
+
+  for (let tag of splitTags) {
+    if (tag.startsWith("art:") || tag.startsWith("artist")) {
+      let t = tag.slice(tag.indexOf(":") + 1)
+      let status = await avoidPosting.getDNPStatus(t)
+      if (status) dnpStatuses.push(status)
+      checked.push(t)
+    }
+  }
+
+  if (!slide.bypassDNP && (hasConditionalDNP || hasAvoidPosting || dnpStatuses.length > 0)) {
+    showGeneralScreen("Warning", `The artist you are approving from is ${hasConditionalDNP ? "conditional DNP" : ""}${hasConditionalDNP && hasAvoidPosting ? " and " : ""}${hasAvoidPosting ? "on the avoid posting list" : ""}. Submit again without any changes to force.\n\n${dnpStatuses.map(s => `${s.name}${(s.message.length > 0 ? ` - ${s.message}` : "")}`).join("\n")}`)
+    slide.bypassDNP = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassArtist && !document.querySelector(".artist-tag-category") && !splitTags.some(t => t.startsWith("art:") || t.startsWith("artist:"))) {
+    showGeneralScreen("Warning", "The post lacks an artist tag. Submit again without any changes to force.")
+    slide.bypassArtist = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassSpecies && !document.querySelector(".species-tag-category") && !splitTags.some(t => t.startsWith("species:") || t.startsWith("spec:"))) {
+    showGeneralScreen("Warning", "The post lacks any species tags. Submit again without any changes to force.")
+    slide.bypassSpecies = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassGender && !["male", "female", "andromorph", "gynomorph", "herm", "maleherm", "intersex", "ambiguous_gender"].some(t => splitTags.includes(t))) {
+    showGeneralScreen("Warning", "The post lacks any obvious gender tags. Submit again without any changes to force.")
+    slide.bypassGender = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassCount && !["solo", "duo", "trio", "group", "zero_pictured"].some(t => splitTags.includes(t))) {
+    showGeneralScreen("Warning", "The post lacks any obvious character count tags. Submit again without any changes to force.")
+    slide.bypassCount = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassCharacterInteractions && !["solo", "zero_pictured", "male/male", "male/female", "female/female", "intersex/male", "intersex/female", "intersex/intersex", "female/ambiguous", "male/ambiguous", "intersex/ambiguous", "ambiguous/ambiguous"].some(t => splitTags.includes(t))) {
+    showGeneralScreen("Warning", "The post lacks any obvious character interaction tags and is not tagged as solo or zero_pictured. Submit again without any changes to force.")
+    slide.bypassCharacterInteractions = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  if (!slide.bypassForms && !["anthro", "feral", "humanoid", "human", "taur", "semi-anthro"].some(t => splitTags.includes(t))) {
+    showGeneralScreen("Warning", "The post lacks any obvious character form tags. Submit again without any changes to force.")
+    slide.bypassForms = true
+    tagTreeHandler.lock = false
+    return
+  }
+
+  try {
+    let changes = getChanges().filter(t => t.change != 0)
+
+    let tagDiff = changes.map(t => t.change == -1 ? `-${t.tag}` : t.tag).join(" ").trim()
+
+    if (!slide.submitted && !tagTreeHandler.lock && tagDiff.length != 0) {
+      for (let change of changes) {
+        let child = findChildInStructure(tagTreeHandler.currentStructure, change.tag)
+        if (child && (child.thisTag.category == 9 || child.thisTag.postCount < 50)) {
+          closeAllModals()
+          tagTreeHandler.approveAfterSubmit = true
+          uiElements.submitChangesButton.click()
+          return
+        }
+      }
+
+      tagTreeHandler.lock = true
+
+      tagTreeHandler.lastChanges.unshift({ img: slide.fileUrl, changes })
+
+      let body = new URLSearchParams()
+      body.append("post[tag_string_diff]", tagDiff)
+      body.append("post[old_tag_string]", tagTreeHandler.unchangedTags)
+      body.append("post[edit_reason]", "Visual Tag Edit yiff.today/visualtagger")
+      body.append("_method", "PATCH")
+
+      uiElements.closeReviewButton.click()
+
+      try {
+        let res = await fetch(`https://e621.net/posts/${slide.id}.json`, {
+          method: "POST",
+          headers: {
+            "User-Agent": "Yiff.Today VisualTagger (by Tarrgon)",
+            Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+          },
+          body
+        })
+
+        if (res.ok) {
+          slide.submitted = true
+        } else {
+          showFailureScreen(`Failure (${res.status})`, "You've probably hit the maximum post changes per hour limit. Take a break.")
+          return
+        }
+      } catch (e) {
+        console.error(e)
+
+        showFailureScreen("Failure", "Unknown error, please check console")
+        return
+      }
+    }
+
+    let res = await fetch("/mod/approve", {
+      method: "POST",
+      body: JSON.stringify({ postId, modId: login.e621Id, trackStats: true }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      },
+    })
+
+    closeAllModals()
+
+    if (!res.ok) {
+      console.error(await res.text())
+      return alert("Error approving post, see console.")
+    } else {
+      slideshowController.nextSlide()
+      modStats.processUpdate(await res.json())
+    }
+  } catch (e) {
+    console.error(e)
+    return alert("Error approving post, see console.")
+  }
+
+  tagTreeHandler.lock = false
+}
+
+async function deletePost(reason) {
+  let slide = slideshowController.getCurrentSlide()
+  let postId = slide.id
+
+  if (!confirm(`Are you sure you want to delete with reason: "${reason}"?`)) return
+
+  showLoadingScreen()
+
+  try {
+    let res = await fetch("/mod/delete", {
+      method: "POST",
+      body: JSON.stringify({ postId, reason, modId: login.e621Id, trackStats: true }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      },
+    })
+
+    closeAllModals()
+
+    if (!res.ok) {
+      console.error(await res.text())
+      return alert("Error deleting post, see console.")
+    } else {
+      slideshowController.nextSlide()
+      modStats.processUpdate(await res.json())
+    }
+  } catch (e) {
+    console.error(e)
+    return alert("Error deleting post, see console.")
+  }
+}
+
+function deletePostCombinedReason() {
+  let reason = Array.from(document.querySelectorAll(".delete-reason.is-active")).map(e => e.getAttribute("data-reason")).join(" / ")
+  deletePost(reason)
+}
+
+function openDeleteModal() {
+  closeAllModals()
+  hotkeys.setScope("mod-delete")
+  uiElements.deleteModal.classList.add("is-active")
+}
+
+function openDisapproveModal() {
+  closeAllModals()
+  hotkeys.setScope("mod-disapprove")
+  uiElements.disapprovalModal.classList.add("is-active")
+}
+
+function toggleDeleteReason(event) {
+  if (event.ctrlKey) event.target.classList.toggle("is-active")
+  else deletePost(event.target.getAttribute("data-reason"))
+}
+
+function openDisapprovalModal() {
+  hotkeys.setScope("mod-disapproval")
+  uiElements.disapprovalModal.classList.add("is-active")
+}
+
+async function disapprovePost(event) {
+  let slide = slideshowController.getCurrentSlide()
+  let postId = slide.id
+
+  let reason = event.target.getAttribute("data-reason")
+
+  showLoadingScreen()
+
+  try {
+    let res = await fetch("/mod/disapprove", {
+      method: "POST",
+      body: JSON.stringify({ postId, reason, modId: login.e621Id, trackStats: true }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${btoa(`${login.e621Username}:${login.e621ApiKey}`)}`
+      },
+    })
+
+    closeAllModals()
+
+    if (!res.ok) {
+      console.error(await res.text())
+      return alert("Error disapproving post, see console.")
+    } else {
+      slideshowController.nextSlide()
+      modStats.processUpdate(await res.json())
+    }
+  } catch (e) {
+    console.error(e)
+    return alert("Error disapproving post, see console.")
+  }
 }
 
 function loadCustomAliases() {

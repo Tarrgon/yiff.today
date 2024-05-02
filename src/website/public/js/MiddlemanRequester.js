@@ -39,7 +39,7 @@ class MiddlemanRequester {
 
         let dimensions = await getFileDimesnions(url, fileType)
 
-        let slide = new Slide(-1, "", url, "", "", dimensions[0], dimensions[1], -1, -1, fileType.toUpperCase(), p.md5, "", [])
+        let slide = new Slide(-1, "", url, "", "", dimensions[0], dimensions[1], -1, -1, fileType.toUpperCase(), p.md5, "", [], false)
 
         slide.wasUploaded = true
         slide.isURLUpload = false

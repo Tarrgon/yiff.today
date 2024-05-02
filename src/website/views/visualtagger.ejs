@@ -41,6 +41,56 @@
       </div>
     </div>
     <div id="tag-changer-container" class="column is-4 has-text-left has-text-light">
+      <div id="mod-delete-modal" class="custom-modal">
+        <div class="modal-background"></div>
+        <div class="modal-content mt-6" style="width:100%; overflow-x:hidden;">
+          <div class="columns has-text-centered mt-3">
+            <div class="column is-4 is-offset-4 box is-size-4 is-size-6-touch has-background-danger has-text-light">
+              Delete
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column has-text-centered">
+              <button class="delete-reason button is-info" data-reason="Does not meet minimum quality standards (Artistic)" onclick="toggleDeleteReason(event)">Artistic</button>
+              <button class="delete-reason button is-info" data-reason="Irrelevant to site (Human only)" onclick="toggleDeleteReason(event)">Human</button>
+              <button class="delete-reason button is-info" data-reason="Does not meet minimum quality standards (Bad digitization of traditional media)" onclick="toggleDeleteReason(event)">Photo/Scan</button>
+              <button class="delete-reason button is-info" data-reason="Does not meet minimum quality standards (Trivial or low quality edit)" onclick="toggleDeleteReason(event)">Bad Edit</button>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column has-text-centered">
+              <button class="delete-reason button is-info" data-reason="Irrelevant to site (AI assisted/generated)" onclick="toggleDeleteReason(event)">AI / Gen</button>
+              <button class="delete-reason button is-info" data-reason="Irrelevant to site (Screencap)" onclick="toggleDeleteReason(event)">Screencap</button>
+              <button class="delete-reason button is-info" data-reason="Advertisement" onclick="toggleDeleteReason(event)">Advert</button>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column has-text-centered">
+              <button class="button is-danger" onclick="deletePostCombinedReason()">Delete</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeAllModals()" class="modal-close is-large" aria-label="close"></button>
+      </div>
+      <div id="mod-disapproval-modal" class="custom-modal">
+        <div class="modal-background"></div>
+        <div class="modal-content mt-6" style="width:100%; overflow-x:hidden;">
+          <div class="columns has-text-centered mt-3">
+            <div class="column is-4 is-offset-4 box is-size-4 is-size-6-touch has-background-warning has-text-light">
+              Disapprove
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column has-text-centered">
+              <button class="delete-reason button is-info" data-reason="borderline_quality" onclick="disapprovePost(event)">Quality</button>
+              <button class="delete-reason button is-info" data-reason="borderline_relevancy" onclick="disapprovePost(event)">Relevancy</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeAllModals()" class="modal-close is-large" aria-label="close"></button>
+      </div>
       <div id="review-add-tag-modal" class="custom-modal">
         <div class="modal-background"></div>
         <div class="modal-content mt-6" style="width:100%; overflow-x:hidden;">
@@ -75,7 +125,7 @@
           </div>
           <div id="description-container" class="columns">
             <div class="column">
-              <textarea id="description-text" class="textarea is-info has-background-dark has-text-light" style="overflow-y: scroll;", placeholder="Description content"></textarea>
+              <textarea id="description-text" class="textarea is-info has-background-dark has-text-light" style="overflow-y: scroll;" , placeholder="Description content"></textarea>
               <br>
               <div class="columns">
                 <div class="column is-4 is-offset-4 has-text-centered">
@@ -116,6 +166,15 @@
         </div>
         <button id="close-redo-button" class="modal-close is-large" aria-label="close"></button>
       </div>
+      <div id="mod-actions-container" class="columns hidden">
+        <div class="column">
+          <button class="button is-success" onclick="approvePost()">Approve</button>
+          <button class="button is-danger" onclick="openDeleteModal()">Delete</button>
+          <button class="button is-warning" onclick="openDisapproveModal()">Disapprove</button>
+          <p id="rating-container" class="button"><span id="rating-text" class="ml-1"></span></p>
+          <p id="pending-replacements-container" class="button has-background-danger hidden"><span class="ml-1 has-text-light">Replacements</span></p>
+        </div>
+      </div>
       <div id="tag-container" class="content"></div>
       <div class="columns is-multiline">
         <div class="column is-full">
@@ -151,6 +210,7 @@
           <p class="has-text-light button has-background-black"><i id="face" class="fa-regular fa-face-frown hidden"></i><span id="tag-count-text" class="ml-1"></span></p>
         </div>
       </div>
+
       <div class="columns">
         <div class="column">
           <button id="show-current-button" class="button is-info">Show current</button>
@@ -328,8 +388,69 @@
     </div>
   </div>
 
+  <div class="columns is-centered hidden" id="mod-stats">
+    <div class="options is-container box column is-7 my-6 has-text-centered" style="overflow: hidden;">
+      <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Janitor Stats</h4>
+      <p class="note">
+        This only counts actions taken through visual tagger.
+      </p>
+      <div class="columns is-centered">
+        <div class="options is-container box column is-3 my-6 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Approvals</h4>
+        </div>
+        <div class="options is-container box column is-3 my-6 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Deletions</h4>
+        </div>
+        <div class="options is-container box column is-3 my-6 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Disapprovals</h4>
+        </div>
+      </div>
+
+      <div class="columns is-centered">
+        <div class="options is-container box column is-3 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-today">Today: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-week">This week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-month">This month: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-alltime">All time: </h4>
+        </div>
+        <div class="options is-container box column is-3 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-today">Today: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-week">This week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-month">This month: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-alltime">All time: </h4>
+        </div>
+        <div class="options is-container box column is-3 has-text-centered" style="margin-bottom: 1.5rem;">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-today">Today: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-week">This week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-month">This month: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-alltime">All time: </h4>
+        </div>
+      </div>
+
+      <hr />
+
+      <!-- <div class="columns is-centered">
+        <div class="options is-container box column is-3 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-averageday">Average per day: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-averageweek">Average per week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="approvals-averagemonth">Average per month: </h4>
+        </div>
+        <div class="options is-container box column is-3 has-text-centered">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-averageday">Average per day: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-averageweek">Average per week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="deletions-averagemonth">Average per month: </h4>
+        </div>
+        <div class="options is-container box column is-3 has-text-centered" style="margin-bottom: 1.5rem;">
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-averageday">Average per day: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-averageweek">Average per week: </h4>
+          <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4" id="disapprovals-averagemonth">Average per month: </h4>
+        </div>
+      </div> -->
+    </div>
+  </div>
+
   <div class="columns">
-    <div class="options is-container box column is-4 is-offset-4 my-6 has-text-centered">
+    <div class="options is-container box column is-4 is-offset-4 my-6 has-text-centered" style="max-height: 45em;">
       <h4 class="is-size-5 has-text-weight-bold has-text-light mb-4">Custom Aliases</h4>
       <div class="custom-alias-container field has-addons" style="justify-content: center;">
         <div class="mr-4 control">
@@ -387,6 +508,7 @@
   <script src="/js/MiddlemanRequester.js"></script>
   <script src="/js/e621AutoCompleter.js"></script>
   <script src="/js/visualtagger/e621WikiFetcher.js"></script>
+  <script src="/js/visualtagger/modStats.js"></script>
   <script src="/js/dataHandler.js"></script>
   <script src="/js/e621LoginHandler.js"></script>
   <script src="/js/middlemanAPIKey.js"></script>

@@ -26,6 +26,25 @@ function scaleLab(lab) {
   return [Math.floor(lab[0] * SCALE_FACTOR), Math.floor(lab[1] * SCALE_FACTOR), Math.floor(lab[2] * SCALE_FACTOR)]
 }
 
+function isDateWithinHours(from, to, maxHours) {
+  let diff = maxHours * 3600000
+
+  return (to.getTime() - from.getTime()) <= diff
+}
+
+function isDateInThisWeek(date) {
+  let todayObj = new Date()
+  let todayDate = todayObj.getDate()
+  let todayDay = todayObj.getDay()
+
+  let firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay))
+
+  let lastDayOfWeek = new Date(firstDayOfWeek)
+  lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6)
+
+  return date >= firstDayOfWeek && date <= lastDayOfWeek
+}
+
 module.exports = (db) => {
   // fetch("https://api.color.pizza/v1/?list=default").then(async (response) => {
   //   let data = await response.json()
@@ -160,9 +179,11 @@ module.exports = (db) => {
 
       let potentialAlternateSources = []
 
-      for (let [site, url] of Object.entries(acc.sources)) {
-        if (site == source) continue
-        potentialAlternateSources.push(url)
+      if (acc.sources) {
+        for (let [site, url] of Object.entries(acc.sources)) {
+          if (site == source) continue
+          potentialAlternateSources.push(url)
+        }
       }
 
       for (let file of files) {
@@ -197,7 +218,7 @@ module.exports = (db) => {
       let file = await database.collection("middlemanImages").findOne({ md5 })
       if (!file) return false
       await database.collection("middlemanImages").updateOne({ md5 }, { $set: { uploaded: true, uploadedBy: key } })
-      
+
       fs.unlinkSync(file.path)
 
       return true
@@ -207,10 +228,39 @@ module.exports = (db) => {
       let file = await database.collection("middlemanImages").findOne({ md5 })
       if (!file) return false
       await database.collection("middlemanImages").updateOne({ md5 }, { $set: { deleted: true, deletedBy: key } })
-      
+
       fs.unlinkSync(file.path)
 
       return true
+    },
+
+    async newApproval(modId, postId) {
+      await database.collection("modActions").updateOne({ modId }, { $push: { approvals: { postId, date: new Date() } } }, { upsert: true })
+    },
+
+    async newDeletion(modId, postId, reason) {
+      await database.collection("modActions").updateOne({ modId }, { $push: { deletions: { postId, date: new Date(), reason } } }, { upsert: true })
+    },
+
+    async newDisapproval(modId, postId, reason) {
+      await database.collection("modActions").updateOne({ modId }, { $push: { disapprovals: { postId, date: new Date(), reason } } }, { upsert: true })
+    },
+
+    async getStats(modId) {
+      if (modId == null) return { ok: false }
+
+      let stats = await database.collection("modActions").findOne({ modId })
+
+      if (!stats) return { ok: false }
+
+      let now = new Date()
+
+      return {
+        ok: true,
+        approvals: stats.approvals ?? [],
+        deletions: stats.deletions ?? [],
+        disapprovals: stats.disapprovals ?? []
+      }
     }
   }
   return mod

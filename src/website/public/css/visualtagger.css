@@ -278,3 +278,7 @@ button.dropdown-item.active {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
   background: linear-gradient(#d66029, #d62929);
 }
+
+.delete-reason.is-active {
+  outline: 2px solid lime;
+}
